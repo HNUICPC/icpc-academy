@@ -86,8 +86,13 @@ export function renderNavbar(activePage = '') {
     `;
 
     window._logout = async () => {
-      await logoutUser();
-    };
+  try {
+    await logoutUser();
+    window.location.href = "https://hnuicpc.github.io/icpc-academy/";
+  } catch (e) {
+    console.error("Logout failed:", e);
+  }
+};
 
     // Load notifications
     loadNotifications(user.uid);
