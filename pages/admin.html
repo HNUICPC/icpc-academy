@@ -599,8 +599,11 @@
       const order = parseInt(document.getElementById('level-order-input').value);
       if (!title) { showToast('Title required', 'error'); return; }
       const data = { title, description: desc, order, updatedAt: serverTimestamp() };
+      let savedId = id;
       if (id) { await updateDoc(doc(db, 'levels', id), data); }
-      else    { await addDoc(collection(db, 'levels'), { ...data, createdAt: serverTimestamp() }); }
+      else    { const ref = await addDoc(collection(db, 'levels'), { ...data, createdAt: serverTimestamp() }); savedId = ref.id; }
+      // Auto-reorder: push down any level with same or higher order
+      await reorderItemsGlobal('levels', savedId, order);
       closeModal('modal-level');
       showToast('Level saved!', 'success');
       await loadLevelsAdmin();
@@ -686,8 +689,11 @@
       const order   = parseInt(document.getElementById('week-order-input').value);
       if (!title || !levelId) { showToast('Title and level required', 'error'); return; }
       const data = { title, description: desc, levelId, order, updatedAt: serverTimestamp() };
+      let savedId = id;
       if (id) { await updateDoc(doc(db, 'weeks', id), data); }
-      else    { await addDoc(collection(db, 'weeks'), { ...data, createdAt: serverTimestamp() }); }
+      else    { const ref = await addDoc(collection(db, 'weeks'), { ...data, createdAt: serverTimestamp() }); savedId = ref.id; }
+      // Auto-reorder: push down any week in same level with same or higher order
+      await reorderItems('weeks', 'levelId', levelId, savedId, order);
       closeModal('modal-week');
       showToast('Week saved!', 'success');
       // Sync the filter dropdown to the saved level then reload list
@@ -795,8 +801,11 @@
         });
       }
 
+      let savedId = id;
       if (id) { await updateDoc(doc(db, 'sections', id), data); }
-      else    { await addDoc(collection(db, 'sections'), { ...data, createdAt: serverTimestamp() }); }
+      else    { const ref = await addDoc(collection(db, 'sections'), { ...data, createdAt: serverTimestamp() }); savedId = ref.id; }
+      // Auto-reorder: push down any section in same week with same or higher order
+      await reorderItems('sections', 'weekId', weekId, savedId, order);
       closeModal('modal-section');
       showToast('Section saved!', 'success');
       const filteredWeek = document.getElementById('section-week-filter').value;
@@ -876,6 +885,42 @@
         if (e.target === el) el.classList.remove('open');
       });
     });
+
+
+    // ── AUTO-REORDER HELPERS ─────────────────────────────────────────
+    // For collections with a parent field (weeks inside level, sections inside week)
+    async function reorderItems(collectionName, filterField, filterValue, savedId, newOrder) {
+      const snap = await getDocs(query(
+        collection(db, collectionName),
+        where(filterField, '==', filterValue),
+        orderBy('order')
+      ));
+      const others = snap.docs
+        .map(d => ({ id: d.id, ...d.data() }))
+        .filter(item => item.id !== savedId && item.order >= newOrder);
+      const { writeBatch } = await import('https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js');
+      const batch = writeBatch(db);
+      others.forEach((item, idx) => {
+        batch.update(doc(db, collectionName, item.id), { order: newOrder + 1 + idx });
+      });
+      await batch.commit();
+    }
+
+    // For top-level collections with no parent field (levels)
+    async function reorderItemsGlobal(collectionName, savedId, newOrder) {
+      const snap = await getDocs(query(collection(db, collectionName), orderBy('order')));
+      const others = snap.docs
+        .map(d => ({ id: d.id, ...d.data() }))
+        .filter(item => item.id !== savedId && item.order >= newOrder);
+      const { writeBatch } = await import('https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js');
+      const batch = writeBatch(db);
+      others.forEach((item, idx) => {
+        batch.update(doc(db, collectionName, item.id), { order: newOrder + 1 + idx });
+      });
+      await batch.commit();
+    }
+
+    // ── OLD PLACEHOLDER (replaced above)
 
     init();
   </script>
