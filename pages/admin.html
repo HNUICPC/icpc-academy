@@ -397,6 +397,7 @@
           document.getElementById(`panel-${panel}`)?.classList.add('active');
           if (panel === 'users')         loadUsersAdmin();
           if (panel === 'notifications') loadNotifPanel();
+          if (panel === 'content')       loadLevelsAdmin();
         });
       });
     }
@@ -614,30 +615,50 @@
 
     // ── CONTENT — WEEKS ─────────────────────────────────────────────
     window.loadWeeksAdmin = async (levelId) => {
-      if (!levelId) return;
-      const snap  = await getDocs(query(collection(db, 'weeks'), where('levelId','==',levelId), orderBy('order')));
-      const weeks = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-      const list  = document.getElementById('weeks-list');
-      list.innerHTML = weeks.map(w => `
-        <div class="sortable-item">
-          <span class="drag-handle">⠿</span>
-          <span style="flex:1;font-weight:600">${w.title}</span>
-          <span class="text-muted fs-sm">Week ${w.order}</span>
-          <button class="btn btn-ghost btn-sm" onclick="window._editWeek('${w.id}')">Edit</button>
-          <button class="btn btn-danger btn-sm" onclick="window._deleteWeek('${w.id}')">Delete</button>
-        </div>
-      `).join('') || '<p class="text-muted fs-sm">No weeks. Add one!</p>';
+      const list = document.getElementById('weeks-list');
+      if (!levelId) {
+        list.innerHTML = '<p class="text-muted fs-sm">Select a level above to see its weeks.</p>';
+        return;
+      }
+      list.innerHTML = '<p class="text-muted fs-sm">⏳ Loading weeks...</p>';
+      try {
+        const snap  = await getDocs(query(collection(db, 'weeks'), where('levelId','==',levelId), orderBy('order')));
+        const weeks = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+        if (weeks.length === 0) {
+          list.innerHTML = '<p class="text-muted fs-sm">No weeks yet. Click "+ Add Week" to add one.</p>';
+          return;
+        }
+        list.innerHTML = weeks.map(w => `
+          <div class="sortable-item">
+            <span class="drag-handle">⠿</span>
+            <span style="flex:1;font-weight:600">${w.title}</span>
+            <span class="text-muted fs-sm" style="margin-right:0.5rem">Order: ${w.order}</span>
+            <button class="btn btn-ghost btn-sm" onclick="window._editWeek('${w.id}')">Edit</button>
+            <button class="btn btn-danger btn-sm" onclick="window._deleteWeek('${w.id}')">Delete</button>
+          </div>
+        `).join('');
+      } catch(e) {
+        list.innerHTML = '<p style="color:var(--danger)" class="fs-sm">Error: ' + e.message + '</p>';
+        console.error('loadWeeksAdmin error:', e);
+      }
     };
 
-    window.showAddWeek = () => {
+    window.showAddWeek = async () => {
       document.getElementById('week-edit-id').value       = '';
       document.getElementById('week-title-input').value   = '';
       document.getElementById('week-desc-input').value    = '';
       document.getElementById('week-order-input').value   = 1;
       document.getElementById('modal-week-title').textContent = 'Add Week';
-      // Populate level select
+
+      // Always reload fresh levels
+      if (allLevels.length === 0) await loadLevelsAdmin();
+      if (allLevels.length === 0) { showToast('Add a Level first!', 'warning'); return; }
+
+      const currentFilterLevel = document.getElementById('week-level-filter').value;
       const sel = document.getElementById('week-level-select');
-      sel.innerHTML = allLevels.map(l => `<option value="${l.id}">${l.title}</option>`).join('');
+      sel.innerHTML = allLevels.map(l =>
+        `<option value="${l.id}" ${l.id === currentFilterLevel ? 'selected' : ''}>${l.title}</option>`
+      ).join('');
       openModal('modal-week');
     };
 
@@ -651,6 +672,9 @@
       const sel = document.getElementById('week-level-select');
       sel.innerHTML = allLevels.map(l => `<option value="${l.id}" ${l.id===d.levelId?'selected':''}>${l.title}</option>`).join('');
       document.getElementById('modal-week-title').textContent = 'Edit Week';
+      // Sync filter dropdown so list refreshes to the correct level after save
+      const filterSel = document.getElementById('week-level-filter');
+      if (filterSel && d.levelId) filterSel.value = d.levelId;
       openModal('modal-week');
     };
 
@@ -666,6 +690,9 @@
       else    { await addDoc(collection(db, 'weeks'), { ...data, createdAt: serverTimestamp() }); }
       closeModal('modal-week');
       showToast('Week saved!', 'success');
+      // Sync the filter dropdown to the saved level then reload list
+      const filterSel = document.getElementById('week-level-filter');
+      if (filterSel) filterSel.value = levelId;
       await loadWeeksAdmin(levelId);
     };
 
