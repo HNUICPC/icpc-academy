@@ -1,0 +1,116 @@
+/* ═══════════════════════════════════════════
+   ADMIN PANEL STYLES
+   ═══════════════════════════════════════════ */
+
+.admin-layout {
+  display: grid;
+  grid-template-columns: 240px 1fr;
+  min-height: calc(100vh - var(--navbar-h));
+  margin-top: var(--navbar-h);
+}
+
+.admin-sidebar {
+  background: var(--bg-glass);
+  backdrop-filter: blur(20px);
+  border-right: 1px solid var(--border);
+  padding: 1.5rem 0;
+  position: sticky;
+  top: var(--navbar-h);
+  height: calc(100vh - var(--navbar-h));
+  overflow-y: auto;
+}
+
+.admin-content {
+  padding: 2rem;
+  overflow-y: auto;
+}
+
+@media (max-width: 900px) {
+  .admin-layout { grid-template-columns: 1fr; }
+  .admin-sidebar { display: none; }
+}
+
+/* Admin Section Panels */
+.admin-panel { display: none; }
+.admin-panel.active { display: block; }
+
+/* Drag & Drop sortable */
+.sortable-item {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 0.9rem 1.1rem;
+  margin-bottom: 0.5rem;
+  cursor: grab;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  transition: var(--transition);
+}
+
+.sortable-item:active { cursor: grabbing; }
+.sortable-item.dragging {
+  opacity: 0.5;
+  border-color: var(--cyan);
+  box-shadow: var(--cyan-glow);
+}
+
+.drag-handle {
+  color: var(--text-muted);
+  cursor: grab;
+  font-size: 1.1rem;
+}
+
+/* Analytics */
+.analytics-bar {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 0.75rem;
+}
+
+.analytics-bar-label {
+  width: 120px;
+  font-size: 0.82rem;
+  color: var(--text-secondary);
+  flex-shrink: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.analytics-bar-track {
+  flex: 1;
+  height: 8px;
+  background: rgba(255,255,255,0.05);
+  border-radius: 100px;
+  overflow: hidden;
+}
+
+.analytics-bar-fill {
+  height: 100%;
+  border-radius: 100px;
+  background: linear-gradient(90deg, var(--cyan), var(--blue));
+  transition: width 0.8s ease;
+}
+
+.analytics-bar-value {
+  width: 40px;
+  text-align: right;
+  font-size: 0.82rem;
+  color: var(--cyan);
+  font-weight: 700;
+  font-family: var(--font-mono);
+}
+
+/* User expand panel */
+.user-row-expanded {
+  background: var(--bg-card2);
+  border: 1px solid var(--border);
+  border-top: none;
+  border-radius: 0 0 var(--radius-sm) var(--radius-sm);
+  padding: 1rem 1.25rem;
+  display: none;
+}
+
+.user-row-expanded.open { display: block; }

@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Login — ICPC Academy</title>
+  <link rel="stylesheet" href="../css/main.css" />
+  <link rel="stylesheet" href="../css/auth.css" />
+</head>
+<body>
+  <div class="bg-glow bg-glow-1"></div>
+  <div class="bg-glow bg-glow-2"></div>
+
+  <main class="auth-page">
+    <div class="auth-container">
+
+      <div class="auth-logo">
+        <div class="logo-circle">🧠</div>
+        <h1>ICPC <span>Academy</span></h1>
+        <p>Competitive Programming Training Platform</p>
+      </div>
+
+      <div class="auth-card">
+        <h2>Welcome Back</h2>
+        <p class="auth-subtitle">Sign in to continue your journey</p>
+
+        <div id="alert-box" class="alert error">
+          <span>⚠️</span>
+          <span id="alert-msg"></span>
+        </div>
+
+        <div class="verification-banner" id="verify-banner">
+          <p>📧 A verification email was sent to <strong id="verify-email"></strong>.<br>Please verify your email before logging in.</p>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Email Address</label>
+          <input type="email" id="email" class="form-control" placeholder="you@example.com" autocomplete="email" />
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" style="display:flex;justify-content:space-between">
+            <span>Password</span>
+            <a href="forgot-password.html" style="font-weight:500;font-size:0.8rem">Forgot password?</a>
+          </label>
+          <input type="password" id="password" class="form-control" placeholder="••••••••" autocomplete="current-password" />
+        </div>
+
+        <button id="login-btn" class="btn btn-primary btn-full btn-lg" onclick="handleLogin()">
+          Sign In
+        </button>
+
+        <div class="auth-footer">
+          Don't have an account? <a href="register.html">Create account</a>
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <div id="toast-container"></div>
+
+  <script type="module">
+    import { loginUser, onAuthChange, isAdmin } from '../js/auth/auth.js';
+    import { auth } from '../js/core/firebase-config.js';
+
+    // Redirect if already logged in
+    onAuthChange(async (user) => {
+      if (user && user.emailVerified) {
+        const admin = await isAdmin();
+        window.location.href = admin ? 'admin.html' : 'dashboard.html';
+      }
+    });
+
+    window.handleLogin = async function() {
+      const email    = document.getElementById('email').value.trim();
+      const password = document.getElementById('password').value;
+      const btn      = document.getElementById('login-btn');
+      const alertBox = document.getElementById('alert-box');
+      const alertMsg = document.getElementById('alert-msg');
+
+      alertBox.classList.remove('show');
+
+      if (!email || !password) {
+        alertMsg.textContent = 'Please fill in all fields.';
+        alertBox.classList.add('show');
+        return;
+      }
+
+      btn.disabled = true;
+      btn.innerHTML = '<span class="spinner"></span> Signing In...';
+
+      try {
+        await loginUser(email, password);
+        const admin = await isAdmin();
+        window.location.href = admin ? 'admin.html' : 'dashboard.html';
+      } catch (err) {
+        alertMsg.textContent = err.message || 'Login failed. Please try again.';
+        alertBox.classList.add('show');
+        btn.disabled = false;
+        btn.innerHTML = 'Sign In';
+      }
+    };
+
+    // Allow Enter key
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') window.handleLogin();
+    });
+
+    // Check for post-registration redirect
+    const params = new URLSearchParams(location.search);
+    if (params.get('registered')) {
+      const email = decodeURIComponent(params.get('email') || '');
+      document.getElementById('verify-email').textContent = email;
+      document.getElementById('verify-banner').classList.add('show');
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ICPC Academy — ECPC Training Platform</title>
+  <link rel="stylesheet" href="css/main.css" />
+  <link rel="stylesheet" href="css/auth.css" />
+  <style>
+    .hero {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem;
+      text-align: center;
+      position: relative;
+    }
+
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      background: rgba(0,212,255,0.1);
+      border: 1px solid rgba(0,212,255,0.3);
+      border-radius: 100px;
+      padding: 0.4rem 1rem;
+      font-size: 0.82rem;
+      color: var(--cyan);
+      font-weight: 600;
+      letter-spacing: 0.05em;
+      margin-bottom: 2rem;
+      animation: fadeUp 0.5s ease;
+    }
+
+    .hero-logo {
+      width: 100px; height: 100px;
+      background: linear-gradient(135deg, var(--cyan), var(--blue));
+      border-radius: 28px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 3rem;
+      margin: 0 auto 2rem;
+      box-shadow: var(--cyan-glow-lg);
+      animation: float 3s ease-in-out infinite, fadeUp 0.6s ease;
+    }
+
+    .hero h1 {
+      font-size: clamp(2.5rem, 6vw, 4rem);
+      font-weight: 900;
+      letter-spacing: -0.04em;
+      margin-bottom: 1rem;
+      animation: fadeUp 0.7s ease;
+      line-height: 1.1;
+    }
+
+    .hero h1 .accent {
+      background: linear-gradient(135deg, var(--cyan), #60a5fa);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .hero p {
+      font-size: clamp(1rem, 2vw, 1.2rem);
+      color: var(--text-secondary);
+      max-width: 580px;
+      margin: 0 auto 3rem;
+      line-height: 1.7;
+      animation: fadeUp 0.8s ease;
+    }
+
+    .hero-actions {
+      display: flex; gap: 1rem; flex-wrap: wrap; justify-content: center;
+      animation: fadeUp 0.9s ease;
+    }
+
+    .features {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1.5rem;
+      max-width: 800px;
+      margin: 4rem auto 0;
+      animation: fadeUp 1s ease;
+    }
+
+    @media (max-width: 640px) {
+      .features { grid-template-columns: 1fr; }
+    }
+
+    .feature-card {
+      background: var(--bg-glass);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 1.5rem;
+      text-align: left;
+      transition: var(--transition);
+    }
+
+    .feature-card:hover {
+      border-color: var(--border-hover);
+      transform: translateY(-4px);
+    }
+
+    .feature-icon {
+      font-size: 2rem;
+      margin-bottom: 0.75rem;
+    }
+
+    .feature-card h3 {
+      font-size: 1rem;
+      margin-bottom: 0.4rem;
+    }
+
+    .feature-card p {
+      font-size: 0.82rem;
+      color: var(--text-muted);
+      line-height: 1.6;
+      margin: 0;
+    }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Grid background */
+    body::before {
+      content: '';
+      position: fixed; inset: 0;
+      background-image:
+        linear-gradient(rgba(0,212,255,0.025) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0,212,255,0.025) 1px, transparent 1px);
+      background-size: 60px 60px;
+      z-index: -1;
+    }
+  </style>
+</head>
+<body>
+  <div class="bg-glow bg-glow-1"></div>
+  <div class="bg-glow bg-glow-2"></div>
+
+  <!-- Loading screen -->
+  <div id="loading-screen" style="
+    position:fixed;inset:0;
+    background:var(--bg-deep);
+    display:flex;align-items:center;justify-content:center;
+    z-index:9999;
+    transition:opacity 0.4s ease;
+  ">
+    <div style="text-align:center">
+      <div style="font-size:3rem;margin-bottom:1rem;animation:float 2s infinite">🧠</div>
+      <div style="color:var(--cyan);font-weight:700">ICPC Academy</div>
+      <div style="color:var(--text-muted);font-size:0.82rem;margin-top:0.5rem">Loading...</div>
+    </div>
+  </div>
+
+  <section class="hero" id="main-content" style="display:none">
+    <div class="hero-badge">🚀 ECPC 2025 Preparation Platform</div>
+    <div class="hero-logo">🧠</div>
+    <h1>
+      Train Smarter.<br>
+      <span class="accent">Compete Better.</span>
+    </h1>
+    <p>
+      The official ECPC competitive programming training platform. 
+      Structured levels, weekly content, streak tracking, and live leaderboards.
+    </p>
+    <div class="hero-actions">
+      <a href="pages/register.html" class="btn btn-primary btn-lg">Get Started Free →</a>
+      <a href="pages/login.html" class="btn btn-outline btn-lg">Sign In</a>
+    </div>
+
+    <div class="features">
+      <div class="feature-card">
+        <div class="feature-icon">📚</div>
+        <h3>Structured Curriculum</h3>
+        <p>Level-based learning with videos, notes, and curated problems.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">🔥</div>
+        <h3>Streak System</h3>
+        <p>Stay consistent with daily streak tracking and milestone badges.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">🏆</div>
+        <h3>Live Leaderboard</h3>
+        <p>Compete with peers and climb the rankings in real time.</p>
+      </div>
+    </div>
+  </section>
+
+  <div id="toast-container"></div>
+
+  <script type="module">
+    import { auth } from './js/core/firebase-config.js';
+    import { isAdmin } from './js/auth/auth.js';
+    import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+
+    onAuthStateChanged(auth, async (user) => {
+      const loading = document.getElementById('loading-screen');
+      const main    = document.getElementById('main-content');
+
+      if (user && user.emailVerified) {
+        // Redirect logged-in user
+        const admin = await isAdmin();
+        window.location.href = admin ? 'pages/admin.html' : 'pages/dashboard.html';
+      } else {
+        loading.style.opacity = '0';
+        setTimeout(() => { loading.style.display = 'none'; main.style.display = 'flex'; }, 400);
+      }
+    });
+  </script>
+</body>
+</html>

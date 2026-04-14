@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dashboard — ICPC Academy</title>
+  <link rel="stylesheet" href="../css/main.css" />
+</head>
+<body>
+  <div class="bg-glow bg-glow-1"></div>
+  <div class="bg-glow bg-glow-2"></div>
+
+  <!-- Navbar -->
+  <nav class="navbar" id="navbar"></nav>
+
+  <!-- Notification Panel -->
+  <div class="notif-panel" id="notif-panel">
+    <div class="notif-panel-header">
+      <span style="font-weight:700;font-size:0.95rem">🔔 Notifications</span>
+      <button style="background:none;border:none;color:var(--text-muted);cursor:pointer;font-size:0.8rem" onclick="document.getElementById('notif-panel').classList.remove('open')">✕ Close</button>
+    </div>
+    <div class="notif-panel-list" id="notif-list">
+      <div style="text-align:center;padding:2rem;color:var(--text-muted)">Loading...</div>
+    </div>
+  </div>
+
+  <!-- Page Layout -->
+  <div class="page-wrapper">
+    <aside class="sidebar" id="sidebar"></aside>
+
+    <main class="main-content">
+
+      <!-- Page Header -->
+      <div class="page-header">
+        <h1 id="welcome-msg">Welcome back! 👋</h1>
+        <p id="welcome-sub">Track your progress and keep the streak going.</p>
+      </div>
+
+      <!-- Stats Row -->
+      <div class="grid-4 mb-lg" id="stats-grid">
+        <div class="card card-glow stat-card skeleton-card">
+          <div class="stat-label">Current Level</div>
+          <div class="stat-value" id="stat-level">—</div>
+          <div class="stat-sub">ECPC Track</div>
+        </div>
+        <div class="card card-glow stat-card">
+          <div class="stat-label">Current Week</div>
+          <div class="stat-value" id="stat-week">—</div>
+          <div class="stat-sub">Week in progress</div>
+        </div>
+        <div class="card card-glow stat-card">
+          <div class="stat-label">🔥 Streak</div>
+          <div class="stat-value" id="stat-streak">—</div>
+          <div class="stat-sub">Consecutive days</div>
+        </div>
+        <div class="card card-glow stat-card">
+          <div class="stat-label">Completion</div>
+          <div class="stat-value" id="stat-completion">—</div>
+          <div class="stat-sub">Overall progress</div>
+        </div>
+      </div>
+
+      <!-- Progress + Badges -->
+      <div class="grid-2 mb-lg">
+        <!-- Current Week Progress -->
+        <div class="card card-glow">
+          <div class="flex-between mb-md">
+            <h3>📊 Week Progress</h3>
+            <a href="course.html" class="btn btn-outline btn-sm">Continue →</a>
+          </div>
+          <div id="week-progress-list">
+            <div class="skeleton" style="height:60px;border-radius:8px;margin-bottom:0.75rem"></div>
+            <div class="skeleton" style="height:60px;border-radius:8px"></div>
+          </div>
+        </div>
+
+        <!-- Badges -->
+        <div class="card card-glow">
+          <div class="flex-between mb-md">
+            <h3>🏅 My Badges</h3>
+            <span class="fs-sm text-muted" id="badge-count">Loading...</span>
+          </div>
+          <div id="badges-grid" style="display:flex;flex-wrap:wrap;gap:0.75rem">
+            <div class="skeleton" style="width:80px;height:80px;border-radius:12px"></div>
+            <div class="skeleton" style="width:80px;height:80px;border-radius:12px"></div>
+            <div class="skeleton" style="width:80px;height:80px;border-radius:12px"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Leaderboard Preview -->
+      <div class="card card-glow mb-lg">
+        <div class="flex-between mb-md">
+          <h3>🏆 Top Performers</h3>
+          <a href="leaderboard.html" class="btn btn-ghost btn-sm">View Full →</a>
+        </div>
+        <div id="leaderboard-preview">
+          <div class="skeleton" style="height:48px;border-radius:8px;margin-bottom:0.5rem"></div>
+          <div class="skeleton" style="height:48px;border-radius:8px;margin-bottom:0.5rem"></div>
+          <div class="skeleton" style="height:48px;border-radius:8px"></div>
+        </div>
+      </div>
+
+    </main>
+  </div>
+
+  <div id="toast-container"></div>
+
+  <script type="module">
+    import { requireAuth, getUserProfile, isAdmin } from '../js/auth/auth.js';
+    import { renderNavbar, renderSidebar, showToast } from '../js/dashboard/components.js';
+    import { updateStreak, getLeaderboard, getLevels, getWeeks, getSections, getWeekProgress, BADGES } from '../js/core/utils.js';
+
+    async function init() {
+      let user;
+      try { user = await requireAuth(); } catch { return; }
+
+      const admin  = await isAdmin();
+      renderNavbar('dashboard');
+      renderSidebar('dashboard', admin);
+
+      const profile = await getUserProfile(user.uid);
+      if (!profile) return;
+
+      // Update streak
+      const streak = await updateStreak(user.uid, profile);
+
+      // Welcome message
+      const handle = profile.codeforcesHandle || user.email.split('@')[0];
+      document.getElementById('welcome-msg').textContent = `Welcome back, ${handle}! 👋`;
+
+      // Stats
+      document.getElementById('stat-level').textContent   = `Level ${profile.currentLevel ?? 0}`;
+      document.getElementById('stat-week').textContent    = `Week ${profile.currentWeek ?? 1}`;
+      document.getElementById('stat-streak').textContent  = streak;
+
+      // Overall completion
+      const progressData = profile.progress || {};
+      const totalDone    = Object.values(progressData).filter(Boolean).length;
+      document.getElementById('stat-completion').textContent = `${totalDone} ✓`;
+
+      // Week progress
+      await loadWeekProgress(user.uid, profile);
+
+      // Badges
+      renderBadges(profile.badges || []);
+
+      // Leaderboard preview
+      await loadLeaderboardPreview(user.uid);
+    }
+
+    async function loadWeekProgress(uid, profile) {
+      const container = document.getElementById('week-progress-list');
+      try {
+        const levels = await getLevels();
+        if (levels.length === 0) {
+          container.innerHTML = '<p class="text-muted fs-sm">No course content yet. Check back soon!</p>';
+          return;
+        }
+
+        const currentLevel = levels.find(l => l.order === profile.currentLevel) || levels[0];
+        const weeks = await getWeeks(currentLevel.id);
+        const currentWeekData = weeks[Math.min((profile.currentWeek || 1) - 1, weeks.length - 1)];
+
+        if (!currentWeekData) {
+          container.innerHTML = '<p class="text-muted fs-sm">No weeks found.</p>';
+          return;
+        }
+
+        const sections = await getSections(currentWeekData.id);
+        const prog = await getWeekProgress(uid, currentLevel.id, currentWeekData.id, sections);
+
+        container.innerHTML = `
+          <div style="margin-bottom:1rem">
+            <div class="progress-label">
+              <span>${currentLevel.title} — ${currentWeekData.title}</span>
+              <span>${prog.percent}%</span>
+            </div>
+            <div class="progress-bar-wrap">
+              <div class="progress-bar-fill" style="width:${prog.percent}%"></div>
+            </div>
+            <p class="fs-xs text-muted mt-sm">${prog.completed} / ${prog.total} sections completed</p>
+          </div>
+          <a href="course.html" class="btn btn-primary btn-sm">Continue Week ${profile.currentWeek} →</a>
+        `;
+      } catch(e) {
+        container.innerHTML = '<p class="text-muted fs-sm">Could not load progress.</p>';
+      }
+    }
+
+    function renderBadges(earned) {
+      const grid     = document.getElementById('badges-grid');
+      const countEl  = document.getElementById('badge-count');
+      countEl.textContent = `${earned.length} earned`;
+
+      if (earned.length === 0) {
+        grid.innerHTML = '<p class="text-muted fs-sm">Complete activities to earn badges!</p>';
+        return;
+      }
+
+      grid.innerHTML = earned.map(id => {
+        const b = BADGES[id];
+        if (!b) return '';
+        return `
+          <div title="${b.desc}" style="
+            width:80px;height:80px;
+            background:var(--bg-card2);
+            border:1px solid var(--border);
+            border-radius:12px;
+            display:flex;flex-direction:column;
+            align-items:center;justify-content:center;
+            gap:0.25rem;cursor:default;
+            transition:var(--transition);
+          " onmouseenter="this.style.borderColor='var(--cyan)'"
+             onmouseleave="this.style.borderColor='var(--border)'">
+            <span style="font-size:1.8rem">${b.icon}</span>
+            <span style="font-size:0.65rem;color:var(--text-muted);text-align:center;line-height:1.2;padding:0 4px">${b.label}</span>
+          </div>
+        `;
+      }).join('');
+    }
+
+    async function loadLeaderboardPreview(currentUid) {
+      const container = document.getElementById('leaderboard-preview');
+      try {
+        const leaders = await getLeaderboard();
+        const top5    = leaders.slice(0, 5);
+        container.innerHTML = top5.map((u, i) => {
+          const rankClass = i === 0 ? 'gold' : i === 1 ? 'silver' : i === 2 ? 'bronze' : 'other';
+          const isMe      = u.id === currentUid;
+          return `
+            <div class="leaderboard-row" style="${isMe ? 'background:var(--cyan-dim);border-color:rgba(0,212,255,0.2)' : ''}">
+              <div class="rank-badge ${rankClass}">${u.rank}</div>
+              <div>
+                <div style="font-weight:600;font-size:0.92rem">${u.codeforcesHandle || 'Anonymous'}${isMe ? ' <span class="badge-chip cyan" style="font-size:0.68rem">You</span>' : ''}</div>
+                <div class="fs-xs text-muted">Level ${u.currentLevel} · Week ${u.currentWeek}</div>
+              </div>
+              <div style="text-align:center">
+                <div style="font-size:1.1rem;font-weight:700;color:var(--cyan)">${u.streak}</div>
+                <div class="fs-xs text-muted">streak</div>
+              </div>
+              <div style="text-align:center">
+                <div style="font-size:0.8rem;font-weight:600;color:var(--success)">${(u.badges||[]).length} 🏅</div>
+              </div>
+            </div>
+          `;
+        }).join('');
+      } catch(e) {
+        container.innerHTML = '<p class="text-muted fs-sm">Could not load leaderboard.</p>';
+      }
+    }
+
+    init();
+  </script>
+</body>
+</html>

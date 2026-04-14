@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Register — ICPC Academy</title>
+  <link rel="stylesheet" href="../css/main.css" />
+  <link rel="stylesheet" href="../css/auth.css" />
+</head>
+<body>
+  <div class="bg-glow bg-glow-1"></div>
+  <div class="bg-glow bg-glow-2"></div>
+
+  <main class="auth-page">
+    <div class="auth-container" style="max-width:500px">
+
+      <div class="auth-logo">
+        <div class="logo-circle">🧠</div>
+        <h1>ICPC <span>Academy</span></h1>
+        <p>Join the best ECPC preparation platform</p>
+      </div>
+
+      <div class="auth-card">
+        <h2>Create Account</h2>
+        <p class="auth-subtitle">Start your competitive programming journey</p>
+
+        <div id="alert-box" class="alert error">
+          <span>⚠️</span>
+          <span id="alert-msg"></span>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Email Address</label>
+          <input type="email" id="email" class="form-control" placeholder="you@example.com" />
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Codeforces Handle</label>
+          <div style="position:relative">
+            <input type="text" id="cf-handle" class="form-control" placeholder="e.g. tourist" style="padding-right:3rem" />
+            <span id="cf-status" style="position:absolute;right:1rem;top:50%;transform:translateY(-50%);font-size:1.1rem"></span>
+          </div>
+          <p class="fs-xs text-muted mt-sm">We'll verify your handle with Codeforces API</p>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Password</label>
+          <input type="password" id="password" class="form-control" placeholder="Minimum 6 characters" oninput="checkPassword(this.value)" />
+          <div class="pwd-strength mt-sm" id="pwd-strength">
+            <div class="pwd-strength-bar" id="ps1"></div>
+            <div class="pwd-strength-bar" id="ps2"></div>
+            <div class="pwd-strength-bar" id="ps3"></div>
+            <div class="pwd-strength-bar" id="ps4"></div>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Confirm Password</label>
+          <input type="password" id="confirm-password" class="form-control" placeholder="Repeat your password" />
+        </div>
+
+        <div style="margin-bottom:1.25rem;font-size:0.82rem;color:var(--text-muted)">
+          By registering, you agree to follow the academy's code of conduct and honor system.
+        </div>
+
+        <button id="register-btn" class="btn btn-primary btn-full btn-lg" onclick="handleRegister()">
+          Create Account
+        </button>
+
+        <div class="auth-footer">
+          Already have an account? <a href="login.html">Sign in</a>
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <div id="toast-container"></div>
+
+  <script type="module">
+    import { registerUser, onAuthChange } from '../js/auth/auth.js';
+
+    onAuthChange((user) => {
+      if (user && user.emailVerified) {
+        window.location.href = 'dashboard.html';
+      }
+    });
+
+    window.checkPassword = function(val) {
+      const bars = ['ps1','ps2','ps3','ps4'];
+      bars.forEach(id => {
+        const el = document.getElementById(id);
+        el.className = 'pwd-strength-bar';
+      });
+
+      const strength = val.length >= 10 && /[A-Z]/.test(val) && /[0-9]/.test(val) && /[^a-zA-Z0-9]/.test(val) ? 4
+                    : val.length >= 8  && /[A-Z]/.test(val) && /[0-9]/.test(val) ? 3
+                    : val.length >= 6  ? 2
+                    : val.length >= 1  ? 1 : 0;
+
+      const cls = strength <= 1 ? 'weak' : strength <= 2 ? 'medium' : 'strong';
+      for (let i = 0; i < strength; i++) {
+        document.getElementById(bars[i]).classList.add('active', cls);
+      }
+    };
+
+    let cfValidating = false;
+    let cfTimeout;
+
+    document.getElementById('cf-handle').addEventListener('input', function() {
+      clearTimeout(cfTimeout);
+      const status = document.getElementById('cf-status');
+      const val = this.value.trim();
+      if (!val) { status.textContent = ''; return; }
+      status.textContent = '⏳';
+      cfTimeout = setTimeout(async () => {
+        try {
+          const res = await fetch(`https://codeforces.com/api/user.info?handles=${val}`);
+          const data = await res.json();
+          status.textContent = data.status === 'OK' ? '✅' : '❌';
+        } catch {
+          status.textContent = '❌';
+        }
+      }, 800);
+    });
+
+    window.handleRegister = async function() {
+      const email    = document.getElementById('email').value.trim();
+      const handle   = document.getElementById('cf-handle').value.trim();
+      const password = document.getElementById('password').value;
+      const confirm  = document.getElementById('confirm-password').value;
+      const btn      = document.getElementById('register-btn');
+      const alertBox = document.getElementById('alert-box');
+      const alertMsg = document.getElementById('alert-msg');
+
+      alertBox.classList.remove('show');
+
+      if (!email || !handle || !password || !confirm) {
+        alertMsg.textContent = 'Please fill in all fields.';
+        alertBox.classList.add('show');
+        return;
+      }
+
+      if (password !== confirm) {
+        alertMsg.textContent = 'Passwords do not match.';
+        alertBox.classList.add('show');
+        return;
+      }
+
+      if (password.length < 6) {
+        alertMsg.textContent = 'Password must be at least 6 characters.';
+        alertBox.classList.add('show');
+        return;
+      }
+
+      btn.disabled = true;
+      btn.innerHTML = '<span class="spinner"></span> Creating Account...';
+
+      try {
+        const user = await registerUser(email, password, handle);
+        window.location.href = `login.html?registered=1&email=${encodeURIComponent(email)}`;
+      } catch (err) {
+        alertMsg.textContent = err.message || 'Registration failed. Please try again.';
+        alertBox.classList.add('show');
+        btn.disabled = false;
+        btn.innerHTML = 'Create Account';
+      }
+    };
+  </script>
+</body>
+</html>

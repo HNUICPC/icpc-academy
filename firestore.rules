@@ -1,0 +1,101 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ─── HELPER FUNCTIONS ────────────────────────────────────────────
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isEmailVerified() {
+      return request.auth.token.email_verified == true;
+    }
+
+    function isAdmin() {
+      return request.auth.token.admin == true;
+    }
+
+    function isOwner(uid) {
+      return request.auth.uid == uid;
+    }
+
+    function isAuthenticatedAndVerified() {
+      return isAuthenticated() && isEmailVerified();
+    }
+
+    // ─── USERS ───────────────────────────────────────────────────────
+    match /users/{userId} {
+      // Authenticated verified users can read their own profile
+      allow read: if isAuthenticatedAndVerified() && (isOwner(userId) || isAdmin());
+
+      // Only owner can create their own profile (on registration)
+      allow create: if isAuthenticated() && isOwner(userId)
+        && request.resource.data.keys().hasAll(['email','codeforcesHandle','currentLevel','currentWeek','streak','badges','progress','createdAt'])
+        && request.resource.data.email is string
+        && request.resource.data.currentLevel == 0
+        && request.resource.data.currentWeek  == 1;
+
+      // Owner can update their own progress/streak/badges; Admin can update anything
+      allow update: if isAuthenticatedAndVerified() && (
+        isOwner(userId) || isAdmin()
+      );
+
+      // Only admin can delete users
+      allow delete: if isAdmin();
+    }
+
+    // Leaderboard: any verified user can read all users for leaderboard
+    match /users/{userId} {
+      allow list: if isAuthenticatedAndVerified();
+    }
+
+    // ─── LEVELS ──────────────────────────────────────────────────────
+    match /levels/{levelId} {
+      allow read: if isAuthenticatedAndVerified();
+      allow write: if isAdmin();
+    }
+
+    // ─── WEEKS ───────────────────────────────────────────────────────
+    match /weeks/{weekId} {
+      allow read: if isAuthenticatedAndVerified();
+      allow write: if isAdmin();
+    }
+
+    // ─── SECTIONS ────────────────────────────────────────────────────
+    match /sections/{sectionId} {
+      allow read: if isAuthenticatedAndVerified();
+      allow write: if isAdmin();
+    }
+
+    // ─── NOTIFICATIONS ───────────────────────────────────────────────
+    match /notifications/{notifId} {
+      // Users can only read their own notifications
+      allow read: if isAuthenticatedAndVerified()
+        && (resource.data.uid == request.auth.uid || isAdmin());
+
+      // Admin can create notifications for any user; system creates via admin SDK
+      allow create: if isAdmin()
+        || (isAuthenticatedAndVerified() && request.resource.data.uid == request.auth.uid);
+
+      // Users can update only the 'read' field of their own notifications
+      allow update: if isAuthenticatedAndVerified()
+        && resource.data.uid == request.auth.uid
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['read']);
+
+      allow delete: if isAdmin();
+    }
+
+    // ─── PROGRESS (optional aggregation cache) ───────────────────────
+    match /progress/{progressId} {
+      allow read: if isAuthenticatedAndVerified()
+        && (resource.data.uid == request.auth.uid || isAdmin());
+      allow write: if isAuthenticatedAndVerified()
+        && request.resource.data.uid == request.auth.uid;
+    }
+
+    // ─── DENY ALL ELSE ───────────────────────────────────────────────
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

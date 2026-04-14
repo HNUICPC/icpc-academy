@@ -1,0 +1,37 @@
+{
+  "indexes": [
+    {
+      "collectionGroup": "notifications",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "uid",       "order": "ASCENDING" },
+        { "fieldPath": "createdAt", "order": "DESCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "weeks",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "levelId", "order": "ASCENDING" },
+        { "fieldPath": "order",   "order": "ASCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "sections",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "weekId", "order": "ASCENDING" },
+        { "fieldPath": "order",  "order": "ASCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "users",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "currentWeek", "order": "DESCENDING" },
+        { "fieldPath": "streak",      "order": "DESCENDING" }
+      ]
+    }
+  ],
+  "fieldOverrides": []
+}
