@@ -485,11 +485,17 @@
           <td style="color:var(--warning);font-weight:700">${u.streak || 0} 🔥</td>
           <td>${(u.badges||[]).length} 🏅</td>
           <td>
-            <div style="display:flex;gap:0.5rem">
-              <button class="btn btn-outline btn-sm" onclick="window._viewUser('${u.id}')">View</button>
-              <button class="btn btn-ghost btn-sm" onclick="window._unlockNextWeek('${u.id}','${u.currentWeek||1}')">+Week</button>
-            </div>
-          </td>
+         <td>
+  <div style="display:flex;gap:0.5rem; flex-wrap:wrap;">
+    <button class="btn btn-outline btn-sm" onclick="window._viewUser('${u.id}')">View</button>
+    <button class="btn btn-ghost btn-sm" onclick="window._unlockNextWeek('${u.id}','${u.currentWeek||1}')">+Week</button>
+    <button class="btn btn-danger btn-sm"
+            onclick="window._deleteUser('${u.id}', '${u.email || 'this user'}')"
+            style="background:#FF3D71; color:white;">
+      🗑 Delete
+    </button>
+  </div>
+</td>
         </tr>
       `).join('');
     }
@@ -920,8 +926,68 @@
       await batch.commit();
     }
 
-    // ── OLD PLACEHOLDER (replaced above)
+// ── DELETE USER ─────────────────────────────────────────────────────
+// ── DELETE USER (نسخة محسنة مع debug) ─────────────────────────────────
+window._deleteUser = async (uid, email) => {
+  const userEmail = email || 'هذا المستخدم';
 
+  if (!confirm(`⚠️ هل أنت متأكد من حذف المستخدم:\n\n${userEmail}؟\n\nهذا الإجراء لا يمكن التراجع عنه!`)) {
+    return;
+  }
+
+  const finalConfirm = prompt(`اكتب "DELETE" لتأكيد حذف ${userEmail}`);
+  if (finalConfirm !== "DELETE") {
+    showToast("تم إلغاء عملية الحذف", "error");
+    return;
+  }
+
+  try {
+    console.log(`🚀 بدء حذف المستخدم: ${uid} - ${userEmail}`);
+
+    // حذف المستخدم الرئيسي
+    await deleteDoc(doc(db, 'users', uid));
+    console.log("✅ تم حذف وثيقة المستخدم بنجاح");
+
+    // محاولة حذف الإشعارات (لو فيها خطأ مش هيوقف العملية)
+    try {
+      const notifSnap = await getDocs(query(
+        collection(db, 'notifications'), 
+        where('userId', '==', uid)
+      ));
+
+      if (!notifSnap.empty) {
+        const batch = writeBatch(db);
+        notifSnap.docs.forEach(docSnap => {
+          batch.delete(docSnap.ref);
+        });
+        await batch.commit();
+        console.log(`✅ تم حذف ${notifSnap.size} إشعار مرتبط بالمستخدم`);
+      }
+    } catch (notifError) {
+      console.warn("⚠️ لم يتم حذف الإشعارات (لكن المستخدم تم حذفه):", notifError.message);
+    }
+
+    showToast(`✅ تم حذف المستخدم ${userEmail} بنجاح`, 'success');
+    await loadUsersAdmin();   // تحديث الجدول
+
+  } catch (error) {
+    console.error("❌ خطأ في حذف المستخدم:", error);
+    console.error("Error Code:", error.code);
+    console.error("Error Message:", error.message);
+
+    let errorMsg = "حدث خطأ أثناء الحذف";
+
+    if (error.code === 'permission-denied') {
+      errorMsg = "خطأ في الصلاحيات: تأكد من أنك Admin و Firestore Rules تسمح بالحذف";
+    } else if (error.code === 'not-found') {
+      errorMsg = "المستخدم غير موجود (ربما تم حذفه بالفعل)";
+    } else if (error.message.includes('undefined')) {
+      errorMsg = "خطأ في المعرف (UID غير صحيح)";
+    }
+
+    showToast(errorMsg, 'error');
+  }
+};
     init();
   </script>
 </body>

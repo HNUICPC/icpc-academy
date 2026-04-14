@@ -519,7 +519,26 @@ a:hover { color: var(--cyan-bright); }
   font-weight: 700;
   box-shadow: 0 4px 18px rgba(0,212,255,0.35), inset 0 1px 0 rgba(255,255,255,0.2);
 }
+/* External Link Button */
+.external-link-btn {
+  background: linear-gradient(135deg, var(--neon-cyan), var(--neon-blue));
+  color: #01102C;
+  font-weight: 700;
+  padding: 14px 24px;
+  border-radius: 12px;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  box-shadow: 0 0 25px rgba(0, 212, 255, 0.4);
+  transition: all 0.3s ease;
+  font-size: 1.02rem;
+}
 
+.external-link-btn:hover {
+  transform: scale(1.05) translateY(-3px);
+  box-shadow: 0 0 40px rgba(0, 212, 255, 0.7);
+}
 .btn-primary:hover {
   transform: translateY(-2px);
   box-shadow: 0 8px 30px rgba(0,212,255,0.5), inset 0 1px 0 rgba(255,255,255,0.2);
