@@ -10,16 +10,19 @@
   <div class="bg-glow bg-glow-1"></div>
 
   <nav class="navbar" id="navbar"></nav>
+
   <div class="notif-panel" id="notif-panel">
     <div class="notif-panel-header">
       <span style="font-weight:700">🔔 Notifications</span>
-      <button style="background:none;border:none;color:var(--text-muted);cursor:pointer" onclick="document.getElementById('notif-panel').classList.remove('open')">✕</button>
+      <button style="background:none;border:none;color:var(--text-muted);cursor:pointer"
+        onclick="document.getElementById('notif-panel').classList.remove('open')">✕</button>
     </div>
     <div class="notif-panel-list"></div>
   </div>
 
   <div class="page-wrapper">
     <aside class="sidebar" id="sidebar"></aside>
+
     <main class="main-content">
 
       <div class="page-header">
@@ -28,22 +31,40 @@
       </div>
 
       <div class="grid-2">
+
         <!-- Profile Card -->
         <div class="card card-glow">
+
           <div style="text-align:center;padding:1rem 0 1.5rem">
-            <div style="
+
+            <!-- Avatar -->
+            <div id="avatar-icon" style="
               width:80px;height:80px;
               background:linear-gradient(135deg,var(--cyan),var(--blue));
               border-radius:50%;
               display:flex;align-items:center;justify-content:center;
               font-size:2rem;margin:0 auto 1rem;
               box-shadow:var(--cyan-glow);
-            " id="avatar-icon">🧑</div>
+            ">🧑</div>
+
             <h2 id="profile-handle" style="font-size:1.3rem">Loading...</h2>
             <p id="profile-email" class="text-muted fs-sm mt-sm"></p>
+
             <div style="margin-top:0.75rem">
               <span class="badge-chip cyan" id="profile-level">Level 0</span>
             </div>
+
+            <!-- Avatar Picker -->
+            <div class="glow-divider"></div>
+
+            <h4 style="margin:0.5rem 0">Choose Avatar</h4>
+            <div id="avatar-grid" style="
+              display:grid;
+              grid-template-columns:repeat(4,1fr);
+              gap:0.5rem;
+              margin-top:0.5rem;
+            "></div>
+
           </div>
 
           <div class="glow-divider"></div>
@@ -68,26 +89,33 @@
           </div>
 
           <div class="glow-divider"></div>
-          <a href="https://codeforces.com/profile/" id="cf-link" target="_blank" class="btn btn-outline btn-full btn-sm">
+
+          <a id="cf-link" target="_blank"
+            class="btn btn-outline btn-full btn-sm">
             View Codeforces Profile ↗
           </a>
+
         </div>
 
-        <!-- Badges Grid -->
+        <!-- Badges -->
         <div class="card card-glow">
           <h3 class="mb-md">🏅 All Badges</h3>
-          <div id="all-badges-grid" style="display:grid;grid-template-columns:repeat(3,1fr);gap:0.75rem">
-            <!-- Rendered dynamically -->
+          <div id="all-badges-grid"
+            style="display:grid;grid-template-columns:repeat(3,1fr);gap:0.75rem">
           </div>
         </div>
+
       </div>
 
-      <!-- Notifications History -->
+      <!-- Notifications -->
       <div class="card card-glow mt-lg">
         <div class="flex-between mb-md">
           <h3>📬 Notification History</h3>
-          <button class="btn btn-ghost btn-sm" onclick="markAllRead()">Mark All Read</button>
+          <button class="btn btn-ghost btn-sm" onclick="markAllRead()">
+            Mark All Read
+          </button>
         </div>
+
         <div id="notif-history">
           <div class="skeleton" style="height:60px;border-radius:8px;margin-bottom:0.5rem"></div>
           <div class="skeleton" style="height:60px;border-radius:8px"></div>
@@ -106,10 +134,47 @@
     import { db } from '../js/core/firebase-config.js';
     import { doc, updateDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
+    const AVATARS = [
+      "🧑","👨","👩","🧔","👨‍💻","👩‍💻","🧠","😎",
+      "🤓","🥷","👑","🦸","🧑‍🚀","👨‍🔬","👩‍🔬","🧙"
+    ];
+
     let currentUser;
+
+    function renderAvatars(selected) {
+      const grid = document.getElementById('avatar-grid');
+
+      grid.innerHTML = AVATARS.map(a => `
+        <div onclick="window.selectAvatar('${a}')"
+          style="
+            font-size:1.5rem;
+            padding:0.5rem;
+            border-radius:10px;
+            cursor:pointer;
+            text-align:center;
+            border:2px solid ${selected === a ? 'var(--cyan)' : 'var(--border)'};
+            background:${selected === a ? 'rgba(0,212,255,0.1)' : 'var(--bg-card2)'};
+            transition:0.2s;
+          ">
+          ${a}
+        </div>
+      `).join('');
+    }
+
+    window.selectAvatar = async (avatar) => {
+      document.getElementById('avatar-icon').textContent = avatar;
+
+      renderAvatars(avatar);
+
+      const userRef = doc(db, "users", currentUser.uid);
+      await updateDoc(userRef, { avatar });
+
+      showToast("Avatar updated", "success");
+    };
 
     async function init() {
       try { currentUser = await requireAuth(); } catch { return; }
+
       const admin = await isAdmin();
       renderNavbar('profile');
       renderSidebar('profile', admin);
@@ -117,30 +182,50 @@
       const profile = await getUserProfile(currentUser.uid);
       if (!profile) return;
 
-      // Fill profile
-      document.getElementById('profile-handle').textContent = profile.codeforcesHandle || 'No handle';
-      document.getElementById('profile-email').textContent   = profile.email || currentUser.email;
-      document.getElementById('profile-level').textContent   = `Level ${profile.currentLevel ?? 0} · Week ${profile.currentWeek ?? 1}`;
-      document.getElementById('p-streak').textContent        = `${profile.streak ?? 0} 🔥`;
-      document.getElementById('p-badges').textContent        = `${(profile.badges||[]).length} earned`;
-      document.getElementById('p-progress').textContent      = `${Object.values(profile.progress||{}).filter(Boolean).length} completed`;
-      document.getElementById('cf-link').href                = `https://codeforces.com/profile/${profile.codeforcesHandle}`;
+      document.getElementById('profile-handle').textContent =
+        profile.codeforcesHandle || 'No handle';
+
+      document.getElementById('profile-email').textContent =
+        profile.email || currentUser.email;
+
+      document.getElementById('profile-level').textContent =
+        `Level ${profile.currentLevel ?? 0} · Week ${profile.currentWeek ?? 1}`;
+
+      document.getElementById('p-streak').textContent =
+        `${profile.streak ?? 0} 🔥`;
+
+      document.getElementById('p-badges').textContent =
+        `${(profile.badges||[]).length} earned`;
+
+      document.getElementById('p-progress').textContent =
+        `${Object.values(profile.progress||{}).filter(Boolean).length} completed`;
+
+      document.getElementById('cf-link').href =
+        `https://codeforces.com/profile/${profile.codeforcesHandle}`;
 
       if (profile.createdAt?.toDate) {
-        document.getElementById('p-since').textContent = profile.createdAt.toDate().toLocaleDateString('en-US', { year:'numeric', month:'long' });
+        document.getElementById('p-since').textContent =
+          profile.createdAt.toDate().toLocaleDateString('en-US', {
+            year:'numeric', month:'long'
+          });
       }
 
-      // Render all badges (earned + locked)
-      renderAllBadges(profile.badges || []);
+      // avatar
+      document.getElementById('avatar-icon').textContent =
+        profile.avatar || "🧑";
 
-      // Load notifications
+      renderAvatars(profile.avatar || "🧑");
+
+      renderAllBadges(profile.badges || []);
       loadNotifHistory();
     }
 
     function renderAllBadges(earned) {
       const grid = document.getElementById('all-badges-grid');
+
       grid.innerHTML = Object.values(BADGES).map(b => {
         const isEarned = earned.includes(b.id);
+
         return `
           <div style="
             padding:1rem 0.5rem;
@@ -149,10 +234,11 @@
             border-radius:12px;
             text-align:center;
             opacity:${isEarned ? '1' : '0.4'};
-            transition:var(--transition);
-          " title="${b.desc}">
+          ">
             <div style="font-size:2rem;margin-bottom:0.4rem">${b.icon}</div>
-            <div style="font-size:0.7rem;font-weight:600;color:${isEarned ? 'var(--cyan)' : 'var(--text-muted)'}">${b.label}</div>
+            <div style="font-size:0.7rem;font-weight:600">
+              ${b.label}
+            </div>
           </div>
         `;
       }).join('');
@@ -160,26 +246,35 @@
 
     async function loadNotifHistory() {
       const container = document.getElementById('notif-history');
+
       try {
         const notifs = await getUserNotifications(currentUser.uid);
+
         if (notifs.length === 0) {
           container.innerHTML = '<p class="text-muted fs-sm text-center" style="padding:2rem">No notifications yet.</p>';
           return;
         }
+
         container.innerHTML = notifs.map(n => {
           const time = n.createdAt?.toDate ? n.createdAt.toDate().toLocaleString() : '';
-          const typeIcon = n.type === 'warning' ? '⚠️' : n.type === 'announcement' ? '📢' : '🎯';
+          const icon = n.type === 'warning' ? '⚠️' : n.type === 'announcement' ? '📢' : '🎯';
+
           return `
-            <div class="notif-item ${n.read ? '' : 'unread'}" id="ni-${n.id}" onclick="window._readNotif('${n.id}')">
+            <div class="notif-item ${n.read ? '' : 'unread'}"
+              id="ni-${n.id}"
+              onclick="window._readNotif('${n.id}')">
+
               <div class="notif-dot ${n.read ? 'read' : ''}"></div>
+
               <div style="flex:1">
-                <div class="notif-item-title">${typeIcon} ${n.title}</div>
+                <div class="notif-item-title">${icon} ${n.title}</div>
                 <div class="notif-item-msg">${n.message}</div>
                 <div class="notif-item-time">${time}</div>
               </div>
             </div>
           `;
         }).join('');
+
       } catch {
         container.innerHTML = '<p class="text-muted fs-sm">Could not load notifications.</p>';
       }
@@ -187,21 +282,18 @@
 
     window._readNotif = async (id) => {
       await markNotificationRead(id);
-      const el = document.getElementById(`ni-${id}`);
-      if (el) {
-        el.classList.remove('unread');
-        el.querySelector('.notif-dot')?.classList.add('read');
-      }
+      document.getElementById(`ni-${id}`)?.classList.remove('unread');
     };
 
     window.markAllRead = async () => {
       const notifs = await getUserNotifications(currentUser.uid);
-      await Promise.all(notifs.filter(n => !n.read).map(n => markNotificationRead(n.id)));
+      await Promise.all(notifs.map(n => markNotificationRead(n.id)));
       showToast('All notifications marked as read', 'success');
       loadNotifHistory();
     };
 
     init();
   </script>
+
 </body>
 </html>

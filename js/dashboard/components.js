@@ -34,9 +34,15 @@ export function renderNavbar(activePage = '') {
 
   navbar.innerHTML = `
     <div class="navbar-brand">
-      <div class="logo-icon">🧠</div>
-      ICPC <span>Academy</span>
-    </div>
+  <div class="logo-ico">
+    <img src="../assets/logo.png" alt="logo">
+  </div>
+
+  <div class="brand-text">
+    ICPC <span>Academy</span>
+    <div class="brand-sub">Developed by Eng. Youssef Barakat</div>
+  </div>
+</div>
     <div class="navbar-actions">
       <button class="notif-btn" id="notif-toggle" title="Notifications">
         🔔

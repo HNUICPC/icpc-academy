@@ -5,6 +5,156 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Course — ICPC Academy</title>
   <link rel="stylesheet" href="../css/main.css" />
+  <style>
+    :root {
+      --neon-cyan: #00D4FF;
+      --neon-blue: #1A7FD4;
+    }
+
+    /* Ultimate Week Cards */
+    .week-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-xl);
+      padding: 2rem 1.75rem;
+      transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+      position: relative;
+      overflow: hidden;
+      box-shadow: 0 8px 32px rgba(0, 212, 255, 0.12);
+    }
+    .week-card::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, transparent, rgba(0,212,255,0.08), transparent);
+      opacity: 0;
+      transition: all 0.4s ease;
+    }
+    .week-card:hover {
+      border-color: var(--neon-cyan);
+      box-shadow: var(--cyan-glow-lg);
+      transform: translateY(-8px) scale(1.03);
+    }
+    .week-card:hover::before {
+      opacity: 1;
+      animation: shimmer 3s linear infinite;
+    }
+    .week-card.locked {
+      opacity: 0.4;
+      pointer-events: none;
+    }
+    .week-card.locked::after {
+      content: '🔒';
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      font-size: 2.2rem;
+      filter: drop-shadow(0 0 20px #FF3D71);
+    }
+    .week-card h3 {
+      font-size: 1.5rem;
+      margin-bottom: 0.6rem;
+      color: var(--text-primary);
+    }
+
+    /* Progress Bar with shine */
+    .week-progress {
+      height: 8px;
+      background: rgba(255,255,255,0.08);
+      border-radius: 9999px;
+      overflow: hidden;
+      position: relative;
+      margin-top: 1.2rem;
+    }
+    .week-progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--neon-cyan), var(--neon-blue));
+      box-shadow: 0 0 20px var(--neon-cyan);
+      transition: width 1s cubic-bezier(0.34, 1.56, 0.64, 1);
+      position: relative;
+    }
+    .week-progress-fill::after {
+      content: '';
+      position: absolute;
+      top: 0; left: -150%;
+      width: 50%; height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.6), transparent);
+      animation: progressShine 4s linear infinite;
+    }
+
+    @keyframes progressShine {
+      0% { transform: translateX(-100%); }
+      100% { transform: translateX(400%); }
+    }
+
+    /* Content Card - Ultimate Glass Panel */
+    .content-card {
+      background: rgba(6, 30, 69, 0.75);
+      border: 1px solid var(--neon-cyan);
+      border-radius: var(--radius-xl);
+      padding: 2.5rem;
+      box-shadow: 
+        0 0 40px rgba(0, 212, 255, 0.25),
+        inset 0 0 40px rgba(0, 212, 255, 0.1);
+      backdrop-filter: blur(24px);
+      min-height: 560px;
+      position: relative;
+      overflow: hidden;
+    }
+    .content-card::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 40%;
+      height: 40%;
+      background: radial-gradient(circle, rgba(0,212,255,0.15) 0%, transparent 70%);
+      animation: slowRotate 25s linear infinite;
+      pointer-events: none;
+    }
+
+    @keyframes slowRotate {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+
+    /* Arabic RTL Support */
+    .arabic-content {
+      direction: rtl;
+      text-align: right;
+      font-size: 1.1rem;
+      line-height: 1.9;
+    }
+
+    /* Neon Buttons */
+    .neon-btn {
+      background: linear-gradient(135deg, var(--neon-cyan), var(--neon-blue));
+      color: #01102C;
+      font-weight: 700;
+      box-shadow: 0 0 25px var(--neon-cyan);
+      transition: all 0.3s ease;
+    }
+    .neon-btn:hover {
+      transform: scale(1.08) translateY(-3px);
+      box-shadow: 0 0 40px var(--neon-cyan);
+    }
+
+    /* Tabs */
+    .tab-nav .tab-btn.active {
+      background: var(--cyan-dim);
+      color: var(--neon-cyan);
+      box-shadow: 0 0 20px var(--neon-cyan);
+      border: 1px solid var(--neon-cyan);
+    }
+
+    /* Section Header */
+    .section-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1.5rem;
+    }
+  </style>
 </head>
 <body>
   <div class="bg-glow bg-glow-1"></div>
@@ -14,7 +164,7 @@
   <div class="notif-panel" id="notif-panel">
     <div class="notif-panel-header">
       <span style="font-weight:700">🔔 Notifications</span>
-      <button style="background:none;border:none;color:var(--text-muted);cursor:pointer" onclick="document.getElementById('notif-panel').classList.remove('open')">✕</button>
+      <button style="background:none;border:none;color:var(--text-muted);cursor:pointer;font-size:1.5rem" onclick="document.getElementById('notif-panel').classList.remove('open')">✕</button>
     </div>
     <div class="notif-panel-list" id="notif-list"></div>
   </div>
@@ -24,49 +174,40 @@
 
     <main class="main-content">
 
-      <!-- Level Tabs -->
       <div class="page-header">
-        <h1>📚 Course</h1>
-        <p>Select your level and navigate through weekly content</p>
+        <h1 style="font-size:2.2rem">📚 Course</h1>
+        <p class="text-secondary">Choose your level and crush your competitive programming journey</p>
       </div>
 
-      <div id="level-tabs" class="tab-nav" style="max-width:400px">
-        <!-- Rendered dynamically -->
-      </div>
+      <div id="level-tabs" class="tab-nav" style="max-width:460px"></div>
 
       <!-- Weeks Grid -->
-      <div id="weeks-grid" class="grid-3">
-        <div class="skeleton" style="height:140px;border-radius:20px"></div>
-        <div class="skeleton" style="height:140px;border-radius:20px"></div>
-        <div class="skeleton" style="height:140px;border-radius:20px"></div>
-      </div>
+      <div id="weeks-grid" class="grid-3" style="margin-top:2.5rem; gap:1.5rem"></div>
 
-      <!-- Week Content Panel -->
-      <div id="week-content" style="display:none;margin-top:2rem">
+      <!-- Week Content -->
+      <div id="week-content" class="content-card" style="display:none; margin-top:2.5rem">
         <div class="flex-between mb-lg">
           <div>
-            <h2 id="week-title">Week</h2>
+            <h2 id="week-title" style="font-size:2rem; margin:0"></h2>
             <p id="week-desc" class="text-muted fs-sm mt-sm"></p>
           </div>
           <div class="flex gap-sm">
-            <button class="btn btn-ghost btn-sm" id="back-to-weeks">← Back</button>
-            <button class="btn btn-primary btn-sm" id="mark-week-done" style="display:none">Mark Week Complete ✓</button>
+            <button class="btn btn-ghost btn-sm" id="back-to-weeks">← Back to Weeks</button>
+            <button class="btn neon-btn btn-sm" id="mark-week-done" style="display:none">Mark Week Complete ✓</button>
           </div>
         </div>
 
-        <div style="margin-bottom:1.5rem">
+        <div style="margin-bottom:2rem">
           <div class="progress-label">
             <span>Week Progress</span>
-            <span id="week-prog-pct">0%</span>
+            <span id="week-prog-pct" class="text-cyan fw-bold">0%</span>
           </div>
           <div class="progress-bar-wrap">
             <div class="progress-bar-fill" id="week-prog-bar" style="width:0%"></div>
           </div>
         </div>
 
-        <div id="sections-list">
-          <!-- Sections rendered here -->
-        </div>
+        <div id="sections-list"></div>
       </div>
 
     </main>
@@ -75,243 +216,186 @@
   <div id="toast-container"></div>
 
   <script type="module">
-    import { requireAuth, getUserProfile, isAdmin } from '../js/auth/auth.js';
-    import { renderNavbar, renderSidebar, showToast } from '../js/dashboard/components.js';
-    import { getLevels, getWeeks, getSections, getWeekProgress, markSectionComplete, awardBadge } from '../js/core/utils.js';
-    import { db } from '../js/core/firebase-config.js';
-    import { doc, getDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+import { requireAuth, getUserProfile, isAdmin } from '../js/auth/auth.js';
+import { renderNavbar, renderSidebar, showToast } from '../js/dashboard/components.js';
+import { getLevels, getWeeks, getSections } from '../js/core/utils.js';
+import { db } from '../js/core/firebase-config.js';
+import { doc, updateDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
-    let currentUser, currentProfile, currentLevelId, currentWeekId, currentSections = [];
+let currentUser, currentProfile;
+let currentLevelId = null;
+let currentWeekId = null;
+let weeksCache = [];
+let currentSections = [];
+let currentSectionIndex = 0;
 
-    async function init() {
-      try { currentUser = await requireAuth(); } catch { return; }
-      const admin = await isAdmin();
-      renderNavbar('course');
-      renderSidebar('course', admin);
+async function init() {
+  currentUser = await requireAuth();
+  const admin = await isAdmin();
+  renderNavbar('course');
+  renderSidebar('course', admin);
+  currentProfile = await getUserProfile(currentUser.uid);
+  await loadLevels();
+}
 
-      currentProfile = await getUserProfile(currentUser.uid);
-      await loadLevels();
-    }
+async function loadLevels() {
+  const levels = await getLevels();
+  const tabNav = document.getElementById('level-tabs');
+  tabNav.innerHTML = levels.map(l => `
+    <button class="tab-btn" data-id="${l.id}" data-order="${l.order}">${l.title}</button>
+  `).join('');
 
-    async function loadLevels() {
-      const levels = await getLevels();
-      const tabNav = document.getElementById('level-tabs');
-
-      if (levels.length === 0) {
-        document.getElementById('weeks-grid').innerHTML = '<p class="text-muted">No course content available yet.</p>';
-        return;
-      }
-
-      tabNav.innerHTML = levels.map(l => `
-        <button class="tab-btn" data-id="${l.id}" data-order="${l.order}">${l.title}</button>
-      `).join('');
-
-      const tabs = tabNav.querySelectorAll('.tab-btn');
-      tabs.forEach(btn => btn.addEventListener('click', () => {
-        tabs.forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
-        currentLevelId = btn.dataset.id;
-        loadWeeks(btn.dataset.id);
-        document.getElementById('week-content').style.display = 'none';
-        document.getElementById('weeks-grid').style.display = 'grid';
-      }));
-
-      // Auto-select first (or user's level)
-      const userLevelOrder = currentProfile?.currentLevel ?? 0;
-      const defaultTab     = [...tabs].find(t => parseInt(t.dataset.order) === userLevelOrder) || tabs[0];
-      defaultTab.click();
-    }
-
-    async function loadWeeks(levelId) {
-      const grid = document.getElementById('weeks-grid');
-      grid.innerHTML = `
-        <div class="skeleton" style="height:140px;border-radius:20px"></div>
-        <div class="skeleton" style="height:140px;border-radius:20px"></div>
-        <div class="skeleton" style="height:140px;border-radius:20px"></div>
-      `;
-
-      const weeks = await getWeeks(levelId);
-
-      if (weeks.length === 0) {
-        grid.innerHTML = '<p class="text-muted" style="grid-column:1/-1">No weeks available yet.</p>';
-        return;
-      }
-
-      const userCurrentWeek = currentProfile?.currentWeek ?? 1;
-
-      grid.innerHTML = await Promise.all(weeks.map(async (w, i) => {
-        const weekNum    = w.order || (i + 1);
-        const isUnlocked = weekNum <= userCurrentWeek;
-        const secs       = await getSections(w.id);
-        const prog       = isUnlocked ? await getWeekProgress(currentUser.uid, levelId, w.id, secs) : { percent: 0 };
-
-        return `
-          <div class="week-card ${isUnlocked ? '' : 'locked'}" data-id="${w.id}" data-num="${weekNum}" ${isUnlocked ? 'onclick="window._openWeek(\'' + w.id + '\',\'' + w.title + '\',\'' + (w.description||'') + '\','+weekNum+')"' : ''}>
-            <div class="flex-between mb-sm">
-              <span class="badge-chip ${isUnlocked ? (prog.percent===100?'green':'cyan') : 'red'}">
-                ${isUnlocked ? (prog.percent===100 ? '✓ Done' : `Week ${weekNum}`) : `🔒 Locked`}
-              </span>
-              <span class="fs-xs text-muted">${secs.length} sections</span>
-            </div>
-            <h3 style="font-size:1rem;margin-bottom:0.5rem">${w.title}</h3>
-            ${w.description ? `<p class="fs-xs text-muted mb-sm">${w.description}</p>` : ''}
-            ${isUnlocked ? `
-              <div class="progress-bar-wrap" style="height:4px">
-                <div class="progress-bar-fill" style="width:${prog.percent}%"></div>
-              </div>
-            ` : ''}
-          </div>
-        `;
-      })).then(cards => cards.join(''));
-    }
-
-    window._openWeek = async function(weekId, title, desc, weekNum) {
-      currentWeekId = weekId;
-      document.getElementById('week-title').textContent = title;
-      document.getElementById('week-desc').textContent  = desc;
-      document.getElementById('weeks-grid').style.display = 'none';
-      document.getElementById('week-content').style.display = 'block';
-
-      const list = document.getElementById('sections-list');
-      list.innerHTML = '<div class="skeleton" style="height:60px;border-radius:12px;margin-bottom:0.75rem"></div>'.repeat(3);
-
-      currentSections = await getSections(weekId);
-      await renderSections();
-
-      document.getElementById('back-to-weeks').onclick = () => {
-        document.getElementById('week-content').style.display = 'none';
-        document.getElementById('weeks-grid').style.display   = 'grid';
-      };
+  const tabs = tabNav.querySelectorAll('.tab-btn');
+  tabs.forEach(btn => {
+    btn.onclick = () => {
+      tabs.forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      currentLevelId = btn.dataset.id;
+      loadWeeks(btn.dataset.id);
+      document.getElementById('week-content').style.display = 'none';
+      document.getElementById('weeks-grid').style.display = 'grid';
     };
+  });
+  tabs[0]?.click();
+}
 
-    async function renderSections() {
-      const list = document.getElementById('sections-list');
-      const profile = await getUserProfile(currentUser.uid);
-      const progress = profile?.progress || {};
+async function loadWeeks(levelId) {
+  const grid = document.getElementById('weeks-grid');
+  grid.innerHTML = '<div class="skeleton" style="height:200px;border-radius:24px"></div>'.repeat(3);
 
-      if (currentSections.length === 0) {
-        list.innerHTML = '<p class="text-muted">No sections in this week yet.</p>';
-        return;
-      }
+  const weeks = await getWeeks(levelId);
+  weeksCache = weeks;
+  const profile = await getUserProfile(currentUser.uid);
+  const progress = profile?.progress || {};
+  const userCurrentWeek = currentProfile?.currentWeek ?? 1;
 
-      list.innerHTML = currentSections.map(s => {
-        const key     = `${currentLevelId}_${currentWeekId}_${s.id}`;
-        const done    = !!progress[key];
-        const typeIcon = s.type === 'video' ? '▶️' : s.type === 'link' ? '🔗' : '📝';
-        const typeClass = s.type || 'note';
+  const html = await Promise.all(weeks.map(async (w, i) => {
+    const weekNum = w.order || (i + 1);
+    const isUnlocked = weekNum <= userCurrentWeek;
+    const sections = await getSections(w.id);
+    const doneCount = sections.filter(s => progress[`${currentLevelId}_${w.id}_${s.id}`]).length;
+    const percent = sections.length ? Math.round((doneCount / sections.length) * 100) : 0;
 
-        let bodyContent = '';
-        if (s.type === 'video') {
-          const embedUrl = getYouTubeEmbed(s.url || s.videoUrl || '');
-          bodyContent = embedUrl
-            ? `<div class="video-embed"><iframe src="${embedUrl}" allowfullscreen></iframe></div>`
-            : `<a href="${s.url}" target="_blank" class="btn btn-outline btn-sm">▶ Watch Video</a>`;
-        } else if (s.type === 'link') {
-          bodyContent = `
-            <div style="display:flex;flex-direction:column;gap:0.5rem">
-              ${(s.links || [s]).map(l => `
-                <a href="${l.url || s.url}" target="_blank" class="btn btn-outline btn-sm" style="justify-content:flex-start">
-                  🔗 ${l.label || l.url || 'Open Link'}
-                </a>
-              `).join('')}
-            </div>
-          `;
-        } else {
-          bodyContent = `<div class="notes-content">${s.content || s.notes || 'No content.'}</div>`;
-        }
+    return `
+      <div class="week-card ${isUnlocked ? '' : 'locked'}" onclick="${isUnlocked ? `window.openWeekById('${w.id}')` : ''}">
+        <h3>${w.title}</h3>
+        <p class="text-muted fs-sm">${w.description || 'Weekly challenges'}</p>
+        <div class="week-progress">
+          <div class="week-progress-fill" style="width:${percent}%"></div>
+        </div>
+        <p style="text-align:right; margin-top:10px; font-size:0.9rem; color:var(--neon-cyan)">${percent}% completed</p>
+      </div>
+    `;
+  }));
 
-        return `
-          <div class="section-card ${done ? 'completed' : ''}" id="sc-${s.id}">
-            <div class="section-header" onclick="toggleSection('${s.id}')">
-              <div class="section-type-icon ${typeClass}">${typeIcon}</div>
-              <span class="section-title">${s.title}</span>
-              <div class="section-check ${done ? 'done' : ''}" id="chk-${s.id}"
-                   onclick="event.stopPropagation(); window._toggleComplete('${s.id}', '${done}')"
-                   title="${done ? 'Mark incomplete' : 'Mark complete'}">
-                ${done ? '✓' : ''}
-              </div>
-            </div>
-            <div class="section-body" id="body-${s.id}">
-              ${bodyContent}
-            </div>
-          </div>
-        `;
-      }).join('');
+  grid.innerHTML = html.join('');
+}
 
-      updateWeekProgress();
-    }
+window.openWeekById = function (weekId) {
+  const index = weeksCache.findIndex(w => w.id === weekId);
+  if (index === -1) return;
+  currentWeekId = weekId;
+  openWeek(weeksCache[index]);
+};
 
-    window.toggleSection = function(id) {
-      const body = document.getElementById(`body-${id}`);
-      body.classList.toggle('open');
-    };
+function openWeek(w) {
+  document.getElementById('week-title').textContent = w.title;
+  document.getElementById('week-desc').textContent = w.description || '';
+  document.getElementById('weeks-grid').style.display = 'none';
+  document.getElementById('week-content').style.display = 'block';
+  loadSections(w.id);
+}
 
-    window._toggleComplete = async function(sectionId, wasDone) {
-      const isDone  = wasDone === 'true' || wasDone === true;
-      const key     = `${currentLevelId}_${currentWeekId}_${sectionId}`;
-      const userRef = doc(db, 'users', currentUser.uid);
+async function loadSections(weekId) {
+  currentSections = await getSections(weekId);
+  currentSectionIndex = 0;
+  renderSection();
+}
 
-      try {
-        await updateDoc(userRef, { [`progress.${key}`]: !isDone });
-        const chk = document.getElementById(`chk-${sectionId}`);
-        const card = document.getElementById(`sc-${sectionId}`);
-        if (!isDone) {
-          chk.classList.add('done');
-          chk.textContent = '✓';
-          card.classList.add('completed');
-          showToast('Section marked complete!', 'success');
-          // Check if week is 100% done
-          await checkWeekCompletion();
-        } else {
-          chk.classList.remove('done');
-          chk.textContent = '';
-          card.classList.remove('completed');
-        }
-        // Refresh check data
-        chk.onclick = (e) => {
-          e.stopPropagation();
-          window._toggleComplete(sectionId, String(!isDone));
-        };
-        updateWeekProgress();
-      } catch(e) {
-        showToast('Failed to update progress.', 'error');
-      }
-    };
+async function renderSection() {
+  const section = currentSections[currentSectionIndex];
+  const container = document.getElementById('sections-list');
+  if (!section) {
+    container.innerHTML = `<div style="text-align:center;padding:4rem"><h2>🎉 Week Completed!</h2><p class="text-success">All sections finished. Amazing work!</p></div>`;
+    return;
+  }
 
-    async function updateWeekProgress() {
-      const profile  = await getUserProfile(currentUser.uid);
-      const progress = profile?.progress || {};
-      const done     = currentSections.filter(s => progress[`${currentLevelId}_${currentWeekId}_${s.id}`]).length;
-      const pct      = currentSections.length > 0 ? Math.round((done/currentSections.length)*100) : 0;
+  const profile = await getUserProfile(currentUser.uid);
+  const progress = profile?.progress || {};
+  const key = `${currentLevelId}_${currentWeekId}_${section.id}`;
+  const isDone = !!progress[key];
 
-      document.getElementById('week-prog-pct').textContent = `${pct}%`;
-      document.getElementById('week-prog-bar').style.width = `${pct}%`;
+  const content = buildContent(section);
+  const isArabic = /[\u0600-\u06FF]/.test(section.content || section.title || '');
 
-      const markBtn = document.getElementById('mark-week-done');
-      markBtn.style.display = pct === 100 ? 'block' : 'none';
-    }
+  container.innerHTML = `
+    <div class="content-card">
+      <div class="section-header">
+        <h3 style="margin:0">${section.title}</h3>
+        <span class="badge-chip ${isDone ? 'green' : 'cyan'}">${isDone ? '✅ Done' : '⏳ In Progress'}</span>
+      </div>
 
-    async function checkWeekCompletion() {
-      const profile   = await getUserProfile(currentUser.uid);
-      const progress  = profile?.progress || {};
-      const allDone   = currentSections.every(s => progress[`${currentLevelId}_${currentWeekId}_${s.id}`]);
+      <div class="${isArabic ? 'arabic-content' : ''}" style="margin:2rem 0; line-height:1.95; font-size:1.08rem">
+        ${content}
+      </div>
 
-      if (allDone) {
-        await awardBadge(currentUser.uid, 'first_week');
-        await awardBadge(currentUser.uid, 'perfect_week');
-        showToast('🎉 Week completed! Badges earned!', 'success', 'Week Complete');
-      }
-    }
+      <div class="flex-between" style="margin-top:2rem">
+        <button onclick="prevSection()" class="btn btn-ghost btn-sm" ${currentSectionIndex === 0 ? 'disabled' : ''}>⬅ Previous</button>
+        <div style="font-family:var(--font-mono); color:var(--text-muted)">${currentSectionIndex + 1} / ${currentSections.length}</div>
+        <button onclick="nextSection()" class="btn neon-btn btn-sm">Next ➡</button>
+      </div>
+    </div>
+  `;
 
-    function getYouTubeEmbed(url) {
-      if (!url) return null;
-      const match = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([a-zA-Z0-9_-]{11})/);
-      if (match) return `https://www.youtube.com/embed/${match[1]}`;
-      if (url.includes('youtube.com/embed/')) return url;
-      return null;
-    }
+  updateProgress();
+}
 
-    init();
+function buildContent(section) {
+  if (section.type === 'video') {
+    const embed = getYouTubeEmbed(section.url || '');
+    return embed 
+      ? `<div style="aspect-ratio:16/9; width:100%; background:#000; border-radius:16px; overflow:hidden; box-shadow:0 0 30px var(--neon-cyan)"><iframe width="100%" height="100%" src="${embed}" frameborder="0" allowfullscreen></iframe></div>`
+      : `<a href="${section.url}" target="_blank" class="btn btn-primary">Watch Video</a>`;
+  }
+  return section.content || '<p class="text-muted">Content will appear here...</p>';
+}
+
+window.nextSection = async function () {
+  const section = currentSections[currentSectionIndex];
+  if (section) {
+    const key = `${currentLevelId}_${currentWeekId}_${section.id}`;
+    await updateDoc(doc(db, 'users', currentUser.uid), { [`progress.${key}`]: true });
+  }
+  if (currentSectionIndex < currentSections.length - 1) {
+    currentSectionIndex++;
+    renderSection();
+  } else {
+    showToast("🎉 Week Completed!", "success");
+  }
+};
+
+window.prevSection = function () {
+  if (currentSectionIndex > 0) {
+    currentSectionIndex--;
+    renderSection();
+  }
+};
+
+async function updateProgress() {
+  const profile = await getUserProfile(currentUser.uid);
+  const progress = profile?.progress || {};
+  const done = currentSections.filter(s => progress[`${currentLevelId}_${currentWeekId}_${s.id}`]).length;
+  const pct = currentSections.length ? Math.round((done / currentSections.length) * 100) : 0;
+  document.getElementById('week-prog-pct').textContent = pct + "%";
+  document.getElementById('week-prog-bar').style.width = pct + "%";
+}
+
+function getYouTubeEmbed(url) {
+  const match = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([a-zA-Z0-9_-]{11})/);
+  return match ? `https://www.youtube.com/embed/${match[1]}` : null;
+}
+
+init();
   </script>
 </body>
 </html>
