@@ -150,9 +150,59 @@
       animation: gridMove 50s linear infinite;
     }
 
-    @keyframes gridMove {
-      0% { background-position: 0 0; }
-      100% { background-position: 80px 80px; }
+    /* ── TRAINER CARDS ── */
+    .trainer-card {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.75rem;
+      background: rgba(0,212,255,0.05);
+      border: 1px solid rgba(0,212,255,0.2);
+      border-radius: 18px;
+      padding: 1.5rem 1.25rem;
+      width: 175px;
+      cursor: default;
+      transition: transform 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+    }
+    .trainer-card:hover {
+      transform: translateY(-7px);
+      border-color: rgba(0,212,255,0.55);
+      box-shadow: 0 0 28px rgba(0,212,255,0.22);
+    }
+    .trainer-photo-wrap {
+      width: 100px;
+      height: 100px;
+      border-radius: 14px;
+      background: rgba(0,212,255,0.1);
+      border: 2px solid rgba(0,212,255,0.3);
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2.6rem;
+      flex-shrink: 0;
+    }
+    .trainer-photo-wrap img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    .trainer-name {
+      font-weight: 800;
+      font-size: 0.88rem;
+      color: var(--text-primary);
+      text-align: center;
+      line-height: 1.3;
+    }
+    .trainer-role {
+      font-size: 0.75rem;
+      color: var(--cyan);
+      text-align: center;
+    }
+
+    @media (max-width: 600px) {
+      .trainer-card { width: 140px; padding: 1.1rem 0.9rem; }
+      .trainer-photo-wrap { width: 80px; height: 80px; }
     }
   </style>
 </head>
@@ -194,18 +244,48 @@
 
     <!-- Trainer Section -->
     <div class="trainer-highlight">
-      <h2>Led by DR.Hadeer Ahmed & Eng. Youssef Barakat </h2>
+      <h2>Meet Your Trainers</h2>
       <p>
-        Founded and personally coached by <strong>Eng. Youssef Barakat</strong> — a passionate competitive programmer 
-        and dedicated community leader. With years of hands-on experience training Egyptian students, 
-        he built ICPC Academy to provide high-quality, structured preparation for <strong>ECPC</strong>, 
-        <strong>ACPC</strong>, and the International Collegiate Programming Contest (<strong>ICPC</strong>).
-      </p>
-      <p>
-        Whether you're aiming for your first regional contest or dreaming of the World Finals, 
-        this platform delivers the same rigorous training methodology used by top contestants — 
+        High-quality, structured preparation for <strong>ECPC</strong>, <strong>ACPC</strong>, and <strong>ICPC</strong> —
         completely free and accessible to every ambitious programmer in Egypt.
       </p>
+
+      <div style="display:flex;gap:1.5rem;justify-content:center;flex-wrap:wrap;margin-top:1.75rem">
+
+        <!-- DR. Hadeer Ahmed -->
+        <div class="trainer-card">
+          <div class="trainer-photo-wrap">
+            <img src="assets/trainers/hadeer.jpg" alt="DR. Hadeer Ahmed"
+              onerror="this.style.display='none';this.nextElementSibling.style.display='flex'" />
+            <span style="display:none">👩‍🏫</span>
+          </div>
+          <div class="trainer-name">DR. Hadeer Ahmed</div>
+          <div class="trainer-role">Founder</div>
+        </div>
+
+        <!-- Eng. Youssef Barakat -->
+        <div class="trainer-card">
+          <div class="trainer-photo-wrap">
+            <img src="assets/trainers/youssef.jpg" alt="Eng. Youssef Barakat"
+              onerror="this.style.display='none';this.nextElementSibling.style.display='flex'" />
+            <span style="display:none">👨‍💻</span>
+          </div>
+          <div class="trainer-name">Eng. Youssef Barakat</div>
+          <div class="trainer-role">Co-Founder & Head Trainer</div>
+        </div>
+
+        <!-- Eng. Ahmed Reda -->
+        <div class="trainer-card">
+          <div class="trainer-photo-wrap">
+            <img src="assets/trainers/ahmed.jpg" alt="Eng. Ahmed Reda"
+              onerror="this.style.display='none';this.nextElementSibling.style.display='flex'" />
+            <span style="display:none">👨‍🏫</span>
+          </div>
+          <div class="trainer-name">Eng. Ahmed Reda</div>
+          <div class="trainer-role">Founder</div>
+        </div>
+
+      </div>
     </div>
 
     <!-- Features -->
