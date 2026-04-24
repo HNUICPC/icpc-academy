@@ -11,7 +11,6 @@
       --neon-blue: #1A7FD4;
     }
 
-    /* Ultimate Week Cards */
     .week-card {
       background: var(--bg-card);
       border: 1px solid var(--border);
@@ -56,8 +55,6 @@
       margin-bottom: 0.6rem;
       color: var(--text-primary);
     }
-
-    /* Progress Bar with shine */
     .week-progress {
       height: 8px;
       background: rgba(255,255,255,0.08);
@@ -87,7 +84,6 @@
       100% { transform: translateX(400%); }
     }
 
-    /* Content Card */
     .content-card {
       background: rgba(6, 30, 69, 0.75);
       border: 1px solid var(--neon-cyan);
@@ -118,7 +114,6 @@
       to { transform: rotate(360deg); }
     }
 
-    /* Arabic RTL Support */
     .arabic-content {
       direction: rtl;
       text-align: right;
@@ -287,7 +282,6 @@ window.openWeekById = async function (weekId) {
   currentWeekId = weekId;
   const week = weeksCache[index];
 
-  // جلب آخر سيكشن مفتوح لهذا الويك من البروفايل
   const profile = await getUserProfile(currentUser.uid);
   const lastSectionKey = `lastSection_${currentLevelId}_${weekId}`;
   currentSectionIndex = profile?.progress?.[lastSectionKey] || 0;
@@ -306,7 +300,6 @@ function openWeek(w) {
 async function loadSections(weekId) {
   currentSections = await getSections(weekId);
   
-  // التأكد إن currentSectionIndex مش أكبر من عدد السيكشنز
   if (currentSectionIndex >= currentSections.length) {
     currentSectionIndex = currentSections.length - 1;
   }
@@ -351,9 +344,6 @@ async function renderSection() {
 
   updateProgress();
 }
-
-/* ====================== الدالة الجديدة المعدلة ====================== */
-/* ====================== buildContent - المعدلة لدعم External Links ====================== */
 function buildContent(section) {
   const url = section.url || '';
   const isArabic = /[\u0600-\u06FF]/.test(section.content || section.title || '');
@@ -368,7 +358,6 @@ function buildContent(section) {
       : `<a href="${url}" target="_blank" class="external-link-btn">▶️ Watch on YouTube</a>`;
   }
 
-  // 2. External Link (نوع link) → قائمة روابط تفتح في تب جديد
   if (section.type === 'link') {
     if (section.links && Array.isArray(section.links) && section.links.length > 0) {
       let linksHTML = section.links.map(link => `
@@ -389,7 +378,6 @@ function buildContent(section) {
       `;
     } 
     else if (url) {
-      // حالة قديمة: لو فيه url واحد بس
       return `
         <a href="${url}" target="_blank" class="external-link-btn" style="width:100%; justify-content:center;">
           📎 Open External Resource <span style="margin-left:auto">↗</span>
@@ -398,7 +386,6 @@ function buildContent(section) {
     }
   }
 
-  // 3. Notes / Text Content
   if (section.type === 'note' || section.content) {
     return `
       <div class="${isArabic ? 'arabic-content' : ''}" style="line-height:1.95; font-size:1.08rem">
@@ -407,7 +394,6 @@ function buildContent(section) {
     `;
   }
 
-  // 4. Default fallback
   return `<p class="text-muted">No content available for this section.</p>`;
 }
 window.nextSection = async function () {
@@ -416,7 +402,6 @@ window.nextSection = async function () {
     const key = `${currentLevelId}_${currentWeekId}_${section.id}`;
     await updateDoc(doc(db, 'users', currentUser.uid), { 
       [`progress.${key}`]: true,
-      // حفظ آخر سيكشن مفتوح
       [`progress.lastSection_${currentLevelId}_${currentWeekId}`]: currentSectionIndex
     });
   }
@@ -426,7 +411,6 @@ window.nextSection = async function () {
     renderSection();
   } else {
     showToast("🎉 Week Completed!", "success");
-    // اختياري: لو خلص الويك كله، نقدر نحفظ آخر سيكشن كمان
     await updateDoc(doc(db, 'users', currentUser.uid), {
       [`progress.lastSection_${currentLevelId}_${currentWeekId}`]: currentSections.length - 1
     });

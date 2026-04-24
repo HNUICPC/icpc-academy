@@ -5,6 +5,143 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Leaderboard — ICPC Academy</title>
   <link rel="stylesheet" href="../css/main.css" />
+  <style>
+    /* ── PODIUM ── */
+    .podium-card {
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: flex-start;
+      padding: 1.25rem 1rem 0;
+      background: var(--bg-card);
+      border-radius: 20px 20px 0 0;
+      cursor: pointer;
+      transition: transform 0.25s cubic-bezier(0.34,1.56,0.64,1), box-shadow 0.25s ease;
+      position: relative;
+      overflow: visible;
+    }
+    .podium-card::before {
+      content: '';
+      position: absolute; inset: 0;
+      border-radius: 20px 20px 0 0;
+      background: linear-gradient(180deg, transparent 60%, rgba(0,0,0,0.4) 100%);
+      pointer-events: none;
+      overflow: hidden;
+    }
+    .podium-card:hover { transform: translateY(-6px); }
+
+    .podium-avatar {
+      width: 60px; height: 60px;
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 2rem;
+      border: 3px solid;
+      margin-bottom: 0.6rem;
+      box-shadow: 0 0 18px currentColor;
+      flex-shrink: 0;
+      position: relative; z-index: 1;
+    }
+    .podium-medal {
+      font-size: 1.5rem;
+      position: absolute; top: 0.6rem; right: 0.6rem;
+      z-index: 2;
+    }
+    .podium-handle {
+      font-weight: 800; font-size: 0.88rem;
+      text-align: center; z-index: 1;
+      white-space: normal;
+      word-break: break-word;
+      overflow: visible;
+      max-width: 120px;
+      line-height: 1.2;
+    }
+    .podium-meta {
+      font-size: 0.72rem; color: var(--text-muted);
+      margin-top: 0.2rem; z-index: 1;
+    }
+    .podium-streak {
+      font-size: 0.8rem; color: var(--warning);
+      margin: 0.3rem 0 0.75rem; z-index: 1; font-weight: 700;
+    }
+    .podium-base {
+      width: calc(100% + 2rem); margin: 0 -1rem;
+      padding: 0.5rem 0;
+      display: flex; align-items: center; justify-content: center;
+      font-weight: 900; font-size: 1.3rem;
+      z-index: 1;
+      margin-top: auto;
+    }
+
+    /* ── TABLE ROW CLICKABLE ── */
+    .lb-row {
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+    .lb-row:hover td { background: rgba(0,212,255,0.06) !important; }
+
+    /* ── AVATAR CELL ── */
+    .lb-avatar {
+      width: 36px; height: 36px;
+      border-radius: 50%;
+      background: var(--cyan-dim);
+      border: 2px solid var(--border-hover);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.2rem;
+      flex-shrink: 0;
+    }
+
+    /* ── PROFILE MODAL ── */
+    #modal-profile .modal { max-width: 420px; }
+
+    .pmodal-header {
+      display: flex; flex-direction: column;
+      align-items: center; gap: 0.6rem;
+      padding-bottom: 1.25rem;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 1.25rem;
+    }
+    .pmodal-avatar {
+      width: 72px; height: 72px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--cyan), var(--blue));
+      display: flex; align-items: center; justify-content: center;
+      font-size: 2.2rem;
+      box-shadow: var(--cyan-glow);
+      border: 3px solid rgba(0,212,255,0.4);
+    }
+    .pmodal-handle {
+      font-size: 1.25rem; font-weight: 800;
+      color: var(--text-primary);
+    }
+    .pmodal-stat {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0.55rem 0;
+      border-bottom: 1px solid var(--border-subtle);
+      font-size: 0.9rem;
+    }
+    .pmodal-stat:last-child { border-bottom: none; }
+    .pmodal-stat-label { color: var(--text-muted); }
+    .pmodal-stat-val   { font-weight: 700; color: var(--text-primary); }
+
+    .pmodal-badges {
+      display: flex; flex-wrap: wrap; gap: 0.4rem;
+      margin-top: 1rem;
+    }
+    .pmodal-badge-item {
+      background: var(--cyan-dim);
+      border: 1px solid rgba(0,212,255,0.2);
+      border-radius: var(--radius-full);
+      padding: 0.2rem 0.6rem;
+      font-size: 0.75rem;
+      color: var(--cyan);
+    }
+
+    /* ── RESPONSIVE PODIUM ── */
+    @media (max-width: 540px) {
+      #podium { gap: 0.75rem !important; }
+      .podium-card { width: 100px !important; }
+      .podium-avatar { width: 48px; height: 48px; font-size: 1.6rem; }
+      .podium-handle { font-size: 0.76rem; max-width: 90px; }
+    }
+  </style>
 </head>
 <body>
   <div class="bg-glow bg-glow-1"></div>
@@ -14,9 +151,23 @@
   <div class="notif-panel" id="notif-panel">
     <div class="notif-panel-header">
       <span style="font-weight:700">🔔 Notifications</span>
-      <button style="background:none;border:none;color:var(--text-muted);cursor:pointer" onclick="document.getElementById('notif-panel').classList.remove('open')">✕</button>
+      <button style="background:none;border:none;color:var(--text-muted);cursor:pointer;font-size:1.3rem"
+        onclick="document.getElementById('notif-panel').classList.remove('open')">✕</button>
     </div>
     <div class="notif-panel-list"></div>
+  </div>
+
+  <!-- ── USER PROFILE MODAL ── -->
+  <div class="modal-overlay" id="modal-profile">
+    <div class="modal" style="max-width:420px">
+      <div class="modal-header">
+        <h3>Player Profile</h3>
+        <button class="modal-close" onclick="document.getElementById('modal-profile').classList.remove('open')">✕</button>
+      </div>
+      <div id="modal-profile-body">
+        <div class="skeleton" style="height:200px;border-radius:12px"></div>
+      </div>
+    </div>
   </div>
 
   <div class="page-wrapper">
@@ -29,10 +180,11 @@
       </div>
 
       <!-- Top 3 Podium -->
-      <div id="podium" class="mb-lg" style="display:flex;justify-content:center;align-items:flex-end;gap:1.5rem;min-height:200px">
-        <div class="skeleton" style="width:150px;height:160px;border-radius:20px"></div>
-        <div class="skeleton" style="width:150px;height:200px;border-radius:20px"></div>
-        <div class="skeleton" style="width:150px;height:140px;border-radius:20px"></div>
+      <div id="podium" class="mb-lg"
+        style="display:flex;justify-content:center;align-items:flex-end;gap:1.5rem;min-height:220px">
+        <div class="skeleton" style="width:130px;height:160px;border-radius:20px 20px 0 0"></div>
+        <div class="skeleton" style="width:130px;height:200px;border-radius:20px 20px 0 0"></div>
+        <div class="skeleton" style="width:130px;height:140px;border-radius:20px 20px 0 0"></div>
       </div>
 
       <!-- Full Table -->
@@ -47,7 +199,7 @@
             <thead>
               <tr>
                 <th>#</th>
-                <th>Handle</th>
+                <th>Player</th>
                 <th>Level</th>
                 <th>Week</th>
                 <th>🔥 Streak</th>
@@ -69,75 +221,189 @@
   <script type="module">
     import { requireAuth, isAdmin } from '../js/auth/auth.js';
     import { renderNavbar, renderSidebar } from '../js/dashboard/components.js';
-    import { getLeaderboard } from '../js/core/utils.js';
+    import { getLeaderboard, BADGES } from '../js/core/utils.js';
+
+    let myUid = null;
+    const usersMap = new Map(); // id → user object (avoids huge inline JSON in onclick)
 
     async function init() {
       let user;
       try { user = await requireAuth(); } catch { return; }
+      myUid = user.uid;
       const admin = await isAdmin();
       renderNavbar('leaderboard');
       renderSidebar('leaderboard', admin);
 
       const leaders = await getLeaderboard();
-      renderPodium(leaders.slice(0, 3), user.uid);
-      renderTable(leaders, user.uid);
+      leaders.forEach(u => usersMap.set(u.id, u));
+      renderPodium(leaders.slice(0, 3));
+      renderTable(leaders);
       document.getElementById('total-count').textContent = `${leaders.length} participants`;
     }
 
-    function renderPodium(top3, myUid) {
-      const podium = document.getElementById('podium');
-      const order  = [1, 0, 2]; // silver, gold, bronze visual order
-      const heights = [160, 200, 140];
+    /* ── Avatar helper: supports emoji & base64 images ── */
+    function avatarHTML(value, size = '36px') {
+      if (value && value.startsWith('data:')) {
+        return `<img src="${value}" style="width:${size};height:${size};border-radius:50%;object-fit:cover;display:block" />`;
+      }
+      return value || '🧑';
+    }
+
+    /* ── PODIUM ─────────────────────────────────────────── */
+    function renderPodium(top3) {
+      const podium  = document.getElementById('podium');
+      const order   = [1, 0, 2]; // silver → gold → bronze (visual L→R)
+      const heights = ['170px', '210px', '145px'];
       const medals  = ['🥈', '🥇', '🥉'];
       const colors  = ['#C0C0C0', '#FFD700', '#CD7F32'];
+      const nums    = ['2', '1', '3'];
 
       podium.innerHTML = order.map((i, vi) => {
         const u = top3[i];
-        if (!u) return `<div style="width:150px;height:${heights[vi]}px"></div>`;
-        const isMe = u.id === myUid;
+        if (!u) return `<div style="width:130px;height:${heights[vi]}"></div>`;
+        const isMe   = u.id === myUid;
+        const handle = u.codeforcesHandle || 'Anonymous';
+
         return `
-          <div style="
-            width:150px;height:${heights[vi]}px;
-            background:var(--bg-card);
-            border:2px solid ${colors[vi]};
-            border-radius:20px 20px 0 0;
-            display:flex;flex-direction:column;
-            align-items:center;justify-content:center;
-            gap:0.5rem;padding:1rem;
-            box-shadow:0 0 20px ${colors[vi]}30;
-            ${isMe ? 'outline:2px solid var(--cyan);outline-offset:3px' : ''}
-          ">
-            <div style="font-size:2rem">${medals[vi]}</div>
-            <div style="font-weight:800;font-size:0.95rem;text-align:center;color:${colors[vi]}">${u.codeforcesHandle || 'Anonymous'}</div>
-            <div class="fs-xs text-muted">Level ${u.currentLevel} · W${u.currentWeek}</div>
-            <div style="font-size:0.8rem;color:var(--warning)">🔥 ${u.streak}</div>
+          <div class="podium-card"
+            style="width:130px;min-height:${heights[vi]};border-color:${colors[vi]};box-shadow:0 0 24px ${colors[vi]}40;${isMe ? 'outline:2px solid var(--cyan);outline-offset:3px;' : ''}"
+            onclick="openUserProfile('${u.id}')">
+
+            <div class="podium-medal">${medals[vi]}</div>
+
+            <div class="podium-avatar"
+              style="border-color:${colors[vi]};color:${colors[vi]};background:${colors[vi]}18">
+              ${avatarHTML(u.avatar, '54px')}
+            </div>
+
+            <div class="podium-handle" style="color:${colors[vi]}">${handle}</div>
+            <div class="podium-meta">Lvl ${u.currentLevel ?? 0} · W${u.currentWeek ?? 1}</div>
+            <div class="podium-streak">🔥 ${u.streak ?? 0}</div>
+
+            <div class="podium-base" style="background:${colors[vi]}22;color:${colors[vi]}">
+              ${nums[vi]}
+            </div>
           </div>
         `;
       }).join('');
     }
 
-    function renderTable(leaders, myUid) {
+    /* ── TABLE ──────────────────────────────────────────── */
+    function renderTable(leaders) {
       const tbody = document.getElementById('leaderboard-body');
       tbody.innerHTML = leaders.map(u => {
-        const isMe     = u.id === myUid;
+        const isMe      = u.id === myUid;
         const rankClass = u.rank === 1 ? 'gold' : u.rank === 2 ? 'silver' : u.rank === 3 ? 'bronze' : 'other';
+
         return `
-          <tr style="${isMe ? 'background:var(--cyan-dim)' : ''}">
-            <td><div class="rank-badge ${rankClass}" style="width:28px;height:28px;font-size:0.8rem">${u.rank}</div></td>
+          <tr class="lb-row ${isMe ? 'my-row' : ''}"
+            style="${isMe ? 'background:var(--cyan-dim)' : ''}"
+            onclick="openUserProfile('${u.id}')">
+
+            <td><div class="rank-badge ${rankClass}" style="width:30px;height:30px;font-size:0.8rem">${u.rank}</div></td>
+
             <td>
-              <div style="font-weight:600">${u.codeforcesHandle || 'Anonymous'}${isMe ? ' <span class="badge-chip cyan" style="font-size:0.68rem;margin-left:4px">You</span>' : ''}</div>
-              <div class="fs-xs text-muted">${u.email || ''}</div>
+              <div style="display:flex;align-items:center;gap:0.65rem">
+                <div class="lb-avatar" style="overflow:hidden">${avatarHTML(u.avatar, '36px')}</div>
+                <div>
+                  <div style="font-weight:700;font-size:0.9rem">
+                    ${u.codeforcesHandle || 'Anonymous'}
+                    ${isMe ? '<span class="badge-chip cyan" style="font-size:0.66rem;margin-left:4px;padding:0.1rem 0.5rem">You</span>' : ''}
+                  </div>
+                  <div class="fs-xs text-muted">${u.email?.split('@')[0] || ''}</div>
+                </div>
+              </div>
             </td>
-            <td><span class="badge-chip cyan">Level ${u.currentLevel}</span></td>
-            <td>Week ${u.currentWeek}</td>
-            <td style="color:var(--warning);font-weight:700">${u.streak} 🔥</td>
-            <td style="color:var(--cyan)">
-              ${(u.badges||[]).length} 🏅
-            </td>
+
+            <td><span class="badge-chip cyan">Lvl ${u.currentLevel ?? 0}</span></td>
+            <td style="color:var(--text-secondary)">W${u.currentWeek ?? 1}</td>
+            <td style="color:var(--warning);font-weight:700">${u.streak ?? 0} 🔥</td>
+            <td style="color:var(--cyan);font-weight:600">${(u.badges||[]).length} 🏅</td>
           </tr>
         `;
       }).join('');
     }
+
+    /* ── OPEN PROFILE MODAL ─────────────────────────────── */
+    window.openUserProfile = function(uid) {
+      const u = usersMap.get(uid);
+      if (!u) return;
+
+      const isMe     = u.id === myUid;
+      const handle   = u.codeforcesHandle || 'Anonymous';
+      const earnedBadges = (u.badges || []);
+
+      // Avatar — emoji or real photo
+      const avatarEl = u.avatar && u.avatar.startsWith('data:')
+        ? `<img src="${u.avatar}" style="width:100%;height:100%;object-fit:cover;border-radius:50%" />`
+        : (u.avatar || '🧑');
+
+      // Build badge chips
+      let badgeHTML = '';
+      if (earnedBadges.length > 0 && typeof BADGES !== 'undefined') {
+        badgeHTML = earnedBadges.map(bid => {
+          const b = Object.values(BADGES).find(x => x.id === bid);
+          return b ? `<span class="pmodal-badge-item">${b.icon} ${b.label}</span>` : '';
+        }).join('');
+      } else if (earnedBadges.length === 0) {
+        badgeHTML = '<span class="text-muted fs-xs">No badges yet</span>';
+      }
+
+      // Rank decoration
+      const rankLabel = u.rank === 1 ? '🥇 #1' : u.rank === 2 ? '🥈 #2' : u.rank === 3 ? '🥉 #3' : `#${u.rank}`;
+
+      document.getElementById('modal-profile-body').innerHTML = `
+        <div class="pmodal-header">
+          <div class="pmodal-avatar" style="overflow:hidden">${avatarEl}</div>
+          <div class="pmodal-handle">${handle} ${isMe ? '<span class="badge-chip cyan" style="font-size:0.7rem">You</span>' : ''}</div>
+          <div class="fs-xs text-muted">${u.email || ''}</div>
+        </div>
+
+        <div>
+          <div class="pmodal-stat">
+            <span class="pmodal-stat-label">🏅 Rank</span>
+            <span class="pmodal-stat-val" style="color:var(--gold)">${rankLabel}</span>
+          </div>
+          <div class="pmodal-stat">
+            <span class="pmodal-stat-label">📘 Level</span>
+            <span class="pmodal-stat-val"><span class="badge-chip cyan">Level ${u.currentLevel ?? 0}</span></span>
+          </div>
+          <div class="pmodal-stat">
+            <span class="pmodal-stat-label">📅 Current Week</span>
+            <span class="pmodal-stat-val">Week ${u.currentWeek ?? 1}</span>
+          </div>
+          <div class="pmodal-stat">
+            <span class="pmodal-stat-label">🔥 Streak</span>
+            <span class="pmodal-stat-val" style="color:var(--warning)">${u.streak ?? 0} days</span>
+          </div>
+          <div class="pmodal-stat">
+            <span class="pmodal-stat-label">🏅 Badges Earned</span>
+            <span class="pmodal-stat-val">${earnedBadges.length}</span>
+          </div>
+        </div>
+
+        ${earnedBadges.length > 0 ? `
+          <div style="margin-top:1rem">
+            <div class="fs-xs text-muted" style="margin-bottom:0.5rem;text-transform:uppercase;letter-spacing:0.08em">Badges</div>
+            <div class="pmodal-badges">${badgeHTML}</div>
+          </div>
+        ` : ''}
+
+        <div style="margin-top:1.5rem">
+          <a href="https://codeforces.com/profile/${handle}" target="_blank"
+            class="btn btn-outline btn-full btn-sm">
+            View Codeforces Profile ↗
+          </a>
+        </div>
+      `;
+
+      document.getElementById('modal-profile').classList.add('open');
+    };
+
+    // Close modal on overlay click
+    document.getElementById('modal-profile').addEventListener('click', function(e) {
+      if (e.target === this) this.classList.remove('open');
+    });
 
     init();
   </script>

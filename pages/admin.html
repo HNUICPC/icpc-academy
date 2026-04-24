@@ -523,9 +523,9 @@
             <div><span class="text-muted fs-sm">Badges</span><div style="font-weight:600;margin-top:0.2rem">${(u.badges||[]).join(', ') || 'None'}</div></div>
           </div>
           <div>
-            <span class="text-muted fs-sm">Progress Keys</span>
-            <div style="font-family:var(--font-mono);font-size:0.75rem;color:var(--cyan);margin-top:0.5rem;line-height:2">
-              ${Object.keys(u.progress||{}).filter(k => u.progress[k]).join('<br>') || 'None'}
+            <span class="text-muted fs-sm">Progress — Completed Sections</span>
+            <div id="progress-details-${uid}" style="margin-top:0.5rem">
+              <span class="text-muted fs-sm">⏳ Loading...</span>
             </div>
           </div>
           <div class="flex gap-sm mt-md">
@@ -535,6 +535,82 @@
         </div>
       `;
       openModal('modal-user');
+
+      // Load progress details asynchronously
+      // Key format: `${levelId}_${weekId}_${sectionId}` (3 parts split by _)
+      // Also skip helper keys like `lastSection_${levelId}_${weekId}`
+      const allProgressKeys = Object.keys(u.progress||{}).filter(k => u.progress[k]);
+      const completedKeys = allProgressKeys.filter(k => {
+        const parts = k.split('_');
+        return parts.length === 3 && !k.startsWith('lastSection');
+      });
+      const progressDiv = document.getElementById(`progress-details-${uid}`);
+      if (completedKeys.length === 0) {
+        progressDiv.innerHTML = '<span class="text-muted fs-sm">No completed sections yet.</span>';
+      } else {
+        try {
+          // Parse each key into { levelId, weekId, sectionId }
+          const parsed = completedKeys.map(k => {
+            const [levelId, weekId, sectionId] = k.split('_');
+            return { key: k, levelId, weekId, sectionId };
+          });
+
+          // Fetch all needed docs in parallel
+          const [levelSnaps, weekSnaps, sectionSnaps] = await Promise.all([
+            Promise.all([...new Set(parsed.map(p => p.levelId))].map(id => getDoc(doc(db, 'levels', id)).catch(() => null))),
+            Promise.all([...new Set(parsed.map(p => p.weekId))].map(id => getDoc(doc(db, 'weeks', id)).catch(() => null))),
+            Promise.all([...new Set(parsed.map(p => p.sectionId))].map(id => getDoc(doc(db, 'sections', id)).catch(() => null))),
+          ]);
+
+          // Build lookup maps
+          const levelMap   = {};
+          const weekMap    = {};
+          const sectionMap = {};
+          levelSnaps.forEach(s => s?.exists() && (levelMap[s.id]   = s.data()));
+          weekSnaps.forEach(s => s?.exists()   && (weekMap[s.id]    = s.data()));
+          sectionSnaps.forEach(s => s?.exists() && (sectionMap[s.id] = s.data()));
+
+          // Group by level → week
+          const grouped = {};
+          parsed.forEach(({ levelId, weekId, sectionId }) => {
+            const lName = levelMap[levelId]?.title   || `Level ${levelId.slice(0,6)}`;
+            const wName = weekMap[weekId]?.title     || `Week ${weekId.slice(0,6)}`;
+            const sec   = sectionMap[sectionId];
+            if (!grouped[lName]) grouped[lName] = {};
+            if (!grouped[lName][wName]) grouped[lName][wName] = [];
+            if (sec) grouped[lName][wName].push(sec);
+          });
+
+          // Render grouped view
+          const html = Object.entries(grouped).map(([lName, weeks]) => `
+            <div style="margin-bottom:1rem">
+              <div style="font-size:0.78rem;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:var(--cyan);margin-bottom:0.5rem">
+                📘 ${lName}
+              </div>
+              ${Object.entries(weeks).map(([wName, sections]) => `
+                <div style="margin-bottom:0.6rem;padding-left:0.75rem;border-left:2px solid var(--border)">
+                  <div style="font-size:0.78rem;color:var(--text-muted);margin-bottom:0.35rem">📅 ${wName}</div>
+                  ${sections.map(s => {
+                    const icon = s.type === 'video' ? '▶️' : s.type === 'link' ? '🔗' : '📝';
+                    return `<div style="display:flex;align-items:center;gap:0.5rem;padding:0.3rem 0.6rem;background:var(--surface-2);border-radius:6px;margin-bottom:0.25rem">
+                      <span style="font-size:0.85rem">${icon}</span>
+                      <span style="font-weight:600;font-size:0.82rem;flex:1">${s.title || 'Untitled'}</span>
+                      <span style="color:var(--success);font-size:0.72rem;font-weight:700">✓ Done</span>
+                    </div>`;
+                  }).join('')}
+                </div>
+              `).join('')}
+            </div>
+          `).join('');
+
+          progressDiv.innerHTML = `
+            <div style="max-height:260px;overflow-y:auto;padding-right:4px">${html}</div>
+            <div style="margin-top:0.5rem;font-size:0.78rem;color:var(--text-muted)">${completedKeys.length} section(s) completed</div>
+          `;
+        } catch(e) {
+          progressDiv.innerHTML = `<span class="text-muted fs-sm">Error loading progress: ${e.message}</span>`;
+        }
+      }
     };
 
     window._unlockNextWeek = async (uid, currentWeek) => {
@@ -582,7 +658,7 @@
       document.getElementById('level-edit-id').value = '';
       document.getElementById('level-title-input').value = '';
       document.getElementById('level-desc-input').value  = '';
-      document.getElementById('level-order-input').value = allLevels.length;
+      document.getElementById('level-order-input').value = allLevels.length > 0 ? Math.max(...allLevels.map(l => l.order || 0)) + 1 : 0;
       document.getElementById('modal-level-title').textContent = 'Add Level';
       openModal('modal-level');
     };
@@ -656,7 +732,6 @@
       document.getElementById('week-edit-id').value       = '';
       document.getElementById('week-title-input').value   = '';
       document.getElementById('week-desc-input').value    = '';
-      document.getElementById('week-order-input').value   = 1;
       document.getElementById('modal-week-title').textContent = 'Add Week';
 
       // Always reload fresh levels
@@ -668,6 +743,20 @@
       sel.innerHTML = allLevels.map(l =>
         `<option value="${l.id}" ${l.id === currentFilterLevel ? 'selected' : ''}>${l.title}</option>`
       ).join('');
+
+      // Auto-calculate next order: max existing order in this level + 1
+      let nextOrder = 1;
+      if (currentFilterLevel) {
+        try {
+          const snap = await getDocs(query(collection(db, 'weeks'), where('levelId','==',currentFilterLevel), orderBy('order')));
+          if (!snap.empty) {
+            const orders = snap.docs.map(d => d.data().order || 0);
+            nextOrder = Math.max(...orders) + 1;
+          }
+        } catch(e) { /* fallback to 1 */ }
+      }
+      document.getElementById('week-order-input').value = nextOrder;
+
       openModal('modal-week');
     };
 
@@ -749,7 +838,6 @@
       document.getElementById('section-url-input').value    = '';
       document.getElementById('section-links-input').value  = '';
       document.getElementById('section-content-input').value = '';
-      document.getElementById('section-order-input').value  = 1;
       document.getElementById('modal-section-title').textContent = 'Add Section';
 
       // Populate weeks select from selected week filter
@@ -762,6 +850,19 @@
       }
       document.getElementById('section-week-select').innerHTML =
         weeks.map(w => `<option value="${w.id}" ${w.id===weekId?'selected':''}>${w.title}</option>`).join('');
+
+      // Auto-calculate next order: max existing order in this week + 1
+      let nextOrder = 1;
+      if (weekId) {
+        try {
+          const snap = await getDocs(query(collection(db, 'sections'), where('weekId','==',weekId), orderBy('order')));
+          if (!snap.empty) {
+            const orders = snap.docs.map(d => d.data().order || 0);
+            nextOrder = Math.max(...orders) + 1;
+          }
+        } catch(e) { /* fallback to 1 */ }
+      }
+      document.getElementById('section-order-input').value = nextOrder;
 
       updateSectionFields('video');
       openModal('modal-section');
