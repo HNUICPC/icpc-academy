@@ -29,7 +29,7 @@
     .podium-card:hover { transform: translateY(-6px); }
 
     .podium-avatar {
-      width: 60px; height: 60px;
+      width: 60px; height: 60px; /* overridden inline for gold */
       border-radius: 50%;
       display: flex; align-items: center; justify-content: center;
       font-size: 2rem;
@@ -40,9 +40,12 @@
       position: relative; z-index: 1;
     }
     .podium-medal {
-      font-size: 1.5rem;
       position: absolute; top: 0.6rem; right: 0.6rem;
       z-index: 2;
+      width: 28px; height: 28px;
+      background: rgba(0,0,0,0.45);
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
     }
     .podium-handle {
       font-weight: 800; font-size: 0.88rem;
@@ -150,9 +153,9 @@
 
   <div class="notif-panel" id="notif-panel">
     <div class="notif-panel-header">
-      <span style="font-weight:700">🔔 Notifications</span>
+      <span style="font-weight:700"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline;vertical-align:middle;margin-right:0.35rem"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>Notifications</span>
       <button style="background:none;border:none;color:var(--text-muted);cursor:pointer;font-size:1.3rem"
-        onclick="document.getElementById('notif-panel').classList.remove('open')">✕</button>
+        onclick="document.getElementById('notif-panel').classList.remove('open')"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
     </div>
     <div class="notif-panel-list"></div>
   </div>
@@ -162,7 +165,7 @@
     <div class="modal" style="max-width:420px">
       <div class="modal-header">
         <h3>Player Profile</h3>
-        <button class="modal-close" onclick="document.getElementById('modal-profile').classList.remove('open')">✕</button>
+        <button class="modal-close" onclick="document.getElementById('modal-profile').classList.remove('open')"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
       </div>
       <div id="modal-profile-body">
         <div class="skeleton" style="height:200px;border-radius:12px"></div>
@@ -175,13 +178,13 @@
     <main class="main-content">
 
       <div class="page-header">
-        <h1>🏆 Leaderboard</h1>
+        <h1><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline;vertical-align:middle;margin-right:0.4rem"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/></svg>Leaderboard</h1>
         <p>See who's leading the ECPC preparation race</p>
       </div>
 
       <!-- Top 3 Podium -->
       <div id="podium" class="mb-lg"
-        style="display:flex;justify-content:center;align-items:flex-end;gap:1.5rem;min-height:220px">
+        style="display:flex;justify-content:center;align-items:flex-end;gap:1.5rem;min-height:260px">
         <div class="skeleton" style="width:130px;height:160px;border-radius:20px 20px 0 0"></div>
         <div class="skeleton" style="width:130px;height:200px;border-radius:20px 20px 0 0"></div>
         <div class="skeleton" style="width:130px;height:140px;border-radius:20px 20px 0 0"></div>
@@ -202,7 +205,7 @@
                 <th>Player</th>
                 <th>Level</th>
                 <th>Week</th>
-                <th>🔥 Streak</th>
+                <th><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="var(--warning)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline;vertical-align:middle;margin-right:0.25rem"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 3z"/></svg>Streak</th>
                 <th>Badges</th>
               </tr>
             </thead>
@@ -253,8 +256,12 @@
     function renderPodium(top3) {
       const podium  = document.getElementById('podium');
       const order   = [1, 0, 2]; // silver → gold → bronze (visual L→R)
-      const heights = ['170px', '210px', '145px'];
-      const medals  = ['🥈', '🥇', '🥉'];
+      const heights = ['185px', '245px', '150px'];
+      const medals  = [
+        '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#C0C0C0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="6"/><path d="M15.477 12.89 17 22l-5-3-5 3 1.523-9.11"/></svg>',
+        '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#FFD700" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="6"/><path d="M15.477 12.89 17 22l-5-3-5 3 1.523-9.11"/></svg>',
+        '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#CD7F32" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="6"/><path d="M15.477 12.89 17 22l-5-3-5 3 1.523-9.11"/></svg>',
+      ];
       const colors  = ['#C0C0C0', '#FFD700', '#CD7F32'];
       const nums    = ['2', '1', '3'];
 
@@ -269,16 +276,16 @@
             style="width:130px;min-height:${heights[vi]};border-color:${colors[vi]};box-shadow:0 0 24px ${colors[vi]}40;${isMe ? 'outline:2px solid var(--cyan);outline-offset:3px;' : ''}"
             onclick="openUserProfile('${u.id}')">
 
-            <div class="podium-medal">${medals[vi]}</div>
+            <div class="podium-medal" style="display:inline-flex;align-items:center;justify-content:center">${medals[vi]}</div>
 
             <div class="podium-avatar"
-              style="border-color:${colors[vi]};color:${colors[vi]};background:${colors[vi]}18">
-              ${avatarHTML(u.avatar, '54px')}
+              style="border-color:${colors[vi]};color:${colors[vi]};background:${colors[vi]}18;width:${vi===1?'72px':'58px'};height:${vi===1?'72px':'58px'}">
+              ${avatarHTML(u.avatar, vi === 1 ? '64px' : '50px')}
             </div>
 
             <div class="podium-handle" style="color:${colors[vi]}">${handle}</div>
             <div class="podium-meta">Lvl ${u.currentLevel ?? 0} · W${u.currentWeek ?? 1}</div>
-            <div class="podium-streak">🔥 ${u.streak ?? 0}</div>
+            <div class="podium-streak" style="display:flex;align-items:center;gap:0.3rem"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="var(--warning)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 3z"/></svg> ${u.streak ?? 0}</div>
 
             <div class="podium-base" style="background:${colors[vi]}22;color:${colors[vi]}">
               ${nums[vi]}
@@ -317,8 +324,8 @@
 
             <td><span class="badge-chip cyan">Lvl ${u.currentLevel ?? 0}</span></td>
             <td style="color:var(--text-secondary)">W${u.currentWeek ?? 1}</td>
-            <td style="color:var(--warning);font-weight:700">${u.streak ?? 0} 🔥</td>
-            <td style="color:var(--cyan);font-weight:600">${(u.badges||[]).length} 🏅</td>
+            <td style="color:var(--warning);font-weight:700;display:flex;align-items:center;gap:0.3rem">${u.streak ?? 0} <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="var(--warning)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 3z"/></svg></td>
+            <td style="color:var(--cyan);font-weight:600">${(u.badges||[]).length} <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="var(--cyan)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline;vertical-align:middle"><circle cx="12" cy="8" r="6"/><path d="M15.477 12.89 17 22l-5-3-5 3 1.523-9.11"/></svg></td>
           </tr>
         `;
       }).join('');
@@ -350,7 +357,8 @@
       }
 
       // Rank decoration
-      const rankLabel = u.rank === 1 ? '🥇 #1' : u.rank === 2 ? '🥈 #2' : u.rank === 3 ? '🥉 #3' : `#${u.rank}`;
+      const medalSvg = (stroke) => `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="${stroke}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline;vertical-align:middle;margin-right:0.25rem"><circle cx="12" cy="8" r="6"/><path d="M15.477 12.89 17 22l-5-3-5 3 1.523-9.11"/></svg>`;
+      const rankLabel = u.rank === 1 ? medalSvg('#FFD700')+'#1' : u.rank === 2 ? medalSvg('#C0C0C0')+'#2' : u.rank === 3 ? medalSvg('#CD7F32')+'#3' : '#'+u.rank;
 
       document.getElementById('modal-profile-body').innerHTML = `
         <div class="pmodal-header">
@@ -361,23 +369,23 @@
 
         <div>
           <div class="pmodal-stat">
-            <span class="pmodal-stat-label">🏅 Rank</span>
+            <span class="pmodal-stat-label"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline;vertical-align:middle;margin-right:0.3rem"><circle cx="12" cy="8" r="6"/><path d="M15.477 12.89 17 22l-5-3-5 3 1.523-9.11"/></svg>Rank</span>
             <span class="pmodal-stat-val" style="color:var(--gold)">${rankLabel}</span>
           </div>
           <div class="pmodal-stat">
-            <span class="pmodal-stat-label">📘 Level</span>
+            <span class="pmodal-stat-label"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline;vertical-align:middle;margin-right:0.3rem"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"/></svg>Level</span>
             <span class="pmodal-stat-val"><span class="badge-chip cyan">Level ${u.currentLevel ?? 0}</span></span>
           </div>
           <div class="pmodal-stat">
-            <span class="pmodal-stat-label">📅 Current Week</span>
+            <span class="pmodal-stat-label"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline;vertical-align:middle;margin-right:0.3rem"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>Current Week</span>
             <span class="pmodal-stat-val">Week ${u.currentWeek ?? 1}</span>
           </div>
           <div class="pmodal-stat">
-            <span class="pmodal-stat-label">🔥 Streak</span>
+            <span class="pmodal-stat-label"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline;vertical-align:middle;margin-right:0.3rem"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 3z"/></svg>Streak</span>
             <span class="pmodal-stat-val" style="color:var(--warning)">${u.streak ?? 0} days</span>
           </div>
           <div class="pmodal-stat">
-            <span class="pmodal-stat-label">🏅 Badges Earned</span>
+            <span class="pmodal-stat-label"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline;vertical-align:middle;margin-right:0.3rem"><circle cx="12" cy="8" r="6"/><path d="M15.477 12.89 17 22l-5-3-5 3 1.523-9.11"/></svg>Badges Earned</span>
             <span class="pmodal-stat-val">${earnedBadges.length}</span>
           </div>
         </div>

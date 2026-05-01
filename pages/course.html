@@ -4,14 +4,34 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Course — ICPC Academy</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.css"/>
+  <script defer src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.js"></script>
+  <script defer src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/contrib/auto-render.min.js"
+    onload="window._katexReady=true"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.css"/>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/theme/dracula.min.css"/>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/clike/clike.min.js"></script>
   <link rel="stylesheet" href="../css/main.css" />
+  <link rel="stylesheet" href="../css/leetcode-theme.css" />
   <style>
     :root {
-      --neon-cyan: #00D4FF;
-      --neon-blue: #1A7FD4;
+      --neon-cyan: #FFA116;
+      --neon-blue: #ef9c13;
     }
+    .result-dot {
+      display: inline-block;
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      margin-right: 4px;
+      vertical-align: 1px;
+      flex-shrink: 0;
+    }
+    .pass-dot { background: #00b8a3; box-shadow: 0 0 6px #00b8a3; }
+    .fail-dot { background: #ef4743; box-shadow: 0 0 6px #ef4743; }
+    .err-dot  { background: #ef4743; box-shadow: 0 0 6px #ef4743; }
+    .warn-dot { background: #FFC01E; box-shadow: 0 0 6px #FFC01E; }
 
-    /* ── WEEK CONTENT LAYOUT ── */
     #week-layout {
       display: grid;
       grid-template-columns: 260px 1fr;
@@ -20,7 +40,6 @@
       align-items: start;
     }
 
-    /* ── SECTIONS SIDEBAR ── */
     .sections-sidebar {
       background: var(--bg-card);
       border: 1px solid var(--border);
@@ -105,7 +124,6 @@
       flex-shrink: 0;
     }
 
-    /* ── MOBILE: sidebar becomes bottom drawer toggle ── */
     .sections-toggle-btn {
       display: none;
       position: fixed;
@@ -253,8 +271,8 @@
     }
     .week-progress-fill {
       height: 100%;
-      background: linear-gradient(90deg, var(--neon-cyan), var(--neon-blue));
-      box-shadow: 0 0 20px var(--neon-cyan);
+      background: linear-gradient(90deg, #FFA116, #ffcf6a);
+      box-shadow: 0 0 12px rgba(255,161,22,0.5);
       transition: width 1s cubic-bezier(0.34, 1.56, 0.64, 1);
       position: relative;
     }
@@ -273,13 +291,11 @@
     }
 
     .content-card {
-      background: rgba(6, 30, 69, 0.75);
-      border: 1px solid var(--neon-cyan);
+      background: var(--bg-card, #1a1a1a);
+      border: 1px solid var(--border);
       border-radius: var(--radius-xl);
       padding: 2.5rem;
-      box-shadow: 
-        0 0 40px rgba(0, 212, 255, 0.25),
-        inset 0 0 40px rgba(0, 212, 255, 0.1);
+      box-shadow: 0 0 40px rgba(255,161,22,0.08);
       backdrop-filter: blur(24px);
       min-height: 560px;
       position: relative;
@@ -292,7 +308,7 @@
       left: -50%;
       width: 40%;
       height: 40%;
-      background: radial-gradient(circle, rgba(0,212,255,0.15) 0%, transparent 70%);
+      background: radial-gradient(circle, rgba(255,161,22,0.05) 0%, transparent 70%);
       animation: slowRotate 25s linear infinite;
       pointer-events: none;
     }
@@ -309,10 +325,9 @@
       line-height: 1.9;
     }
 
-    /* External Link Button */
     .external-link-btn {
-      background: linear-gradient(135deg, #00D4FF, #1A7FD4);
-      color: #01102C;
+      background: linear-gradient(135deg, #FFA116, #ef9c13);
+      color: #000;
       font-weight: 700;
       padding: 14px 28px;
       border-radius: 12px;
@@ -320,12 +335,295 @@
       display: inline-flex;
       align-items: center;
       gap: 10px;
-      box-shadow: 0 0 25px rgba(0, 212, 255, 0.4);
+      box-shadow: 0 0 25px rgba(255,161,22,0.3);
       transition: all 0.3s ease;
     }
     .external-link-btn:hover {
       transform: scale(1.05) translateY(-3px);
-      box-shadow: 0 0 40px rgba(0, 212, 255, 0.6);
+      box-shadow: 0 0 40px rgba(255,161,22,0.5);
+    }
+
+    .katex { color: var(--text-primary); font-size: 1em; }
+    .katex-display { margin: 1rem 0; overflow-x: auto; overflow-y: hidden; }
+    .katex-display > .katex { white-space: normal; }
+    .challenge-statement .katex-display,
+    .challenge-constraints-text .katex-display { padding: 0.25rem 0; }
+
+    .challenge-layout {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0;
+      height: calc(100vh - 220px);
+      min-height: 600px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-xl);
+      overflow: hidden;
+      box-shadow: 0 0 30px rgba(255,161,22,0.08);
+    }
+
+    .challenge-left {
+      background: var(--bg-card, #1a1a1a);
+      border-right: 1px solid var(--border);
+      overflow-y: auto;
+      padding: 2rem 1.75rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+    }
+    .challenge-left::-webkit-scrollbar { width: 5px; }
+    .challenge-left::-webkit-scrollbar-track { background: transparent; }
+    .challenge-left::-webkit-scrollbar-thumb { background: var(--border-hover); border-radius: 3px; }
+
+    .challenge-title {
+      font-size: 1.5rem;
+      font-weight: 800;
+      color: var(--text-primary);
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+    }
+    .challenge-statement {
+      font-size: 0.95rem;
+      line-height: 1.85;
+      color: var(--text-secondary, #a0b4cc);
+      white-space: pre-wrap;
+    }
+    .challenge-constraints-text {
+      font-size: 0.9rem;
+      line-height: 1.8;
+      color: var(--text-secondary, #a0b4cc);
+      white-space: pre-wrap;
+    }
+    .challenge-constraints-box {
+      background: rgba(255,184,0,0.06);
+      border: 1px solid rgba(255,184,0,0.2);
+      border-radius: 10px;
+      padding: 0.9rem 1rem;
+    }
+    .challenge-section-label {
+      font-size: 0.72rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--neon-cyan);
+      margin-bottom: 0.6rem;
+    }
+    .challenge-example {
+      background: rgba(255,161,22,0.04);
+      border: 1px solid rgba(255,161,22,0.15);
+      border-radius: 10px;
+      padding: 0.9rem 1rem;
+      margin-bottom: 0.75rem;
+    }
+    .challenge-example-io {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.75rem;
+      margin-bottom: 0.5rem;
+    }
+    .challenge-io-box {
+      background: rgba(0,0,0,0.35);
+      border-radius: 8px;
+      padding: 0.6rem 0.75rem;
+    }
+    .challenge-io-label {
+      font-size: 0.68rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--text-muted);
+      margin-bottom: 0.3rem;
+    }
+    .challenge-io-value {
+      font-family: var(--font-mono, monospace);
+      font-size: 0.82rem;
+      color: var(--text-primary);
+      white-space: pre-wrap;
+      word-break: break-all;
+    }
+    .challenge-explanation {
+      font-size: 0.82rem;
+      color: var(--text-muted);
+      margin-top: 0.4rem;
+      font-style: italic;
+    }
+
+    .challenge-right {
+      background: var(--bg-base, #111111);
+      display: flex;
+      flex-direction: column;
+    }
+    .challenge-editor-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0.75rem 1rem;
+      border-bottom: 1px solid var(--border);
+      flex-shrink: 0;
+    }
+    .challenge-lang-badge {
+      background: rgba(255,161,22,0.1);
+      border: 1px solid rgba(255,161,22,0.3);
+      border-radius: 6px;
+      padding: 0.25rem 0.7rem;
+      font-family: var(--font-mono, monospace);
+      font-size: 0.78rem;
+      font-weight: 700;
+      color: var(--neon-cyan);
+    }
+    .challenge-editor-wrap {
+      flex: 1;
+      overflow: hidden;
+      position: relative;
+    }
+    .challenge-editor-wrap .CodeMirror {
+      height: 100%;
+      font-size: 0.88rem;
+      font-family: 'Fira Code', 'Cascadia Code', monospace;
+      background: transparent;
+    }
+    .challenge-editor-wrap .CodeMirror-scroll {
+      height: 100%;
+    }
+    .challenge-actions {
+      display: flex;
+      gap: 0.6rem;
+      padding: 0.75rem 1rem;
+      border-top: 1px solid var(--border);
+      flex-shrink: 0;
+      align-items: center;
+    }
+    .btn-run {
+      background: rgba(0,224,150,0.15);
+      border: 1px solid rgba(0,224,150,0.4);
+      color: #00E096;
+      font-weight: 700;
+      padding: 0.5rem 1.1rem;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 0.85rem;
+      transition: all 0.2s;
+    }
+    .btn-run:hover { background: rgba(0,224,150,0.28); box-shadow: 0 0 14px rgba(0,224,150,0.35); }
+    .btn-run:disabled { opacity: 0.45; cursor: not-allowed; }
+    .btn-submit {
+      background: linear-gradient(135deg, #FFA116, #ef9c13);
+      color: #000;
+      font-weight: 800;
+      padding: 0.5rem 1.3rem;
+      border-radius: 8px;
+      border: none;
+      cursor: pointer;
+      font-size: 0.85rem;
+      transition: all 0.2s;
+    }
+    .btn-submit:hover { box-shadow: 0 0 20px rgba(255,161,22,0.45); transform: translateY(-1px); }
+    .btn-submit:disabled { opacity: 0.45; cursor: not-allowed; }
+    .challenge-spinner {
+      width: 16px; height: 16px;
+      border: 2px solid rgba(255,255,255,0.2);
+      border-top-color: var(--neon-cyan);
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+      display: none;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .challenge-results {
+      max-height: 220px;
+      overflow-y: auto;
+      border-top: 1px solid var(--border);
+      flex-shrink: 0;
+      background: rgba(0,0,0,0.3);
+      padding: 0.75rem 1rem;
+    }
+    .challenge-results:empty { display: none; }
+    .challenge-results::-webkit-scrollbar { width: 4px; }
+    .challenge-results::-webkit-scrollbar-thumb { background: var(--border-hover); border-radius: 2px; }
+
+    .result-case {
+      display: flex;
+      flex-direction: column;
+      gap: 0.3rem;
+      padding: 0.6rem 0.75rem;
+      border-radius: 8px;
+      margin-bottom: 0.5rem;
+      font-size: 0.8rem;
+      font-family: var(--font-mono, monospace);
+    }
+    .result-case.pass { background: rgba(0,224,150,0.08); border: 1px solid rgba(0,224,150,0.25); }
+    .result-case.fail { background: rgba(255,61,113,0.08); border: 1px solid rgba(255,61,113,0.25); }
+    .result-case.err  { background: rgba(255,184,0,0.08);  border: 1px solid rgba(255,184,0,0.25); }
+    .result-case-header { font-weight: 700; display: flex; align-items: center; gap: 0.4rem; }
+    .result-case-row { color: var(--text-muted); }
+    .result-case-row span { color: var(--text-primary); }
+
+    .verdict-banner {
+      text-align: center;
+      font-size: 1.05rem;
+      font-weight: 800;
+      padding: 0.65rem 1rem;
+      border-radius: 10px;
+      margin-bottom: 0.6rem;
+    }
+    .verdict-ac  { background: rgba(0,224,150,0.15); color: #00E096; border: 1px solid rgba(0,224,150,0.35); }
+    .verdict-wa  { background: rgba(255,61,113,0.12); color: #FF3D71; border: 1px solid rgba(255,61,113,0.3); }
+    .verdict-err { background: rgba(255,184,0,0.12);  color: #FFB800; border: 1px solid rgba(255,184,0,0.3); }
+
+    .challenge-tabs {
+      display: flex;
+      border-bottom: 1px solid var(--border);
+      flex-shrink: 0;
+    }
+    .challenge-tab-btn {
+      background: none;
+      border: none;
+      border-bottom: 2px solid transparent;
+      color: var(--text-muted);
+      font-size: 0.82rem;
+      font-weight: 600;
+      padding: 0.6rem 1rem;
+      cursor: pointer;
+      transition: all 0.15s;
+      margin-bottom: -1px;
+    }
+    .challenge-tab-btn.active {
+      color: var(--neon-cyan);
+      border-bottom-color: var(--neon-cyan);
+    }
+    .challenge-tab-panel { display: none; flex: 1; overflow: hidden; flex-direction: column; }
+    .challenge-tab-panel.active { display: flex; }
+
+    .submissions-list {
+      overflow-y: auto;
+      flex: 1;
+      padding: 0.75rem 1rem;
+    }
+    .submissions-list::-webkit-scrollbar { width: 4px; }
+    .submissions-list::-webkit-scrollbar-thumb { background: var(--border-hover); border-radius: 2px; }
+    .sub-item {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0.6rem 0.75rem;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      margin-bottom: 0.45rem;
+      cursor: pointer;
+      transition: background 0.15s;
+      font-size: 0.8rem;
+    }
+    .sub-item:hover { background: rgba(255,255,255,0.04); }
+    .sub-verdict { font-weight: 800; flex-shrink: 0; }
+    .sub-verdict.ac  { color: #00E096; }
+    .sub-verdict.wa  { color: #FF3D71; }
+    .sub-verdict.err { color: #FFB800; }
+    .sub-ts { color: var(--text-muted); margin-left: auto; flex-shrink: 0; }
+
+    @media (max-width: 900px) {
+      .challenge-layout { grid-template-columns: 1fr; height: auto; min-height: unset; }
+      .challenge-left  { max-height: 55vh; }
+      .challenge-right { min-height: 480px; }
     }
   </style>
 </head>
@@ -336,7 +634,7 @@
 
   <div class="notif-panel" id="notif-panel">
     <div class="notif-panel-header">
-      <span style="font-weight:700">🔔 Notifications</span>
+      <span style="font-weight:700">Notifications</span>
       <button style="background:none;border:none;color:var(--text-muted);cursor:pointer;font-size:1.5rem" onclick="document.getElementById('notif-panel').classList.remove('open')">✕</button>
     </div>
     <div class="notif-panel-list" id="notif-list"></div>
@@ -348,7 +646,7 @@
     <main class="main-content">
 
       <div class="page-header">
-        <h1 style="font-size:2.2rem">📚 Course</h1>
+        <h1 style="font-size:2.2rem">Course</h1>
         <p class="text-secondary">Choose your level and crush your competitive programming journey</p>
       </div>
 
@@ -388,7 +686,7 @@
           <!-- Sections Sidebar (desktop) -->
           <aside class="sections-sidebar" id="sections-sidebar-desktop">
             <div class="sections-sidebar-header">
-              <span>📋 Sections</span>
+              <span>SECTIONS</span>
               <span id="sidebar-progress-chip" style="font-size:0.75rem;color:var(--neon-cyan)"></span>
             </div>
             <div class="sections-sidebar-list" id="sections-nav-list"></div>
@@ -405,14 +703,15 @@
 
   <!-- Mobile: FAB + Drawer -->
   <button class="sections-toggle-btn" id="sections-fab" onclick="toggleSectionsDrawer()">
-    ☰ Sections
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+    Sections
   </button>
 
   <div class="sections-drawer-overlay" id="drawer-overlay" onclick="closeSectionsDrawer()"></div>
   <div class="sections-drawer" id="sections-drawer">
     <div class="drawer-handle"></div>
     <div class="drawer-header">
-      <span>📋 Sections</span>
+      <span>SECTIONS</span>
       <button class="drawer-close-btn" onclick="closeSectionsDrawer()">✕</button>
     </div>
     <div class="drawer-list" id="sections-drawer-list"></div>
@@ -434,9 +733,8 @@ let weeksCache = [];
 let currentSections = [];
 let currentSectionIndex = 0;
 
-/* ── Sections Nav (sidebar + drawer) ── */
 function renderSectionsNav(progress) {
-  const typeIcon = { video: '▶️', link: '🔗', note: '📝' };
+  const typeIcon = { video: '▶️', link: '🔗', note: '📝', challenge: '⚡' };
 
   const itemsHTML = currentSections.map((s, i) => {
     const key    = `${currentLevelId}_${currentWeekId}_${s.id}`;
@@ -457,14 +755,12 @@ function renderSectionsNav(progress) {
   document.getElementById('sections-nav-list').innerHTML   = itemsHTML;
   document.getElementById('sections-drawer-list').innerHTML = itemsHTML;
 
-  // progress chip
   const done = currentSections.filter(s => !!progress[`${currentLevelId}_${currentWeekId}_${s.id}`]).length;
   document.getElementById('sidebar-progress-chip').textContent =
     `${done}/${currentSections.length}`;
 
-  // FAB label
   const fab = document.getElementById('sections-fab');
-  if (fab) fab.innerHTML = `☰ ${currentSectionIndex + 1}/${currentSections.length}`;
+  if (fab) fab.innerHTML = `<svg width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round' style='vertical-align:-2px;margin-right:4px'><line x1='3' y1='6' x2='21' y2='6'/><line x1='3' y1='12' x2='21' y2='12'/><line x1='3' y1='18' x2='21' y2='18'/></svg>${currentSectionIndex + 1}/${currentSections.length}`;
 }
 
 window.jumpToSection = function(index) {
@@ -517,12 +813,15 @@ async function loadLevels() {
       tabs.forEach(b => b.classList.remove('active'));
       btn.classList.add('active');
       currentLevelId = btn.dataset.id;
-      loadWeeks(btn.dataset.id);
+      loadWeeks(currentLevelId);
       document.getElementById('week-content').style.display = 'none';
       document.getElementById('weeks-grid').style.display = 'grid';
     };
   });
-  tabs[0]?.click();
+  if (tabs[0]) {
+    currentLevelId = tabs[0].dataset.id;
+    tabs[0].click();
+  }
 }
 
 async function loadWeeks(levelId) {
@@ -593,7 +892,7 @@ async function renderSection() {
   const section = currentSections[currentSectionIndex];
   const container = document.getElementById('sections-list');
   if (!section) {
-    container.innerHTML = `<div style="text-align:center;padding:4rem"><h2>🎉 Week Completed!</h2><p class="text-success">All sections finished. Amazing work!</p></div>`;
+    container.innerHTML = `<div style="text-align:center;padding:4rem"><h2>Week Completed!</h2><p class="text-success">All sections finished. Amazing work!</p></div>`;
     return;
   }
 
@@ -602,6 +901,16 @@ async function renderSection() {
   const key = `${currentLevelId}_${currentWeekId}_${section.id}`;
   const isDone = !!progress[key];
 
+  // Always render sidebar nav and progress
+  renderSectionsNav(progress);
+  updateProgress(progress);
+
+  if (section.type === 'challenge') {
+    container.innerHTML = buildChallengeLayout(section, isDone);
+    initChallengeEditor(section);
+    return;
+  }
+
   const content = buildContent(section);
   const isArabic = /[\u0600-\u06FF]/.test(section.content || section.title || '');
 
@@ -609,7 +918,7 @@ async function renderSection() {
     <div class="content-card">
       <div class="section-header">
         <h3 style="margin:0">${section.title}</h3>
-        <span class="badge-chip ${isDone ? 'green' : 'cyan'}">${isDone ? '✅ Done' : '⏳ In Progress'}</span>
+        <span class="badge-chip ${isDone ? 'green' : 'cyan'}">${isDone ? 'Done' : 'In Progress'}</span>
       </div>
 
       <div class="${isArabic ? 'arabic-content' : ''}" style="margin:2rem 0; line-height:1.95; font-size:1.08rem">
@@ -623,15 +932,12 @@ async function renderSection() {
       </div>
     </div>
   `;
-
-  renderSectionsNav(progress);
-  updateProgress();
 }
+
 function buildContent(section) {
   const url = section.url || '';
   const isArabic = /[\u0600-\u06FF]/.test(section.content || section.title || '');
 
-  // 1. YouTube Video → Embed داخل الصفحة
   if (section.type === 'video' && (url.includes('youtube.com') || url.includes('youtu.be'))) {
     const embed = getYouTubeEmbed(url);
     return embed 
@@ -655,7 +961,7 @@ function buildContent(section) {
 
       return `
         <div style="margin:1.5rem 0;">
-          <h4 style="margin-bottom:1rem; color:var(--neon-cyan);">📚 Resources & Links</h4>
+          <h4 style="margin-bottom:1rem; color:var(--neon-cyan);">Resources &amp; Links</h4>
           ${linksHTML}
         </div>
       `;
@@ -693,11 +999,11 @@ window.nextSection = async function () {
     currentSectionIndex++;
     renderSection();
   } else {
-    showToast("🎉 Week Completed!", "success");
+    showToast("Week Completed!", "success");
     await updateDoc(doc(db, 'users', currentUser.uid), {
       [`progress.lastSection_${currentLevelId}_${currentWeekId}`]: currentSections.length - 1
     });
-    renderSection(); // re-render to show updated nav
+    renderSection(); 
   }
 };
 
@@ -708,9 +1014,7 @@ window.prevSection = function () {
   }
 };
 
-async function updateProgress() {
-  const profile = await getUserProfile(currentUser.uid);
-  const progress = profile?.progress || {};
+function updateProgress(progress) {
   const done = currentSections.filter(s => progress[`${currentLevelId}_${currentWeekId}_${s.id}`]).length;
   const pct = currentSections.length ? Math.round((done / currentSections.length) * 100) : 0;
   document.getElementById('week-prog-pct').textContent = pct + "%";
@@ -721,6 +1025,407 @@ function getYouTubeEmbed(url) {
   const match = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([a-zA-Z0-9_-]{11})/);
   return match ? `https://www.youtube.com/embed/${match[1]}` : null;
 }
+
+
+let challengeEditor = null;
+
+
+function renderLatex(el) {
+  if (!el) return;
+  const tryRender = () => {
+    if (window.renderMathInElement) {
+      renderMathInElement(el, {
+        delimiters: [
+          { left: '$$',   right: '$$',   display: true  },
+          { left: '\\[',  right: '\\]',  display: true  },
+          { left: '$',    right: '$',    display: false },
+          { left: '\\(',  right: '\\)',  display: false },
+        ],
+        throwOnError: false,
+        errorColor: '#FF3D71',
+      });
+    } else {
+      setTimeout(tryRender, 120);
+    }
+  };
+  tryRender();
+}
+
+function escapeHtml(str) {
+  return String(str)
+    .replace(/&/g,'&amp;')
+    .replace(/</g,'&lt;')
+    .replace(/>/g,'&gt;')
+    .replace(/"/g,'&quot;');
+}
+
+function buildChallengeLayout(section, isDone) {
+  const examplesHTML = (section.examples || []).map((ex, i) => `
+    <div class="challenge-example">
+      <div style="font-size:0.75rem;font-weight:700;color:var(--neon-cyan);margin-bottom:0.5rem">Example ${i + 1}</div>
+      <div class="challenge-example-io">
+        <div class="challenge-io-box">
+          <div class="challenge-io-label">Input</div>
+          <div class="challenge-io-value">${escapeHtml(ex.input || '')}</div>
+        </div>
+        <div class="challenge-io-box">
+          <div class="challenge-io-label">Output</div>
+          <div class="challenge-io-value">${escapeHtml(ex.output || '')}</div>
+        </div>
+      </div>
+      ${ex.explanation ? `
+        <div class="challenge-explanation latex-content">💡 ${ex.explanation}</div>
+      ` : ''}
+    </div>
+  `).join('');
+
+  const navHTML = `
+    <div class="flex-between" style="margin-top:auto;padding-top:1rem;border-top:1px solid var(--border)">
+      <button onclick="prevSection()" class="btn btn-ghost btn-sm" ${currentSectionIndex===0?'disabled':''}>⬅ Previous</button>
+      <div style="font-family:var(--font-mono);color:var(--text-muted);font-size:0.82rem">${currentSectionIndex+1} / ${currentSections.length}</div>
+      <button onclick="nextSection()" class="btn neon-btn btn-sm">Next ➡</button>
+    </div>
+  `;
+
+  return `
+    <div class="challenge-layout">
+
+      <!-- ── LEFT: problem panel ── -->
+      <div class="challenge-left" id="challenge-left-panel">
+        <div>
+          <div class="challenge-title">⚡ ${escapeHtml(section.title)}</div>
+          <span class="badge-chip ${isDone?'green':'cyan'}" style="margin-top:0.5rem;display:inline-block">
+            ${isDone ? 'Solved' : 'Unsolved'}
+          </span>
+        </div>
+
+        ${section.statement ? `
+          <div>
+            <div class="challenge-section-label">Problem Statement</div>
+            <div class="challenge-statement latex-content">${section.statement}</div>
+          </div>
+        ` : ''}
+
+        ${section.constraints ? `
+          <div>
+            <div class="challenge-section-label">Constraints</div>
+            <div class="challenge-constraints-box">
+              <div class="challenge-constraints-text latex-content">${section.constraints}</div>
+            </div>
+          </div>
+        ` : ''}
+
+        ${(section.examples||[]).length ? `
+          <div>
+            <div class="challenge-section-label">Examples</div>
+            ${examplesHTML}
+          </div>
+        ` : ''}
+
+        ${navHTML}
+      </div>
+
+      <!-- ── RIGHT: editor panel ── -->
+      <div class="challenge-right">
+        <div class="challenge-tabs">
+          <button class="challenge-tab-btn active" onclick="switchChallengeTab(this,'code-tab')">💻 Code</button>
+          <button class="challenge-tab-btn" onclick="switchChallengeTab(this,'submissions-tab')">Submissions</button>
+        </div>
+
+        <!-- Code tab -->
+        <div class="challenge-tab-panel active" id="code-tab" style="flex-direction:column">
+          <div class="challenge-editor-header">
+            <span class="challenge-lang-badge">C++17</span>
+            <span style="font-size:0.75rem;color:var(--text-muted)">Piston API</span>
+          </div>
+          <div class="challenge-editor-wrap">
+            <textarea id="challenge-code-area">#include &lt;bits/stdc++.h&gt;
+using namespace std;
+//batats
+int main(){
+    ios_base::sync_with_stdio(false);
+    cin.tie(NULL);
+
+    // your solution here
+
+    return 0;
+}</textarea>
+          </div>
+          <div class="challenge-actions">
+            <button class="btn-run"    id="btn-run"    onclick="runChallenge()">▶ Run</button>
+            <button class="btn-submit" id="btn-submit" onclick="submitChallenge()">Submit ⚡</button>
+            <div class="challenge-spinner" id="challenge-spinner"></div>
+            <span id="challenge-status" style="font-size:0.78rem;color:var(--text-muted);margin-left:auto"></span>
+          </div>
+          <div class="challenge-results" id="challenge-results"></div>
+        </div>
+
+        <!-- Submissions tab -->
+        <div class="challenge-tab-panel" id="submissions-tab" style="flex-direction:column">
+          <div class="submissions-list" id="submissions-list">
+            <p style="color:var(--text-muted);font-size:0.82rem;padding:0.5rem">Loading submissions…</p>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  `;
+}
+
+function initChallengeEditor(section) {
+  const ta = document.getElementById('challenge-code-area');
+  if (!ta) return;
+  if (challengeEditor) { challengeEditor.toTextArea(); challengeEditor = null; }
+  challengeEditor = CodeMirror.fromTextArea(ta, {
+    mode: 'text/x-c++src',
+    theme: 'dracula',
+    lineNumbers: true,
+    indentUnit: 4,
+    tabSize: 4,
+    indentWithTabs: false,
+    matchBrackets: true,
+    autoCloseBrackets: true,
+    lineWrapping: false,
+  });
+  setTimeout(() => challengeEditor.refresh(), 50);
+
+  setTimeout(() => renderLatex(document.getElementById('challenge-left-panel')), 80);
+
+  loadSubmissions(section.id);
+}
+
+window.switchChallengeTab = function(btn, tabId) {
+  document.querySelectorAll('.challenge-tab-btn').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.challenge-tab-panel').forEach(p => p.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById(tabId)?.classList.add('active');
+  if (tabId === 'submissions-tab') {
+    const sec = currentSections[currentSectionIndex];
+    if (sec) loadSubmissions(sec.id);
+  }
+  if (tabId === 'code-tab' && challengeEditor) setTimeout(() => challengeEditor.refresh(), 30);
+};
+
+
+async function pistonRun(code, stdin) {
+  const resp = await fetch('https://wandbox.org/api/compile.json', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      code: code,
+      compiler: 'gcc-head',
+      options: '-std=c++17 -O2',
+      stdin: stdin || '',
+    }),
+  });
+  if (!resp.ok) throw new Error(`Wandbox HTTP ${resp.status}`);
+  const data = await resp.json();
+  return {
+    stdout: data.program_output  || '',
+    stderr: (data.compiler_error || '') + (data.program_error || ''),
+    code:   parseInt(data.status) || 0,
+  };
+}
+function classifyResult(result, expectedOutput) {
+  if (result.stderr && result.stderr.trim()) return 'CE';   
+  if (result.code !== 0)                     return 'RE';  
+  const got = result.stdout.trim();
+  const exp = (expectedOutput || '').trim();
+  return got === exp ? 'AC' : 'WA';
+}
+
+function setExecLoading(loading, msg) {
+  document.getElementById('btn-run').disabled    = loading;
+  document.getElementById('btn-submit').disabled = loading;
+  document.getElementById('challenge-spinner').style.display = loading ? 'block' : 'none';
+  document.getElementById('challenge-status').textContent    = loading ? (msg || 'Running…') : '';
+}
+
+window.runChallenge = async function() {
+  const section  = currentSections[currentSectionIndex];
+  if (!section) return;
+  const code     = challengeEditor?.getValue() || '';
+  if (!code.trim()) return;
+  const examples = section.examples || [];
+  if (!examples.length) { showToast('No examples to run against', 'warning'); return; }
+
+  setExecLoading(true, `Running ${examples.length} example(s)…`);
+  const resultsDiv = document.getElementById('challenge-results');
+  resultsDiv.innerHTML = '';
+  const rows = [];
+  for (let i = 0; i < examples.length; i++) {
+    const ex = examples[i];
+    try {
+      const r       = await pistonRun(code, ex.input || '');
+      const verdict = classifyResult(r, ex.output);
+      const stdout  = r.stdout.trim();
+      const stderr  = r.stderr.trim();
+      const pass    = verdict === 'AC';
+
+      if (verdict === 'CE') {
+        rows.push(`
+          <div class="result-case err">
+            <div class="result-case-header"><span class="result-dot err-dot"></span> Example ${i+1} — Compilation / Runtime Error</div>
+            ${stderr ? `<div class="result-case-row" style="color:#FFB800;white-space:pre-wrap">${escapeHtml(stderr.substring(0,400))}</div>` : ''}
+          </div>`);
+      } else if (verdict === 'RE') {
+        rows.push(`
+          <div class="result-case err">
+            <div class="result-case-header"><span class="result-dot err-dot"></span> Example ${i+1} — Runtime Error (exit ${r.code})</div>
+            ${stderr ? `<div class="result-case-row" style="color:#FFB800;white-space:pre-wrap">${escapeHtml(stderr.substring(0,400))}</div>` : ''}
+          </div>`);
+      } else {
+        rows.push(`
+          <div class="result-case ${pass?'pass':'fail'}">
+            <div class="result-case-header"><span class="result-dot ${pass?'pass-dot':'fail-dot'}"></span> Example ${i+1} — ${pass?'Passed':'Wrong Answer'}</div>
+            <div class="result-case-row">Input:    <span>${escapeHtml((ex.input||'').substring(0,200))}</span></div>
+            <div class="result-case-row">Expected: <span>${escapeHtml((ex.output||'').trim())}</span></div>
+            <div class="result-case-row">Got:      <span style="color:${pass?'#00E096':'#FF3D71'}">${escapeHtml(stdout||'(empty)')}</span></div>
+          </div>`);
+      }
+    } catch(e) {
+      rows.push(`
+        <div class="result-case err">
+          <div class="result-case-header"><span class="result-dot warn-dot"></span> Example ${i+1} — Network Error</div>
+          <div class="result-case-row">${escapeHtml(e.message)}</div>
+        </div>`);
+    }
+  }
+
+  resultsDiv.innerHTML = rows.join('');
+  setExecLoading(false);
+};
+
+window.submitChallenge = async function() {
+  const section = currentSections[currentSectionIndex];
+  if (!section) return;
+  const code    = challengeEditor?.getValue() || '';
+  if (!code.trim()) return;
+  const tests   = section.tests || [];
+  if (!tests.length) { showToast('No hidden test cases configured', 'warning'); return; }
+
+  setExecLoading(true, `Judging ${tests.length} test(s)…`);
+  const resultsDiv = document.getElementById('challenge-results');
+  resultsDiv.innerHTML = '';
+
+  let finalVerdict  = 'AC';
+  let verdictDesc   = 'Accepted';
+  let failDetail    = '';
+  let passedCount   = 0;
+
+  for (let i = 0; i < tests.length; i++) {
+    setExecLoading(true, `Testing ${i+1} / ${tests.length}…`);
+    try {
+      const r       = await pistonRun(code, tests[i].input || '');
+      const verdict = classifyResult(r, tests[i].output);
+
+      if (verdict === 'AC') {
+        passedCount++;
+      } else {
+        if (verdict === 'CE') {
+          finalVerdict = 'CE';
+          verdictDesc  = 'Compilation Error';
+          failDetail   = r.stderr;
+        } else if (verdict === 'RE') {
+          finalVerdict = 'RE';
+          verdictDesc  = `Runtime Error on test ${i+1}`;
+          failDetail   = r.stderr;
+        } else {
+          finalVerdict = 'WA';
+          verdictDesc  = `Wrong Answer on test ${i+1}`;
+        }
+        break;
+      }
+    } catch(e) {
+      finalVerdict = 'NET';
+      verdictDesc  = `Network Error on test ${i+1}: ${e.message}`;
+      break;
+    }
+  }
+
+  const isAC = finalVerdict === 'AC';
+  const bannerClass = isAC ? 'verdict-ac' : finalVerdict === 'WA' ? 'verdict-wa' : 'verdict-err';
+  const bannerIcon  = isAC 
+    ? '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>'
+    : finalVerdict === 'WA' 
+    ? '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>'
+    : '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>';
+
+  resultsDiv.innerHTML = `
+    <div class="verdict-banner ${bannerClass}">${bannerIcon} ${verdictDesc}</div>
+    ${failDetail ? `<div style="font-family:var(--font-mono);font-size:0.78rem;color:#FFB800;white-space:pre-wrap;padding:0.4rem 0.5rem;background:rgba(0,0,0,0.3);border-radius:6px;margin-top:0.4rem">${escapeHtml(failDetail.substring(0,600))}</div>` : ''}
+    <div style="font-size:0.78rem;color:var(--text-muted);text-align:center;margin-top:0.5rem">
+      ${passedCount} / ${tests.length} test cases passed
+    </div>
+  `;
+
+  const subKey = `challenge_submissions_${section.id}`;
+  const subs   = JSON.parse(localStorage.getItem(subKey) || '[]');
+  subs.unshift({
+    verdict: finalVerdict,
+    verdictDesc,
+    code,
+    passedCount,
+    totalTests: tests.length,
+    timestamp: Date.now(),
+  });
+  if (subs.length > 50) subs.length = 50;
+  localStorage.setItem(subKey, JSON.stringify(subs));
+
+  if (isAC) {
+    const key = `${currentLevelId}_${currentWeekId}_${section.id}`;
+    await updateDoc(doc(db, 'users', currentUser.uid), { [`progress.${key}`]: true });
+    showToast('Accepted! Section marked complete.', 'success');
+    const updatedProfile = await getUserProfile(currentUser.uid);
+    const updatedProgress = updatedProfile?.progress || {};
+    renderSectionsNav(updatedProgress);
+    updateProgress(updatedProgress);
+    renderSection();
+  }
+
+  loadSubmissions(section.id);
+  setExecLoading(false);
+};
+
+function loadSubmissions(sectionId) {
+  const list = document.getElementById('submissions-list');
+  if (!list) return;
+  const subKey = `challenge_submissions_${sectionId}`;
+  const subs   = JSON.parse(localStorage.getItem(subKey) || '[]');
+  if (!subs.length) {
+    list.innerHTML = '<p style="color:var(--text-muted);font-size:0.82rem;padding:0.5rem">No submissions yet.</p>';
+    return;
+  }
+  list.innerHTML = subs.map((s, i) => {
+    const isAC  = s.verdict === 'AC';
+    const isWA  = s.verdict === 'WA';
+    const cls   = isAC ? 'ac' : isWA ? 'wa' : 'err';
+    const icon  = isAC 
+      ? '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-1px"><polyline points="20 6 9 17 4 12"/></svg>'
+      : isWA 
+      ? '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-1px"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>'
+      : '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-1px"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>';
+    const ts    = new Date(s.timestamp).toLocaleString();
+    const score = (s.totalTests != null) ? ` · ${s.passedCount}/${s.totalTests}` : '';
+    return `
+      <div class="sub-item" onclick="loadSubmissionCode(${i},'${sectionId}')">
+        <span class="sub-verdict ${cls}">${icon} ${s.verdictDesc}</span>
+        <span style="font-size:0.75rem;color:var(--neon-cyan)">${score}</span>
+        <span class="sub-ts">${ts}</span>
+      </div>
+    `;
+  }).join('');
+}
+
+window.loadSubmissionCode = function(index, sectionId) {
+  const subKey = `challenge_submissions_${sectionId}`;
+  const subs   = JSON.parse(localStorage.getItem(subKey) || '[]');
+  const sub    = subs[index];
+  if (!sub || !challengeEditor) return;
+  challengeEditor.setValue(sub.code);
+  switchChallengeTab(document.querySelector('.challenge-tab-btn'), 'code-tab');
+  showToast('Code loaded from submission', 'info');
+};
 
 init();
   </script>

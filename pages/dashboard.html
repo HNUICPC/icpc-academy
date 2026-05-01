@@ -16,8 +16,8 @@
   <!-- Notification Panel -->
   <div class="notif-panel" id="notif-panel">
     <div class="notif-panel-header">
-      <span style="font-weight:700;font-size:0.95rem">🔔 Notifications</span>
-      <button style="background:none;border:none;color:var(--text-muted);cursor:pointer;font-size:0.8rem" onclick="document.getElementById('notif-panel').classList.remove('open')">✕ Close</button>
+      <span style="font-weight:700;font-size:0.95rem"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline;vertical-align:middle;margin-right:0.35rem"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>Notifications</span>
+      <button style="background:none;border:none;color:var(--text-muted);cursor:pointer;font-size:0.8rem" onclick="document.getElementById('notif-panel').classList.remove('open')"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="display:inline;vertical-align:middle;margin-right:0.25rem"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>Close</button>
     </div>
     <div class="notif-panel-list" id="notif-list">
       <div style="text-align:center;padding:2rem;color:var(--text-muted)">Loading...</div>
@@ -32,7 +32,7 @@
 
       <!-- Page Header -->
       <div class="page-header">
-        <h1 id="welcome-msg">Welcome back! 👋</h1>
+        <h1 id="welcome-msg">Welcome back! <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="display:inline;vertical-align:middle"><path d="M18 11V6a2 2 0 0 0-2-2 2 2 0 0 0-2 2"/><path d="M14 10V4a2 2 0 0 0-2-2 2 2 0 0 0-2 2v2"/><path d="M10 10.5V6a2 2 0 0 0-2-2 2 2 0 0 0-2 2v8"/><path d="M18 8a2 2 0 1 1 4 0v6a8 8 0 0 1-8 8h-2c-2.8 0-4.5-.86-5.99-2.34l-3.6-3.6a2 2 0 0 1 2.83-2.82L7 15"/></svg></h1>
         <p id="welcome-sub">Track your progress and keep the streak going.</p>
       </div>
 
@@ -49,7 +49,7 @@
           <div class="stat-sub">Week in progress</div>
         </div>
         <div class="card card-glow stat-card">
-          <div class="stat-label">🔥 Streak</div>
+          <div class="stat-label"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline;vertical-align:middle;margin-right:0.3rem"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 3z"/></svg>Streak</div>
           <div class="stat-value" id="stat-streak">—</div>
           <div class="stat-sub">Consecutive days</div>
         </div>
@@ -65,7 +65,7 @@
         <!-- Current Week Progress -->
         <div class="card card-glow">
           <div class="flex-between mb-md">
-            <h3>📊 Week Progress</h3>
+            <h3><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline;vertical-align:middle;margin-right:0.4rem"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>Week Progress</h3>
             <a href="course.html" class="btn btn-outline btn-sm">Continue →</a>
           </div>
           <div id="week-progress-list">
@@ -77,7 +77,7 @@
         <!-- Badges -->
         <div class="card card-glow">
           <div class="flex-between mb-md">
-            <h3>🏅 My Badges</h3>
+            <h3><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline;vertical-align:middle;margin-right:0.4rem"><circle cx="12" cy="8" r="6"/><path d="M15.477 12.89 17 22l-5-3-5 3 1.523-9.11"/></svg>My Badges</h3>
             <span class="fs-sm text-muted" id="badge-count">Loading...</span>
           </div>
           <div id="badges-grid" style="display:flex;flex-wrap:wrap;gap:0.75rem">
@@ -91,7 +91,7 @@
       <!-- Leaderboard Preview -->
       <div class="card card-glow mb-lg">
         <div class="flex-between mb-md">
-          <h3>🏆 Top Performers</h3>
+          <h3><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline;vertical-align:middle;margin-right:0.4rem"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/></svg>Top Performers</h3>
           <a href="leaderboard.html" class="btn btn-ghost btn-sm">View Full →</a>
         </div>
         <div id="leaderboard-preview">
@@ -127,7 +127,7 @@
 
       // Welcome message
       const handle = profile.codeforcesHandle || user.email.split('@')[0];
-      document.getElementById('welcome-msg').textContent = `Welcome back, ${handle}! 👋`;
+      document.getElementById('welcome-msg').textContent = `Welcome back, ${handle}!`;
 
       // Stats
       document.getElementById('stat-level').textContent   = `Level ${profile.currentLevel ?? 0}`;
@@ -137,7 +137,7 @@
       // Overall completion
       const progressData = profile.progress || {};
       const totalDone    = Object.values(progressData).filter(Boolean).length;
-      document.getElementById('stat-completion').textContent = `${totalDone} ✓`;
+      document.getElementById('stat-completion').textContent = `${totalDone} done`;
 
       // Week progress
       await loadWeekProgress(user.uid, profile);
@@ -240,7 +240,7 @@
                 <div class="fs-xs text-muted">streak</div>
               </div>
               <div style="text-align:center">
-                <div style="font-size:0.8rem;font-weight:600;color:var(--success)">${(u.badges||[]).length} 🏅</div>
+                <div style="font-size:0.8rem;font-weight:600;color:var(--success)">${(u.badges||[]).length} <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline;vertical-align:middle"><circle cx="12" cy="8" r="6"/><path d="M15.477 12.89 17 22l-5-3-5 3 1.523-9.11"/></svg></div>
               </div>
             </div>
           `;
