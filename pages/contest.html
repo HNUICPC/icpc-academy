@@ -1,0 +1,2178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Contests — ICPC Academy</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.css"/>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script defer src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.js"></script>
+  <script defer src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/contrib/auto-render.min.js"
+    onload="window._katexReady=true"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.css"/>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/theme/monokai.min.css"/>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/clike/clike.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/edit/closebrackets.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/edit/matchbrackets.min.js"></script>
+  <link rel="stylesheet" href="../css/main.css" />
+  <link rel="stylesheet" href="../css/leetcode-theme.css" />
+  <link rel="icon" type="image/png" href="../assets/favicon.png">
+  <style>
+    :root {
+      --neon-cyan: #00D4FF;
+      --neon-blue: #0084FF;
+      --contest-gold: #FFD700;
+      --contest-silver: #C0C0C0;
+      --contest-bronze: #CD7F32;
+    }
+
+    /* ── Contest List Page ── */
+    .contests-header {
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      margin-bottom: 2rem;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+    .contests-filter-tabs {
+      display: flex;
+      gap: 0.25rem;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 0.25rem;
+    }
+    .filter-tab {
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      font-size: 0.82rem;
+      font-weight: 600;
+      padding: 0.45rem 1rem;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.15s;
+      white-space: nowrap;
+    }
+    .filter-tab.active {
+      background: rgba(0,212,255,0.15);
+      color: var(--neon-cyan);
+    }
+
+    .contest-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 1.5rem 1.75rem;
+      margin-bottom: 1rem;
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 1rem;
+      align-items: center;
+      transition: border-color 0.2s, box-shadow 0.2s;
+      cursor: pointer;
+      position: relative;
+      overflow: hidden;
+    }
+    .contest-card::before {
+      content: '';
+      position: absolute;
+      left: 0; top: 0; bottom: 0;
+      width: 3px;
+      background: var(--neon-cyan);
+      opacity: 0;
+      transition: opacity 0.2s;
+    }
+    .contest-card:hover {
+      border-color: rgba(0,212,255,0.4);
+      box-shadow: 0 0 24px rgba(0,212,255,0.1);
+    }
+    .contest-card:hover::before { opacity: 1; }
+    .contest-card.upcoming::before { background: #FFA116; }
+    .contest-card.active-now { border-color: rgba(0,224,150,0.5); box-shadow: 0 0 24px rgba(0,224,150,0.15); }
+    .contest-card.active-now::before { background: #00E096; opacity: 1; }
+
+    .contest-card-title {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--text-primary);
+      margin-bottom: 0.4rem;
+    }
+    .contest-card-meta {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      flex-wrap: wrap;
+      font-size: 0.8rem;
+      color: var(--text-muted);
+    }
+    .contest-meta-item {
+      display: flex;
+      align-items: center;
+      gap: 0.35rem;
+    }
+    .contest-status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.3rem;
+      padding: 0.3rem 0.75rem;
+      border-radius: 20px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+    .status-upcoming { background: rgba(255,161,22,0.12); color: #FFA116; border: 1px solid rgba(255,161,22,0.3); }
+    .status-running  { background: rgba(0,224,150,0.12); color: #00E096; border: 1px solid rgba(0,224,150,0.3); }
+    .status-ended    { background: rgba(255,255,255,0.05); color: var(--text-muted); border: 1px solid var(--border); }
+    .status-registered { background: rgba(0,212,255,0.12); color: var(--neon-cyan); border: 1px solid rgba(0,212,255,0.3); }
+
+    .live-dot {
+      width: 7px; height: 7px;
+      background: #00E096;
+      border-radius: 50%;
+      animation: pulse-dot 1.2s ease-in-out infinite;
+      flex-shrink: 0;
+    }
+    @keyframes pulse-dot {
+      0%,100% { opacity:1; transform:scale(1); }
+      50% { opacity:0.5; transform:scale(0.7); }
+    }
+
+    .contest-register-btn {
+      background: linear-gradient(135deg, var(--neon-cyan), var(--neon-blue));
+      color: #01102C;
+      font-weight: 800;
+      font-size: 0.82rem;
+      padding: 0.55rem 1.25rem;
+      border-radius: 10px;
+      border: none;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: all 0.2s;
+    }
+    .contest-register-btn:hover { transform: translateY(-1px); box-shadow: 0 0 20px rgba(0,212,255,0.4); }
+    .contest-register-btn.registered {
+      background: rgba(0,224,150,0.15);
+      color: #00E096;
+      border: 1px solid rgba(0,224,150,0.35);
+    }
+    .contest-enter-btn {
+      background: linear-gradient(135deg, #00E096, #00b874);
+      color: #01102C;
+      font-weight: 800;
+      font-size: 0.82rem;
+      padding: 0.55rem 1.25rem;
+      border-radius: 10px;
+      border: none;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: all 0.2s;
+    }
+    .contest-enter-btn:hover { transform: translateY(-1px); box-shadow: 0 0 20px rgba(0,224,150,0.4); }
+
+    /* ══════════════════════════════════════════════════════
+       ARENA – Complete LeetCode-quality redesign
+    ══════════════════════════════════════════════════════ */
+    :root {
+      --ar-bg:          #0f0f0f;
+      --ar-surface:     #1a1a1a;
+      --ar-surface2:    #212121;
+      --ar-surface3:    #2a2a2a;
+      --ar-border:      #303030;
+      --ar-border2:     #3d3d3d;
+      --ar-text:        #eff2f6;
+      --ar-text2:       rgba(239,242,246,0.72);
+      --ar-text3:       rgba(239,242,246,0.42);
+      --ar-green:       #2cbb5d;
+      --ar-green-dim:   rgba(44,187,93,0.12);
+      --ar-green-border:rgba(44,187,93,0.3);
+      --ar-red:         #ef4743;
+      --ar-red-dim:     rgba(239,71,67,0.1);
+      --ar-red-border:  rgba(239,71,67,0.28);
+      --ar-yellow:      #ffc01e;
+      --ar-yellow-dim:  rgba(255,192,30,0.1);
+      --ar-mono:        'JetBrains Mono', 'Fira Code', monospace;
+      --ar-sans:        'DM Sans', system-ui, sans-serif;
+      --ar-radius:      8px;
+      --ar-radius-sm:   5px;
+    }
+
+    body.arena-mode > .bg-glow { display: none; }
+    body.arena-mode #navbar     { display: none !important; }
+    body.arena-mode #contests-list-page { display: none !important; }
+    body.arena-mode { font-family: var(--ar-sans); }
+
+    #contest-arena {
+      display: none;
+      position: fixed;
+      inset: 0;
+      z-index: 200;
+      background: var(--ar-bg);
+      flex-direction: column;
+      font-family: var(--ar-sans);
+    }
+
+    /* ── TOP NAVIGATION BAR ─────────────────────────── */
+    .arena-header {
+      background: var(--ar-surface);
+      border-bottom: 1px solid var(--ar-border);
+      height: 48px;
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      padding: 0 10px;
+      gap: 0;
+      position: static;
+      z-index: 10;
+    }
+    .arena-header-left {
+      display: flex;
+      align-items: center;
+      gap: 2px;
+      flex-shrink: 0;
+    }
+    .arena-logo-btn {
+      width: 34px; height: 34px;
+      border-radius: var(--ar-radius-sm);
+      border: none; background: none;
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer; flex-shrink: 0;
+      transition: background 0.15s;
+    }
+    .arena-logo-btn:hover { background: var(--ar-surface3); }
+    .arena-list-btn {
+      background: none; border: none;
+      color: var(--ar-text3);
+      width: 30px; height: 30px; border-radius: var(--ar-radius-sm);
+      cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      transition: background 0.15s, color 0.15s; flex-shrink: 0;
+    }
+    .arena-list-btn:hover { background: var(--ar-surface3); color: var(--ar-text); }
+    .arena-contest-title {
+      font-size: 0.81rem; font-weight: 600;
+      color: var(--ar-text);
+      white-space: nowrap; padding: 0 8px;
+      max-width: 200px; overflow: hidden; text-overflow: ellipsis;
+      letter-spacing: -0.01em;
+    }
+    .arena-nav-arrows { display: flex; align-items: center; gap: 1px; }
+    .arena-nav-arrows button {
+      background: none; border: none; color: var(--ar-text3);
+      width: 26px; height: 26px; border-radius: 4px;
+      cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      transition: background 0.15s, color 0.15s;
+    }
+    .arena-nav-arrows button:hover  { background: var(--ar-surface3); color: var(--ar-text); }
+    .arena-nav-arrows button:disabled { opacity: 0.2; cursor: not-allowed; pointer-events: none; }
+    .arena-ranking-btn {
+      background: none; border: none; color: var(--ar-text3);
+      width: 30px; height: 30px; border-radius: var(--ar-radius-sm);
+      cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      transition: background 0.15s, color 0.15s; margin-left: 2px;
+    }
+    .arena-ranking-btn:hover { background: var(--ar-surface3); color: var(--ar-text); }
+
+    /* CENTER */
+    .arena-header-center {
+      flex: 1; display: flex; align-items: center;
+      justify-content: center; gap: 8px;
+    }
+    .arena-run-btn {
+      background: var(--ar-surface3);
+      border: 1px solid var(--ar-border2);
+      color: var(--ar-text2);
+      font-family: var(--ar-sans);
+      font-size: 0.79rem; font-weight: 600;
+      padding: 0 16px; height: 32px; border-radius: var(--ar-radius);
+      cursor: pointer; display: flex; align-items: center; gap: 7px;
+      transition: all 0.15s; white-space: nowrap; letter-spacing: 0.01em;
+    }
+    .arena-run-btn:hover   { background: #363636; border-color: #555; color: var(--ar-text); }
+    .arena-run-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+    .arena-submit-btn {
+      background: var(--ar-green);
+      border: none; color: #fff;
+      font-family: var(--ar-sans);
+      font-size: 0.79rem; font-weight: 700;
+      padding: 0 16px; height: 32px; border-radius: var(--ar-radius);
+      cursor: pointer; display: flex; align-items: center; gap: 7px;
+      transition: all 0.15s; white-space: nowrap; letter-spacing: 0.01em;
+    }
+    .arena-submit-btn:hover   { background: #28a854; box-shadow: 0 0 16px rgba(44,187,93,0.3); }
+    .arena-submit-btn:disabled { opacity: 0.35; cursor: not-allowed; box-shadow: none; }
+
+    /* RIGHT */
+    .arena-header-right {
+      display: flex; align-items: center; gap: 2px; flex-shrink: 0;
+    }
+    .arena-icon-btn {
+      background: none; border: none; color: var(--ar-text3);
+      width: 32px; height: 32px; border-radius: var(--ar-radius-sm);
+      cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      transition: background 0.15s, color 0.15s;
+    }
+    .arena-icon-btn:hover { background: var(--ar-surface3); color: var(--ar-text2); }
+    .arena-timer-wrap {
+      display: flex; align-items: center; gap: 4px;
+      padding: 0 10px;
+      border: 1px solid var(--ar-border);
+      border-radius: var(--ar-radius);
+      height: 30px; margin: 0 4px;
+      background: var(--ar-surface2);
+      transition: border-color 0.15s;
+    }
+    .arena-timer-chevron { color: var(--ar-text3); font-size: 0.65rem; margin-right: 1px; }
+    .arena-timer {
+      font-family: var(--ar-mono);
+      font-size: 0.8rem; font-weight: 500;
+      color: var(--ar-text); letter-spacing: 0.04em;
+    }
+    .arena-timer.ending { color: var(--ar-red); }
+    .arena-timer.ending + .arena-timer-wrap { border-color: var(--ar-red-border); }
+    .arena-avatar {
+      width: 28px; height: 28px; border-radius: 50%;
+      background: linear-gradient(135deg, #1a6fff 0%, #00b4ff 100%);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.62rem; font-weight: 700; color: #fff;
+      cursor: pointer; margin-left: 6px; flex-shrink: 0;
+      box-shadow: 0 0 0 1.5px rgba(26,111,255,0.4);
+    }
+
+    /* ── SUB-HEADER BAR ─────────────────────────────── */
+    .arena-sub-header {
+      display: grid; grid-template-columns: 1fr 1fr;
+      background: var(--ar-surface);
+      border-bottom: 1px solid var(--ar-border);
+      flex-shrink: 0; height: 40px;
+    }
+    .arena-sub-left {
+      display: flex; align-items: stretch;
+      padding: 0 10px; border-right: 1px solid var(--ar-border); gap: 0;
+    }
+    .arena-sub-tab {
+      background: none; border: none; color: var(--ar-text3);
+      font-family: var(--ar-sans);
+      font-size: 0.78rem; font-weight: 500;
+      padding: 0 12px; height: 100%;
+      cursor: pointer; display: flex; align-items: center; gap: 6px;
+      border-bottom: 2px solid transparent; margin-bottom: -1px;
+      transition: color 0.15s, border-color 0.15s; white-space: nowrap;
+    }
+    .arena-sub-tab:hover { color: var(--ar-text2); }
+    .arena-sub-tab.active { color: var(--ar-text); border-bottom-color: var(--ar-text); }
+    .arena-sub-sep {
+      display: flex; align-items: center;
+      color: var(--ar-border2); font-size: 0.9rem;
+      user-select: none; pointer-events: none; padding: 0 2px;
+    }
+    .arena-sub-right {
+      display: flex; align-items: center;
+      padding: 0 14px; gap: 8px;
+      color: var(--ar-text2); font-size: 0.79rem; font-weight: 500;
+      font-family: var(--ar-sans);
+    }
+
+    /* ── PROBLEM LIST PANEL ──────────────────────────── */
+    .arena-problems-nav { display: none; }
+    .arena-prob-btn     { display: none; }
+    .prob-letter { font-weight: 700; }
+    .prob-check  { font-size: 0.65rem; }
+    .prob-diff-easy   { color: var(--ar-green); font-size: 0.7rem; }
+    .prob-diff-medium { color: var(--ar-yellow); font-size: 0.7rem; }
+    .prob-diff-hard   { color: var(--ar-red); font-size: 0.7rem; }
+
+    .arena-prob-list-panel {
+      position: fixed;
+      top: 88px; left: 0; bottom: 0;
+      width: 320px;
+      background: var(--ar-surface);
+      border-right: 1px solid var(--ar-border);
+      z-index: 250;
+      display: flex; flex-direction: column;
+      transform: translateX(-100%);
+      transition: transform 0.22s cubic-bezier(0.4,0,0.2,1);
+      box-shadow: 4px 0 24px rgba(0,0,0,0.5);
+    }
+    .arena-prob-list-panel.open { transform: translateX(0); }
+    .prob-list-header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 12px 14px; border-bottom: 1px solid var(--ar-border); flex-shrink: 0;
+    }
+    .prob-list-tabs { display: flex; gap: 4px; }
+    .prob-list-tab {
+      background: none; border: none; color: var(--ar-text3);
+      font-family: var(--ar-sans);
+      font-size: 0.8rem; font-weight: 600;
+      padding: 6px 12px; border-radius: var(--ar-radius-sm);
+      cursor: pointer; transition: background 0.15s, color 0.15s;
+    }
+    .prob-list-tab.active { background: var(--ar-surface3); color: var(--ar-text); }
+    .prob-list-close {
+      background: none; border: none; color: var(--ar-text3);
+      font-size: 0.9rem; cursor: pointer;
+      width: 26px; height: 26px; border-radius: 4px;
+      display: flex; align-items: center; justify-content: center;
+      transition: background 0.15s, color 0.15s;
+    }
+    .prob-list-close:hover { background: var(--ar-surface3); color: var(--ar-text); }
+    .prob-list-info {
+      padding: 8px 14px;
+      font-size: 0.72rem; color: var(--ar-text3);
+      border-bottom: 1px solid var(--ar-border); flex-shrink: 0;
+      letter-spacing: 0.02em; text-transform: uppercase; font-weight: 600;
+    }
+    .prob-list-items { overflow-y: auto; flex: 1; }
+    .prob-list-items::-webkit-scrollbar { width: 4px; }
+    .prob-list-items::-webkit-scrollbar-thumb { background: var(--ar-border2); border-radius: 2px; }
+    .prob-list-item {
+      display: flex; align-items: center; gap: 10px;
+      padding: 14px; cursor: pointer;
+      border-bottom: 1px solid var(--ar-border);
+      transition: background 0.12s;
+    }
+    .prob-list-item:hover { background: var(--ar-surface2); }
+    .prob-list-item.active {
+      background: var(--ar-surface2);
+      border-left: 2px solid var(--ar-text);
+      padding-left: 12px;
+    }
+    .prob-list-item-title {
+      flex: 1; font-size: 0.83rem; color: var(--ar-text2); font-weight: 500;
+      line-height: 1.35;
+    }
+    .prob-list-item.active .prob-list-item-title { color: var(--ar-text); font-weight: 600; }
+    .prob-list-item-pts { font-size: 0.72rem; font-weight: 700; color: var(--ar-text3); }
+    .prob-list-diff {
+      font-size: 0.7rem; font-weight: 600;
+      padding: 3px 8px; border-radius: 4px; flex-shrink: 0;
+    }
+    .prob-list-diff.easy   { background: var(--ar-green-dim);  color: var(--ar-green); }
+    .prob-list-diff.medium { background: var(--ar-yellow-dim); color: var(--ar-yellow); }
+    .prob-list-diff.hard   { background: var(--ar-red-dim);    color: var(--ar-red); }
+    .prob-list-item.solved .prob-list-item-title { color: var(--ar-green); }
+    .prob-list-item.tried  .prob-list-item-title { color: var(--ar-red); }
+
+    /* ── ARENA BODY ──────────────────────────────────── */
+    .arena-body { flex: 1; overflow: hidden; display: flex; flex-direction: column; }
+
+    /* result dots */
+    .result-dot {
+      display: inline-block; width: 8px; height: 8px;
+      border-radius: 50%; margin-right: 4px;
+      vertical-align: 1px; flex-shrink: 0;
+    }
+    .pass-dot { background: var(--ar-green); box-shadow: 0 0 6px rgba(44,187,93,0.6); }
+    .fail-dot { background: var(--ar-red);   box-shadow: 0 0 6px rgba(239,71,67,0.6); }
+    .err-dot  { background: var(--ar-red);   box-shadow: 0 0 6px rgba(239,71,67,0.6); }
+    .warn-dot { background: var(--ar-yellow);box-shadow: 0 0 6px rgba(255,192,30,0.6); }
+
+    /* ── SPLIT LAYOUT ────────────────────────────────── */
+    .challenge-layout {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0; height: 100%; min-height: 0;
+      border: none; border-radius: 0; overflow: hidden; flex: 1;
+    }
+
+    /* ── LEFT PANEL (Description) ────────────────────── */
+    .challenge-left {
+      background: var(--ar-surface);
+      border-right: 1px solid var(--ar-border);
+      overflow-y: auto;
+      padding: 0;
+      display: flex; flex-direction: column; gap: 0;
+    }
+    .challenge-left::-webkit-scrollbar { width: 4px; }
+    .challenge-left::-webkit-scrollbar-thumb { background: var(--ar-border2); border-radius: 2px; }
+
+    /* inner scroll container */
+    .cl-inner {
+      padding: 24px 24px 40px;
+      display: flex; flex-direction: column; gap: 20px;
+      flex: 1;
+    }
+
+    /* Problem title */
+    .challenge-title {
+      font-size: 1.1rem; font-weight: 700;
+      color: var(--ar-text);
+      letter-spacing: -0.02em; line-height: 1.3;
+    }
+
+    /* Badges row */
+    .challenge-badges {
+      display: flex; align-items: center; gap: 8px;
+      flex-wrap: wrap; margin-top: 10px;
+    }
+    .badge {
+      display: inline-flex; align-items: center;
+      font-size: 0.72rem; font-weight: 600;
+      padding: 4px 10px; border-radius: 20px;
+      letter-spacing: 0.01em; line-height: 1;
+    }
+    .badge-easy   { background: var(--ar-green-dim);  color: var(--ar-green);  border: 1px solid var(--ar-green-border); }
+    .badge-medium { background: var(--ar-yellow-dim); color: var(--ar-yellow); border: 1px solid rgba(255,192,30,0.3); }
+    .badge-hard   { background: var(--ar-red-dim);    color: var(--ar-red);    border: 1px solid var(--ar-red-border); }
+    .badge-pts    { background: rgba(255,255,255,0.05); color: var(--ar-text3); border: 1px solid var(--ar-border2); }
+    .badge-ac     { background: var(--ar-green-dim);  color: var(--ar-green);  border: 1px solid var(--ar-green-border); }
+
+    /* Problem statement */
+    .challenge-statement {
+      font-size: 0.875rem; line-height: 1.85;
+      color: var(--ar-text2); white-space: pre-wrap;
+      font-family: var(--ar-sans);
+    }
+
+    /* Section header */
+    .cl-section-head {
+      font-size: 0.72rem; font-weight: 700;
+      text-transform: uppercase; letter-spacing: 0.1em;
+      color: var(--ar-text3); margin-bottom: 10px;
+    }
+
+    /* Example blocks */
+    .cl-example {
+      border: 1px solid var(--ar-border);
+      border-radius: var(--ar-radius);
+      overflow: hidden;
+      margin-bottom: 10px;
+    }
+    .cl-example:last-child { margin-bottom: 0; }
+    .cl-example-label {
+      padding: 8px 14px;
+      font-size: 0.72rem; font-weight: 700;
+      color: var(--ar-text3); text-transform: uppercase; letter-spacing: 0.08em;
+      background: var(--ar-surface2);
+      border-bottom: 1px solid var(--ar-border);
+    }
+    .cl-example-body { padding: 14px; }
+    .cl-io-row {
+      margin-bottom: 10px;
+    }
+    .cl-io-row:last-child { margin-bottom: 0; }
+    .cl-io-label {
+      font-size: 0.68rem; font-weight: 700; letter-spacing: 0.08em;
+      text-transform: uppercase; color: var(--ar-text3); margin-bottom: 5px;
+    }
+    .cl-io-value {
+      background: var(--ar-bg);
+      border: 1px solid var(--ar-border);
+      border-radius: 6px; padding: 8px 12px;
+      font-family: var(--ar-mono);
+      font-size: 0.8rem; color: var(--ar-text);
+      white-space: pre-wrap; word-break: break-all; line-height: 1.5;
+    }
+    .cl-explanation {
+      margin-top: 10px;
+      font-size: 0.8rem; line-height: 1.65;
+      color: var(--ar-text3);
+      padding: 10px 12px;
+      background: rgba(255,255,255,0.02);
+      border-radius: 6px;
+      border: 1px solid var(--ar-border);
+    }
+
+    /* Constraints box */
+    .cl-constraints {
+      background: var(--ar-surface2);
+      border: 1px solid var(--ar-border);
+      border-radius: var(--ar-radius); padding: 14px 16px;
+    }
+    .challenge-constraints-text {
+      font-size: 0.84rem; line-height: 1.9;
+      color: var(--ar-text2); white-space: pre-wrap;
+      font-family: var(--ar-sans);
+    }
+
+    /* keep old class names alive (used in JS) */
+    .challenge-section-label { display: none; }
+    .challenge-constraints-box { display: contents; }
+    .challenge-example { display: contents; }
+    .challenge-example-io { display: contents; }
+    .challenge-io-box { display: contents; }
+    .challenge-io-label { display: contents; }
+    .challenge-io-value { display: contents; }
+    .challenge-explanation { display: contents; }
+
+    /* Submissions inside left */
+    .submissions-list { overflow-y: auto; flex: 1; padding: 16px; }
+    .submissions-list::-webkit-scrollbar { width: 4px; }
+    .submissions-list::-webkit-scrollbar-thumb { background: var(--ar-border2); border-radius: 2px; }
+    .sub-item {
+      display: flex; align-items: center; gap: 12px;
+      padding: 10px 12px;
+      border-radius: var(--ar-radius);
+      border: 1px solid var(--ar-border);
+      margin-bottom: 6px; cursor: pointer;
+      transition: background 0.12s, border-color 0.12s;
+      font-size: 0.79rem; font-family: var(--ar-sans);
+    }
+    .sub-item:hover { background: var(--ar-surface2); border-color: var(--ar-border2); }
+    .sub-verdict { font-weight: 700; flex-shrink: 0; font-size: 0.8rem; }
+    .sub-verdict.ac  { color: var(--ar-green); }
+    .sub-verdict.wa  { color: var(--ar-red); }
+    .sub-verdict.err { color: var(--ar-yellow); }
+    .sub-ts { color: var(--ar-text3); margin-left: auto; flex-shrink: 0; font-size: 0.75rem; }
+
+    /* ── RIGHT PANEL (Editor) ────────────────────────── */
+    .challenge-right {
+      background: var(--ar-bg);
+      display: flex; flex-direction: column; overflow: hidden;
+    }
+    .challenge-right::-webkit-scrollbar { width: 4px; }
+    .challenge-right::-webkit-scrollbar-thumb { background: var(--ar-border2); border-radius: 2px; }
+
+    /* Editor header bar */
+    .challenge-editor-header {
+      display: flex; align-items: center;
+      justify-content: space-between;
+      padding: 0 12px;
+      height: 40px;
+      border-bottom: 1px solid var(--ar-border);
+      flex-shrink: 0;
+      background: var(--ar-surface);
+    }
+    .challenge-lang-badge {
+      background: none;
+      border: 1px solid var(--ar-border2);
+      border-radius: var(--ar-radius-sm);
+      padding: 5px 10px;
+      font-family: var(--ar-sans);
+      font-size: 0.77rem; font-weight: 600;
+      color: var(--ar-text2);
+      display: flex; align-items: center; gap: 5px;
+      cursor: pointer; transition: border-color 0.15s, color 0.15s;
+    }
+    .challenge-lang-badge:hover { border-color: #666; color: var(--ar-text); }
+
+    /* Editor area */
+    .challenge-editor-wrap {
+      flex: 1; overflow: hidden; position: relative; min-height: 0;
+      background: var(--ar-bg);
+    }
+    .challenge-editor-wrap .CodeMirror {
+      height: 100%;
+      font-size: 0.84rem;
+      font-family: var(--ar-mono);
+      background: var(--ar-bg);
+      color: var(--ar-text);
+      line-height: 1.65;
+    }
+    .challenge-editor-wrap .CodeMirror-scroll { height: 100%; }
+    .challenge-editor-wrap .CodeMirror-gutters {
+      background: var(--ar-bg);
+      border-right: 1px solid var(--ar-border);
+    }
+    .challenge-editor-wrap .CodeMirror-linenumber { color: var(--ar-text3); }
+
+    /* legacy */
+    .challenge-actions { display: none; }
+    .btn-run {
+      background: var(--ar-surface3); border: 1px solid var(--ar-border2);
+      color: var(--ar-text2); font-family: var(--ar-sans); font-weight: 600;
+      padding: 6px 14px; border-radius: var(--ar-radius);
+      cursor: pointer; font-size: 0.79rem; transition: all 0.15s;
+    }
+    .btn-run:hover { background: #363636; color: var(--ar-text); }
+    .btn-run:disabled { opacity: 0.3; cursor: not-allowed; }
+    .btn-submit {
+      background: var(--ar-green); color: #fff;
+      font-family: var(--ar-sans); font-weight: 700;
+      padding: 6px 14px; border-radius: var(--ar-radius);
+      border: none; cursor: pointer; font-size: 0.79rem; transition: all 0.15s;
+    }
+    .btn-submit:hover { background: #28a854; }
+    .btn-submit:disabled { opacity: 0.35; cursor: not-allowed; }
+
+    /* Spinner */
+    .challenge-spinner {
+      width: 13px; height: 13px;
+      border: 2px solid rgba(255,255,255,0.1);
+      border-top-color: var(--ar-green);
+      border-radius: 50%;
+      animation: spin 0.75s linear infinite;
+      display: none; flex-shrink: 0;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ── BOTTOM BAR (Testcase / Results) ─────────────── */
+    .challenge-bottom-bar {
+      border-top: 1px solid var(--ar-border);
+      background: var(--ar-surface);
+      flex-shrink: 0;
+    }
+    .challenge-bottom-tabs {
+      display: flex; gap: 0; padding: 0 12px;
+    }
+    .challenge-bottom-tab {
+      background: none; border: none;
+      border-bottom: 2px solid transparent;
+      color: var(--ar-text3);
+      font-family: var(--ar-sans);
+      font-size: 0.77rem; font-weight: 600;
+      padding: 9px 12px;
+      cursor: pointer;
+      transition: color 0.15s, border-color 0.15s;
+      margin-bottom: -1px;
+    }
+    .challenge-bottom-tab.active { color: var(--ar-text); border-bottom-color: var(--ar-text); }
+    .challenge-bottom-tab:hover  { color: var(--ar-text2); }
+    .challenge-bottom-content {
+      padding: 12px 14px;
+      background: var(--ar-bg);
+      border-top: 1px solid var(--ar-border);
+    }
+    .testcase-input {
+      background: var(--ar-surface2);
+      border: 1px solid var(--ar-border);
+      border-radius: var(--ar-radius); color: var(--ar-text);
+      font-family: var(--ar-mono); font-size: 0.8rem;
+      padding: 9px 12px; width: 100%; resize: vertical;
+      outline: none; transition: border-color 0.15s;
+      line-height: 1.6; min-height: 60px;
+    }
+    .testcase-input:focus { border-color: var(--ar-border2); }
+    .testcase-input::placeholder { color: var(--ar-text3); }
+    .testcase-footer {
+      display: flex; align-items: center;
+      justify-content: flex-end; gap: 8px; padding: 8px 0 0;
+    }
+
+    /* ── RESULT CASES ────────────────────────────────── */
+    .challenge-results {
+      max-height: 200px; overflow-y: auto;
+      border-top: 1px solid var(--ar-border); flex-shrink: 0;
+      background: var(--ar-bg); padding: 12px 14px;
+    }
+    .challenge-results:empty { display: none; }
+    .result-case {
+      display: flex; flex-direction: column; gap: 6px;
+      padding: 10px 12px; border-radius: var(--ar-radius);
+      margin-bottom: 8px; font-size: 0.77rem;
+      font-family: var(--ar-mono);
+    }
+    .result-case:last-child { margin-bottom: 0; }
+    .result-case.pass { background: rgba(44,187,93,0.07);  border: 1px solid rgba(44,187,93,0.22); }
+    .result-case.fail { background: rgba(239,71,67,0.07);  border: 1px solid rgba(239,71,67,0.22); }
+    .result-case.err  { background: rgba(255,192,30,0.07); border: 1px solid rgba(255,192,30,0.22); }
+    .result-case-header { font-weight: 700; display: flex; align-items: center; gap: 6px; }
+    .result-case-row { color: var(--ar-text3); }
+    .result-case-row span { color: var(--ar-text); }
+    .verdict-banner {
+      display: flex; align-items: center; justify-content: center; gap: 8px;
+      text-align: center; font-size: 0.9rem; font-weight: 800;
+      font-family: var(--ar-sans);
+      padding: 10px 14px; border-radius: var(--ar-radius); margin-bottom: 10px;
+    }
+    .verdict-ac  { background: var(--ar-green-dim); color: var(--ar-green); border: 1px solid var(--ar-green-border); }
+    .verdict-wa  { background: var(--ar-red-dim);   color: var(--ar-red);   border: 1px solid var(--ar-red-border); }
+    .verdict-err { background: var(--ar-yellow-dim);color: var(--ar-yellow);border: 1px solid rgba(255,192,30,0.3); }
+
+    /* ── old tab classes (kept for JS compat) ─────────── */
+    .challenge-tabs { display: none; }
+    .challenge-tab-btn { display: none; }
+    .challenge-tab-panel { display: none; flex: 1; flex-direction: column; min-height: 0; }
+    .challenge-tab-panel.active { display: flex; }
+
+    /* ── LEADERBOARD ─────────────────────────────────── */
+    .leaderboard-modal-overlay {
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,0.82);
+      z-index: 300; display: none;
+      align-items: center; justify-content: center;
+      backdrop-filter: blur(6px);
+    }
+    .leaderboard-modal-overlay.open { display: flex; }
+    .leaderboard-modal {
+      background: var(--ar-surface);
+      border: 1px solid var(--ar-border);
+      border-radius: 16px;
+      width: 100%; max-width: 700px; max-height: 85vh;
+      display: flex; flex-direction: column; overflow: hidden;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.8), 0 0 0 1px rgba(255,255,255,0.04);
+    }
+    .leaderboard-header {
+      padding: 18px 22px; border-bottom: 1px solid var(--ar-border);
+      display: flex; align-items: center; justify-content: space-between; flex-shrink: 0;
+    }
+    .leaderboard-body { overflow-y: auto; flex: 1; }
+    .leaderboard-row {
+      display: grid;
+      grid-template-columns: 48px 1fr repeat(4, 80px) 90px;
+      align-items: center; gap: 8px;
+      padding: 12px 22px;
+      border-bottom: 1px solid rgba(255,255,255,0.04);
+      font-size: 0.83rem; transition: background 0.12s;
+    }
+    .leaderboard-row:hover { background: rgba(255,255,255,0.025); }
+    .leaderboard-row.header {
+      background: rgba(255,255,255,0.03);
+      font-size: 0.7rem; font-weight: 700;
+      text-transform: uppercase; letter-spacing: 0.07em; color: var(--ar-text3);
+    }
+    .leaderboard-row.me { background: rgba(44,187,93,0.05); }
+    .rank-num { font-weight: 800; text-align: center; }
+    .rank-1 { color: var(--contest-gold); font-size: 1.05rem; }
+    .rank-2 { color: var(--contest-silver); }
+    .rank-3 { color: var(--contest-bronze); }
+    .lb-solved { color: var(--ar-green); font-weight: 700; text-align: center; }
+    .lb-penalty { color: var(--ar-text3); text-align: center; }
+    .lb-score { font-weight: 800; color: #00D4FF; text-align: right; }
+    .lb-prob-cell { text-align: center; font-size: 0.76rem; font-weight: 700; }
+    .lb-prob-ac { color: var(--ar-green); }
+    .lb-prob-wa { color: var(--ar-red); }
+
+    /* ── MISC ────────────────────────────────────────── */
+    .countdown-chip { font-family: var(--ar-mono); font-size: 0.75rem; font-weight: 700; color: #FFA116; }
+    .empty-state { text-align: center; padding: 4rem 2rem; color: var(--ar-text3); }
+    .empty-state svg { opacity: 0.25; margin-bottom: 1rem; }
+    .empty-state h3 { font-size: 1.1rem; color: var(--ar-text2); margin-bottom: 0.5rem; }
+
+    @media (max-width: 900px) {
+      .challenge-layout { grid-template-columns: 1fr; height: auto; }
+      .challenge-left  { max-height: 50vh; }
+      .challenge-right { min-height: 420px; }
+      .leaderboard-row { grid-template-columns: 40px 1fr auto auto; }
+      .lb-prob-cell, .lb-penalty { display: none; }
+    }
+
+    /* CodeMirror monokai overrides for arena */
+    .challenge-editor-wrap .cm-s-monokai.CodeMirror { background: var(--ar-bg) !important; }
+    .challenge-editor-wrap .cm-s-monokai .CodeMirror-gutters { background: var(--ar-surface) !important; border-right-color: var(--ar-border) !important; }
+    .challenge-editor-wrap .cm-s-monokai .CodeMirror-linenumber { color: var(--ar-text3) !important; }
+    .challenge-editor-wrap .cm-s-monokai .CodeMirror-cursor { border-left-color: var(--ar-text) !important; }
+
+
+    /* ── EDITOR TOOLBAR RIGHT ────────────────────────── */
+    .editor-toolbar-right {
+      display: flex; align-items: center; gap: 2px;
+    }
+    .editor-icon-btn {
+      background: none; border: none; color: var(--ar-text3);
+      width: 28px; height: 28px; border-radius: var(--ar-radius-sm);
+      cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      transition: background 0.15s, color 0.15s;
+    }
+    .editor-icon-btn:hover { background: var(--ar-surface3); color: var(--ar-text2); }
+
+    /* ── EDITOR STATUS BAR ───────────────────────────── */
+    .editor-status-bar {
+      height: 24px; flex-shrink: 0;
+      background: var(--ar-surface);
+      border-top: 1px solid var(--ar-border);
+      display: flex; align-items: center;
+      justify-content: space-between;
+      padding: 0 12px;
+    }
+    .editor-status-left {
+      display: flex; align-items: center; gap: 4px;
+    }
+    .editor-status-txt {
+      font-family: var(--ar-sans);
+      font-size: 0.7rem; color: var(--ar-text3);
+      letter-spacing: 0.01em;
+    }
+
+    /* ── BOTTOM BAR HEADER ───────────────────────────── */
+    .challenge-bottom-header {
+      display: flex; align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid var(--ar-border);
+      height: 38px;
+    }
+    .challenge-bottom-right {
+      padding: 0 12px; display: flex; align-items: center; gap: 6px;
+    }
+
+    /* Bottom tab icons */
+    .challenge-bottom-tab {
+      display: flex; align-items: center; gap: 5px;
+    }
+    .challenge-bottom-tab svg { opacity: 0.7; flex-shrink: 0; }
+    .challenge-bottom-tab.active svg { opacity: 1; }
+
+    /* Testcase placeholder */
+    .tc-placeholder {
+      padding: 20px; text-align: center;
+      font-family: var(--ar-sans); font-size: 0.8rem;
+      color: var(--ar-text3);
+    }
+
+    /* Fullscreen editor mode */
+    .challenge-right.fullscreen {
+      position: fixed; inset: 0; z-index: 500;
+      display: flex; flex-direction: column;
+    }
+    .challenge-right.fullscreen .challenge-editor-wrap .CodeMirror { font-size: 0.9rem; }
+
+    /* "Saved" flash animation */
+    @keyframes savedFlash {
+      0%   { color: var(--ar-green); }
+      80%  { color: var(--ar-green); }
+      100% { color: var(--ar-text3); }
+    }
+    .saved-flash { animation: savedFlash 1.6s ease forwards; }
+
+    .katex { color: var(--text-primary); font-size: 1em; }
+    .katex-display { margin: 1rem 0; overflow-x: auto; overflow-y: hidden; }
+  </style>
+</head>
+<body>
+  <div class="bg-glow bg-glow-1"></div>
+
+  <nav class="navbar" id="navbar"></nav>
+
+  <!-- ══ CONTESTS LIST PAGE ══════════════════════════ -->
+  <div id="contests-list-page">
+    <div class="notif-panel" id="notif-panel">
+      <div class="notif-panel-header">
+        <span style="font-weight:700">Notifications</span>
+        <button style="background:none;border:none;color:var(--text-muted);cursor:pointer;font-size:1.5rem" onclick="document.getElementById('notif-panel').classList.remove('open')">✕</button>
+      </div>
+      <div class="notif-panel-list" id="notif-list"></div>
+    </div>
+
+    <div class="page-wrapper">
+      <aside class="sidebar" id="sidebar"></aside>
+      <main class="main-content">
+        <div class="page-header">
+          <h1 style="font-size:2.2rem">⚔️ Contests</h1>
+          <p class="text-secondary">Compete in timed contests and climb the leaderboard</p>
+        </div>
+
+        <div class="contests-header">
+          <div class="contests-filter-tabs" id="contest-filter-tabs">
+            <button class="filter-tab active" data-filter="all">All</button>
+            <button class="filter-tab" data-filter="upcoming">Upcoming</button>
+            <button class="filter-tab" data-filter="running">Running</button>
+            <button class="filter-tab" data-filter="ended">Ended</button>
+          </div>
+        </div>
+
+        <div id="contests-container">
+          <div class="skeleton" style="height:90px;border-radius:16px;margin-bottom:1rem"></div>
+          <div class="skeleton" style="height:90px;border-radius:16px;margin-bottom:1rem"></div>
+          <div class="skeleton" style="height:90px;border-radius:16px"></div>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <!-- ══ CONTEST ARENA ══════════════════════════════ -->
+  <div id="contest-arena">
+
+    <!-- Problem List Panel (slide-in) -->
+    <div class="arena-prob-list-panel" id="arena-prob-list-panel">
+      <div class="prob-list-header">
+        <div class="prob-list-tabs">
+          <button class="prob-list-tab active" id="prob-tab-list">≡ Problem List</button>
+          <button class="prob-list-tab" onclick="openLeaderboard()">📊 Ranking</button>
+        </div>
+        <button class="prob-list-close" onclick="toggleProblemList()">✕</button>
+      </div>
+      <div class="prob-list-info" id="prob-list-contest-name">Weekly Contest</div>
+      <div class="prob-list-items" id="prob-list-items"></div>
+    </div>
+
+    <!-- Top Bar – LeetCode exact match -->
+    <div class="arena-header" id="arena-header">
+
+      <!-- LEFT: logo + hamburger + title + arrows + chart -->
+      <div class="arena-header-left">
+        <!-- G logo -->
+        <button class="arena-logo-btn" onclick="leaveArena()" title="Home">
+  <img src="../assets/favicon.png" alt="Home" width="22" height="22" style="border-radius:50%; object-fit:cover;" />
+</button>
+
+        <!-- hamburger list -->
+        <button class="arena-list-btn" onclick="toggleProblemList()" title="Problem List">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/>
+            <line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/>
+          </svg>
+        </button>
+
+        <!-- Contest title -->
+        <span class="arena-contest-title" id="arena-title">Contest</span>
+
+        <!-- Prev / Next arrows -->
+        <div class="arena-nav-arrows">
+          <button id="arena-prev-btn" onclick="window.renderProblem(window.activeProbIndex-1)" title="Previous problem">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+          </button>
+          <button id="arena-next-btn" onclick="window.renderProblem(window.activeProbIndex+1)" title="Next problem">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+          </button>
+        </div>
+
+        <!-- Bar chart / ranking -->
+        <button class="arena-ranking-btn" onclick="openLeaderboard()" title="Ranking">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/>
+          </svg>
+        </button>
+      </div>
+
+      <!-- CENTER: Run + Submit -->
+      <div class="arena-header-center">
+        <button class="arena-run-btn" id="arena-btn-run" onclick="runChallenge()">
+          <!-- play triangle -->
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+          Run
+        </button>
+        <button class="arena-submit-btn" id="arena-btn-submit" onclick="submitChallenge()">
+          <!-- cloud upload icon -->
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="16 16 12 12 8 16"/><line x1="12" y1="12" x2="12" y2="21"/>
+            <path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3"/>
+          </svg>
+          Submit
+        </button>
+      </div>
+
+      <!-- RIGHT: icons + timer + avatar -->
+      <div class="arena-header-right">
+        <!-- grid / layout icon -->
+        <button class="arena-icon-btn" title="Layout">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/>
+            <rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/>
+          </svg>
+        </button>
+        <!-- settings gear -->
+        <button class="arena-icon-btn" title="Settings">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="3"/>
+            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+          </svg>
+        </button>
+        <!-- timer with chevron -->
+        <div class="arena-timer-wrap">
+          <span class="arena-timer-chevron">‹</span>
+          <span class="arena-timer" id="arena-timer">01:30:00</span>
+        </div>
+        <!-- avatar -->
+        <div class="arena-avatar" onclick="leaveArena()" title="Exit">U</div>
+      </div>
+    </div>
+
+    <!-- Sub-header: Description|Submissions  |  Code -->
+    <div class="arena-sub-header" id="arena-sub-header">
+      <div class="arena-sub-left">
+        <button class="arena-sub-tab active" id="sub-tab-desc"
+                onclick="switchArenaSubTab(this,'desc-panel')">
+          <!-- doc icon -->
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+            <polyline points="14 2 14 8 20 8"/>
+          </svg>
+          Description
+        </button>
+        <span class="arena-sub-sep">|</span>
+        <button class="arena-sub-tab" id="sub-tab-subs"
+                onclick="switchArenaSubTab(this,'sub-panel')">
+          <!-- refresh icon -->
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="23 4 23 10 17 10"/>
+            <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/>
+          </svg>
+          Submissions
+        </button>
+      </div>
+      <div class="arena-sub-right">
+        <!-- code icon -->
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/>
+        </svg>
+        Code
+      </div>
+    </div>
+
+    <!-- hidden nav for prob-list panel logic -->
+    <div class="arena-problems-nav" id="arena-prob-nav" style="display:none"></div>
+
+    <!-- Arena body: full-height split -->
+    <div class="arena-body">
+      <div id="arena-problem-view" style="display:flex;flex-direction:column;height:100%"></div>
+    </div>
+  </div>
+
+  <!-- ══ LEADERBOARD MODAL ═══════════════════════════ -->
+  <div class="leaderboard-modal-overlay" id="leaderboard-modal">
+    <div class="leaderboard-modal">
+      <div class="leaderboard-header">
+        <h3 style="margin:0;font-size:1.1rem">🏆 Leaderboard</h3>
+        <button style="background:none;border:none;color:var(--text-muted);cursor:pointer;font-size:1.3rem;line-height:1" onclick="closeLeaderboard()">✕</button>
+      </div>
+      <div class="leaderboard-body" id="leaderboard-body">
+        <p style="text-align:center;padding:2rem;color:var(--text-muted)">Loading…</p>
+      </div>
+    </div>
+  </div>
+
+  <div id="toast-container"></div>
+
+  <!-- Team Register Modal -->
+  <div id="team-register-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:2000;align-items:center;justify-content:center">
+    <div style="background:var(--bg-card,#0d1f3c);border:1px solid rgba(0,212,255,0.2);border-radius:16px;padding:1.75rem;width:100%;max-width:440px;margin:1rem">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.25rem">
+        <h3 style="margin:0;font-size:1.05rem">Register for Contest</h3>
+        <button onclick="closeTeamRegisterModal()" style="background:none;border:none;color:var(--text-muted,#888);cursor:pointer;font-size:1.2rem;line-height:1">✕</button>
+      </div>
+      <p style="font-size:0.83rem;color:var(--text-muted,#888);margin-bottom:1rem">Choose a team to register with, or register as an individual.</p>
+      <div id="team-register-list"></div>
+      <div id="team-register-individual-btn" style="display:none;align-items:center;justify-content:space-between;padding:0.85rem 1rem;background:rgba(0,212,255,0.06);border:1px dashed rgba(0,212,255,0.3);border-radius:10px;margin-top:0.5rem;cursor:pointer;transition:border-color 0.15s"
+        onmouseover="this.style.borderColor='rgba(0,212,255,0.7)'"
+        onmouseout="this.style.borderColor='rgba(0,212,255,0.3)'">
+        <div style="font-weight:600;font-size:0.9rem;color:var(--neon-cyan,#00D4FF)">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline;vertical-align:-2px;margin-right:0.4rem"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+          Register as Individual
+        </div>
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color:var(--neon-cyan,#00D4FF)"><polyline points="9 18 15 12 9 6"/></svg>
+      </div>
+    </div>
+  </div>
+
+  <script type="module">
+import { requireAuth, getUserProfile, isAdmin } from '../js/auth/auth.js';
+import { renderNavbar, renderSidebar, showToast } from '../js/dashboard/components.js';
+import { db } from '../js/core/firebase-config.js';
+import {
+  collection, getDocs, getDoc, addDoc, updateDoc, deleteDoc,
+  doc, query, orderBy, where, serverTimestamp, onSnapshot,
+  increment, arrayUnion, setDoc, Timestamp
+} from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+let currentUser, currentProfile, adminMode = false;
+let activeContestId = null;
+let activeContest   = null;
+let activeProblems  = [];
+window.activeProbIndex = 0;
+let activeProbIndex = 0;
+let timerInterval   = null;
+let challengeEditor = null;
+let currentFilter   = 'all';
+let contestsCache   = [];
+
+// ─────────────────────────────────────────────
+// INIT
+// ─────────────────────────────────────────────
+async function init() {
+  // ✅ await علشان يتسجل قبل ما يجيب الـ leaderboard
+await updateDoc(doc(db, 'users', user.uid), { lastSeen: serverTimestamp() });
+setInterval(() => updateDoc(doc(db, 'users', user.uid), { lastSeen: serverTimestamp() }), 60_000);
+  currentUser    = await requireAuth();
+  adminMode      = await isAdmin();
+  renderNavbar('contest');
+  renderSidebar('contest', adminMode);
+  currentProfile = await getUserProfile(currentUser.uid);
+  setupFilterTabs();
+  await loadContests();
+}
+
+function setupFilterTabs() {
+  document.querySelectorAll('.filter-tab').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.filter-tab').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      currentFilter = btn.dataset.filter;
+      renderContestsList(contestsCache);
+    });
+  });
+}
+
+// ─────────────────────────────────────────────
+// LOAD CONTESTS
+// ─────────────────────────────────────────────
+async function loadContests() {
+  try {
+    const snap = await getDocs(query(collection(db, 'contests'), orderBy('startTime', 'desc')));
+    contestsCache = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    renderContestsList(contestsCache);
+  } catch(e) {
+    document.getElementById('contests-container').innerHTML =
+      `<div class="empty-state"><h3>Could not load contests</h3><p>${e.message}</p></div>`;
+  }
+}
+
+function getContestStatus(c) {
+  const now   = Date.now();
+  const start = c.startTime?.toMillis?.() || c.startTime;
+  const end   = c.endTime?.toMillis?.()   || c.endTime;
+  if (now < start) return 'upcoming';
+  if (now >= start && now <= end) return 'running';
+  return 'ended';
+}
+
+function formatDuration(ms) {
+  const h = Math.floor(ms / 3600000);
+  const m = Math.floor((ms % 3600000) / 60000);
+  if (h > 0) return `${h}h ${m}m`;
+  return `${m}m`;
+}
+
+function formatCountdown(ms) {
+  if (ms <= 0) return '00:00:00';
+  const h = Math.floor(ms / 3600000);
+  const m = Math.floor((ms % 3600000) / 60000);
+  const s = Math.floor((ms % 60000) / 1000);
+  return [h, m, s].map(v => String(v).padStart(2,'0')).join(':');
+}
+
+function renderContestsList(contests) {
+  const container = document.getElementById('contests-container');
+  const now = Date.now();
+
+  let filtered = contests;
+  if (currentFilter !== 'all') {
+    filtered = contests.filter(c => getContestStatus(c) === currentFilter);
+  }
+
+  if (!filtered.length) {
+    container.innerHTML = `<div class="empty-state"><h3>No contests found</h3><p>Check back later or try a different filter.</p></div>`;
+    return;
+  }
+
+  container.innerHTML = filtered.map(c => {
+    const status = getContestStatus(c);
+    const start  = c.startTime?.toMillis?.() || c.startTime;
+    const end    = c.endTime?.toMillis?.()   || c.endTime;
+    const dur    = end && start ? formatDuration(end - start) : '';
+    const isRegistered = c.registeredUsers && c.registeredUsers.includes(currentUser.uid);
+
+    let statusBadge = '';
+    if (status === 'running')  statusBadge = `<span class="contest-status-badge status-running"><span class="live-dot"></span>Live</span>`;
+    else if (status === 'upcoming') statusBadge = `<span class="contest-status-badge status-upcoming">Upcoming</span>`;
+    else statusBadge = `<span class="contest-status-badge status-ended">Ended</span>`;
+
+    let actionBtn = '';
+    if (status === 'running') {
+      actionBtn = `<button class="contest-enter-btn" onclick="enterContest('${c.id}',event)">Enter →</button>`;
+    } else if (status === 'upcoming') {
+      actionBtn = isRegistered
+        ? `<button class="contest-register-btn registered" onclick="unregisterContest('${c.id}',event)">✓ Registered</button>`
+        : `<button class="contest-register-btn" onclick="registerContest('${c.id}',event)">Register</button>`;
+    } else {
+      actionBtn = `<button class="contest-register-btn" style="opacity:0.5;cursor:default" disabled>View Results</button>`;
+    }
+
+    return `
+      <div class="contest-card ${status === 'running' ? 'active-now' : status}" onclick="enterContest('${c.id}',event)">
+        <div>
+          <div class="contest-card-title">${escapeHtml(c.title || 'Untitled Contest')}</div>
+          <div class="contest-card-meta">
+            <span class="contest-meta-item">📅 ${start ? new Date(start).toLocaleString() : '—'}</span>
+            ${dur ? `<span class="contest-meta-item">⏱ ${dur}</span>` : ''}
+            ${c.problemCount ? `<span class="contest-meta-item">📝 ${c.problemCount} problems</span>` : ''}
+            ${statusBadge}
+          </div>
+        </div>
+        <div onclick="event.stopPropagation()">${actionBtn}</div>
+      </div>`;
+  }).join('');
+}
+
+// ─────────────────────────────────────────────
+// CONTEST REGISTRATION
+// ─────────────────────────────────────────────
+window.registerContest = async function(contestId, e) {
+  if (e) e.stopPropagation();
+  try {
+    const contestDoc = await getDoc(doc(db, 'contests', contestId));
+    if (!contestDoc.exists()) return;
+    const cType = contestDoc.data().contestType || 'individual';
+
+    if (cType === 'team' || cType === 'both') {
+      // Show team selection modal
+      await showTeamRegisterModal(contestId, cType);
+    } else {
+      // Individual register
+      await updateDoc(doc(db, 'contests', contestId), { registeredUsers: arrayUnion(currentUser.uid) });
+      showToast('Registered successfully!', 'success');
+      await loadContests();
+    }
+  } catch(err) { showToast('Registration failed: ' + err.message, 'error'); }
+};
+
+async function showTeamRegisterModal(contestId, cType) {
+  // Load user's teams
+  const [ownedSnap, memberSnap] = await Promise.all([
+    getDocs(query(collection(db, 'teams'), where('ownerId', '==', currentUser.uid))),
+    getDocs(query(collection(db, 'teams'), where('members', 'array-contains', currentUser.uid))),
+  ]);
+  const teamMap = {};
+  ownedSnap.docs.forEach(d => teamMap[d.id] = { id: d.id, ...d.data() });
+  memberSnap.docs.forEach(d => { if (!teamMap[d.id]) teamMap[d.id] = { id: d.id, ...d.data() }; });
+  const teams = Object.values(teamMap);
+
+  const modal = document.getElementById('team-register-modal');
+  const teamListEl = document.getElementById('team-register-list');
+  const indivBtn = document.getElementById('team-register-individual-btn');
+
+  // Show/hide individual option
+  indivBtn.style.display = cType === 'both' ? 'flex' : 'none';
+  indivBtn.onclick = async () => {
+    closeTeamRegisterModal();
+    await updateDoc(doc(db, 'contests', contestId), { registeredUsers: arrayUnion(currentUser.uid) });
+    showToast('Registered as individual!', 'success');
+    await loadContests();
+  };
+
+  if (!teams.length) {
+    teamListEl.innerHTML = `<div style="text-align:center;padding:1.5rem;color:var(--text-muted);font-size:0.85rem">
+      You have no teams yet. <br>Go to your profile to create one first.
+    </div>`;
+  } else {
+    teamListEl.innerHTML = teams.map(t => `
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:0.85rem 1rem;background:rgba(255,255,255,0.03);border:1px solid var(--border);border-radius:10px;margin-bottom:0.5rem;cursor:pointer;transition:border-color 0.15s"
+        onmouseover="this.style.borderColor='rgba(0,212,255,0.4)'"
+        onmouseout="this.style.borderColor='var(--border)'"
+        onclick="window._registerAsTeam('${contestId}','${t.id}','${t.name.replace(/'/g,"\\'")}')">
+        <div>
+          <div style="font-weight:600;font-size:0.9rem">${escapeHtml(t.name)}</div>
+          <div style="font-size:0.75rem;color:var(--text-muted);margin-top:0.15rem">${t.members.length}/3 members</div>
+        </div>
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color:var(--neon-cyan)"><polyline points="9 18 15 12 9 6"/></svg>
+      </div>
+    `).join('');
+  }
+
+  modal.style.display = 'flex';
+}
+
+window._registerAsTeam = async (contestId, teamId, teamName) => {
+  closeTeamRegisterModal();
+  try {
+    const teamDoc = await getDoc(doc(db, 'teams', teamId));
+    const members = teamDoc.data().members;
+    // Register all members
+    await updateDoc(doc(db, 'contests', contestId), {
+      registeredUsers: arrayUnion(...members),
+      [`teamRegistrations.${teamId}`]: { teamId, teamName, memberUids: members },
+    });
+    showToast(`Team "${teamName}" registered!`, 'success');
+    await loadContests();
+  } catch(err) { showToast('Registration failed: ' + err.message, 'error'); }
+};
+
+window.closeTeamRegisterModal = function() {
+  document.getElementById('team-register-modal').style.display = 'none';
+};
+
+window.unregisterContest = async function(contestId, e) {
+  if (e) e.stopPropagation();
+  try {
+    const { arrayRemove } = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js");
+    await updateDoc(doc(db, 'contests', contestId), { registeredUsers: arrayRemove(currentUser.uid) });
+    showToast('Unregistered.', 'info');
+    await loadContests();
+  } catch(err) { showToast('Failed: ' + err.message, 'error'); }
+};
+
+// ─────────────────────────────────────────────
+// ENTER ARENA
+// ─────────────────────────────────────────────
+window.enterContest = async function(contestId, e) {
+  if (e) e.stopPropagation();
+  try {
+    const contestDoc = await getDoc(doc(db, 'contests', contestId));
+    if (!contestDoc.exists()) { showToast('Contest not found', 'error'); return; }
+    activeContestId = contestId;
+    activeContest   = { id: contestId, ...contestDoc.data() };
+
+    const probSnap = await getDocs(
+      query(collection(db, 'contests', contestId, 'problems'), orderBy('order', 'asc'))
+    );
+    activeProblems = probSnap.docs.map(d => ({ id: d.id, ...d.data() }));
+
+    document.getElementById('arena-title').textContent = activeContest.title || 'Contest';
+    const avatarEl = document.querySelector('.arena-avatar');
+    if (avatarEl && currentUser.email) avatarEl.textContent = currentUser.email[0].toUpperCase();
+
+    buildProblemsNav();
+    startArenaTimer();
+
+    document.getElementById('contests-list-page').style.display = 'none';
+    document.getElementById('contest-arena').style.display = 'flex';
+    document.body.classList.add('arena-mode');
+
+    if (activeProblems.length) window.renderProblem(0);
+  } catch(err) { showToast('Could not enter contest: ' + err.message, 'error'); }
+};
+
+// ─────────────────────────────────────────────
+// PROBLEMS NAV PANEL
+// ─────────────────────────────────────────────
+function buildProblemsNav() {
+  const listEl = document.getElementById('prob-list-items');
+  const nameEl = document.getElementById('prob-list-contest-name');
+  if (nameEl) nameEl.textContent = activeContest?.title || 'Contest';
+  if (!listEl) return;
+
+  listEl.innerHTML = activeProblems.map((p, i) => {
+    const letter  = String.fromCharCode(65 + i);
+    const diff    = p.difficulty || '';
+    const diffCls = diff === 'easy' ? 'easy' : diff === 'medium' ? 'medium' : diff === 'hard' ? 'hard' : '';
+    const diffLbl = diff ? diff.charAt(0).toUpperCase() + diff.slice(1) : '';
+    const subs    = JSON.parse(localStorage.getItem(`contest_${activeContestId}_prob_${p.id}`) || '[]');
+    const isAC    = subs.some(s => s.verdict === 'AC');
+    const isTried = !isAC && subs.length > 0;
+    const cls     = isAC ? 'solved' : isTried ? 'tried' : '';
+    return `
+      <div class="prob-list-item ${cls} ${i === window.activeProbIndex ? 'active' : ''}"
+           onclick="window.renderProblem(${i}); toggleProblemList()">
+        <span style="font-size:0.8rem;font-weight:700;color:var(--ar-text3);width:18px;flex-shrink:0">${letter}</span>
+        <span class="prob-list-item-title">${escapeHtml(p.title || 'Problem ' + letter)}</span>
+        ${diffCls ? `<span class="prob-list-diff ${diffCls}">${diffLbl}</span>` : ''}
+        ${p.points ? `<span class="prob-list-item-pts">${p.points}pt</span>` : ''}
+        ${isAC ? `<span style="color:var(--ar-green);font-size:0.75rem">✓</span>` : ''}
+      </div>`;
+  }).join('');
+}
+
+window.toggleProblemList = function() {
+  document.getElementById('arena-prob-list-panel').classList.toggle('open');
+};
+
+// ─────────────────────────────────────────────
+// RENDER PROBLEM (Arena)
+// ─────────────────────────────────────────────
+window.renderProblem = function(index) {
+  if (index < 0 || index >= activeProblems.length) return;
+  activeProbIndex = index;
+  window.activeProbIndex = index;
+
+  const problem  = activeProblems[index];
+  const letter   = String.fromCharCode(65 + index);
+  const diff     = problem.difficulty;
+  const diffCls  = diff === 'easy' ? 'easy' : diff === 'medium' ? 'medium' : diff === 'hard' ? 'hard' : '';
+  const diffLbl  = diff ? diff.charAt(0).toUpperCase() + diff.slice(1) : '';
+  const solved   = currentUser && problem.id &&
+    (JSON.parse(localStorage.getItem(`contest_${activeContestId}_prob_${problem.id}`) || '[]')
+      .some(s => s.verdict === 'AC'));
+
+  // Update nav arrows
+  const prevBtn = document.getElementById('arena-prev-btn');
+  const nextBtn = document.getElementById('arena-next-btn');
+  if (prevBtn) prevBtn.disabled = index === 0;
+  if (nextBtn) nextBtn.disabled = index === activeProblems.length - 1;
+
+  // Update prob list active state
+  document.querySelectorAll('.prob-list-item').forEach((el, i) => {
+    el.classList.toggle('active', i === index);
+  });
+
+  const view = document.getElementById('arena-problem-view');
+  view.innerHTML = `
+    <div class="challenge-layout" style="flex:1;min-height:0">
+
+      <!-- ═══════════════ LEFT PANEL ═══════════════ -->
+      <div class="challenge-left" id="arena-left-panel">
+
+        <!-- Description panel -->
+        <div id="desc-panel" class="challenge-tab-panel active">
+          <div class="cl-inner">
+
+            <!-- Title + badges -->
+            <div>
+              <div class="challenge-title">${letter}. ${escapeHtml(problem.title || '')}</div>
+              <div class="challenge-badges">
+                ${diff ? `<span class="badge badge-${diffCls}">${diffLbl}</span>` : ''}
+                ${problem.points ? `<span class="badge badge-pts">${problem.points} pt.</span>` : ''}
+                ${solved ? `<span class="badge badge-ac">✓ Accepted</span>` : ''}
+              </div>
+            </div>
+
+            <!-- Statement -->
+            ${problem.statement ? `
+            <div class="challenge-statement latex-content">${problem.statement}</div>` : ''}
+
+            <!-- Examples -->
+            ${(problem.examples || []).length ? `
+            <div>
+              ${(problem.examples || []).map((ex, i) => `
+              <div class="cl-example">
+                <div class="cl-example-label">Example ${i + 1}</div>
+                <div class="cl-example-body">
+                  <div class="cl-io-row">
+                    <div class="cl-io-label">Input</div>
+                    <div class="cl-io-value">${escapeHtml(ex.input || '')}</div>
+                  </div>
+                  <div class="cl-io-row">
+                    <div class="cl-io-label">Output</div>
+                    <div class="cl-io-value">${escapeHtml(ex.output || '')}</div>
+                  </div>
+                  ${ex.explanation ? `<div class="cl-explanation">💡 ${ex.explanation}</div>` : ''}
+                </div>
+              </div>`).join('')}
+            </div>` : ''}
+
+            <!-- Constraints -->
+            ${problem.constraints ? `
+            <div>
+              <div class="cl-section-head">Constraints</div>
+              <div class="cl-constraints">
+                <div class="challenge-constraints-text latex-content">${problem.constraints}</div>
+              </div>
+            </div>` : ''}
+
+          </div>
+        </div>
+
+        <!-- Submissions panel -->
+        <div id="sub-panel" class="challenge-tab-panel" style="flex-direction:column">
+          <div class="submissions-list" id="submissions-list">
+            <div style="display:flex;align-items:center;gap:8px;padding:12px 0;color:var(--ar-text3);font-size:0.8rem">
+              <div class="challenge-spinner" style="display:block;border-top-color:#2cbb5d"></div>
+              Loading submissions…
+            </div>
+          </div>
+        </div>
+
+      </div><!-- /challenge-left -->
+
+      <!-- ═══════════════ RIGHT PANEL ══════════════ -->
+      <div class="challenge-right">
+
+        <!-- Editor top bar (LeetCode style) -->
+        <div class="challenge-editor-header">
+          <!-- Language selector -->
+          <button class="challenge-lang-badge">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+            C++
+            <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+          </button>
+
+          <!-- Right toolbar icons -->
+          <div class="editor-toolbar-right">
+            <!-- Format -->
+            <button class="editor-icon-btn" title="Format code">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="21" y1="10" x2="3" y2="10"/><line x1="21" y1="6" x2="3" y2="6"/><line x1="21" y1="14" x2="3" y2="14"/><line x1="21" y1="18" x2="11" y2="18"/>
+              </svg>
+            </button>
+            <!-- Reset -->
+            <button class="editor-icon-btn" title="Reset to default" onclick="resetEditorCode()">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-3.36"/>
+              </svg>
+            </button>
+            <!-- Undo -->
+            <button class="editor-icon-btn" title="Undo" onclick="challengeEditor && challengeEditor.undo()">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="9 14 4 9 9 4"/><path d="M20 20v-7a4 4 0 0 0-4-4H4"/>
+              </svg>
+            </button>
+            <!-- Fullscreen -->
+            <button class="editor-icon-btn" title="Fullscreen" onclick="toggleEditorFullscreen()">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="15 3 21 3 21 9"/><polyline points="9 21 3 21 3 15"/>
+                <line x1="21" y1="3" x2="14" y2="10"/><line x1="3" y1="21" x2="10" y2="14"/>
+              </svg>
+            </button>
+          </div>
+        </div>
+
+        <!-- Code editor -->
+        <div class="challenge-tab-panel active" id="code-tab" style="flex-direction:column;flex:1;min-height:0">
+          <div class="challenge-editor-wrap">
+            <textarea id="challenge-code-area">#include &lt;bits/stdc++.h&gt;
+using namespace std;
+//batats
+int main(){
+    ios_base::sync_with_stdio(false);
+    cin.tie(NULL);
+
+    // your solution here
+
+    return 0;
+}</textarea>
+          </div>
+        </div>
+
+        <!-- Status bar (Saved | Ln X, Col Y) -->
+        <div class="editor-status-bar">
+          <div class="editor-status-left">
+            <div class="challenge-spinner" id="challenge-spinner" style="width:11px;height:11px;border-width:1.5px;margin-right:4px"></div>
+            <span id="challenge-status" class="editor-status-txt">Saved</span>
+          </div>
+          <span id="editor-cursor-pos" class="editor-status-txt">Ln 1, Col 1</span>
+        </div>
+
+        <!-- Bottom bar -->
+        <div class="challenge-bottom-bar">
+          <div class="challenge-bottom-header">
+            <div class="challenge-bottom-tabs">
+              <!-- Testcase tab with checkbox icon -->
+              <button class="challenge-bottom-tab active" onclick="switchBottomTab(this,'tc-input')">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <rect x="3" y="3" width="18" height="18" rx="2"/><polyline points="9 11 12 14 22 4"/>
+                </svg>
+                Testcase
+              </button>
+              <!-- Test Result tab with terminal icon -->
+              <button class="challenge-bottom-tab" onclick="switchBottomTab(this,'tc-result')">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <polyline points="4 17 10 11 4 5"/><line x1="12" y1="19" x2="20" y2="19"/>
+                </svg>
+                Test Result
+              </button>
+            </div>
+            <div class="challenge-bottom-right">
+              <div class="challenge-spinner" id="challenge-spinner-b"
+                   style="width:11px;height:11px;border-width:1.5px;display:none"></div>
+              <span id="challenge-status-b" class="editor-status-txt"></span>
+            </div>
+          </div>
+
+          <div class="challenge-bottom-content" id="tc-input">
+            <textarea class="testcase-input" id="testcase-custom" rows="3"
+                      placeholder="Enter custom input here (stdin)…"></textarea>
+          </div>
+          <div class="challenge-bottom-content" id="tc-result" style="display:none">
+            <div id="challenge-results-placeholder" class="tc-placeholder">
+              You must run your code first
+            </div>
+            <div class="challenge-results" id="challenge-results"
+                 style="max-height:160px;border:none;padding:0;background:transparent;display:none"></div>
+          </div>
+        </div>
+
+      </div><!-- /challenge-right -->
+
+    </div>`;
+
+  initChallengeEditor(problem);
+  loadContestSubmissions(problem.id);
+};
+
+// ─────────────────────────────────────────────
+// ARENA TIMER
+// ─────────────────────────────────────────────
+function startArenaTimer() {
+  clearInterval(timerInterval);
+  const timerEl = document.getElementById('arena-timer');
+  const status  = getContestStatus(activeContest);
+
+  function tick() {
+    const now   = Date.now();
+    const end   = activeContest.endTime?.toMillis?.() || activeContest.endTime;
+    const start = activeContest.startTime?.toMillis?.() || activeContest.startTime;
+
+    if (status === 'ended') {
+      timerEl.textContent = 'Contest Ended';
+      clearInterval(timerInterval);
+      return;
+    }
+
+    if (now < start) {
+      const diff = start - now;
+      timerEl.textContent = `Starts in ${formatCountdown(diff)}`;
+      return;
+    }
+
+    const remaining = end - now;
+    if (remaining <= 0) {
+      timerEl.textContent = '00:00:00';
+      timerEl.classList.add('ending');
+      clearInterval(timerInterval);
+      showToast('Contest has ended!', 'warning');
+      return;
+    }
+
+    timerEl.textContent = formatCountdown(remaining);
+    if (remaining < 5 * 60 * 1000) timerEl.classList.add('ending');
+    else timerEl.classList.remove('ending');
+  }
+
+  tick();
+  timerInterval = setInterval(tick, 1000);
+}
+
+// ─────────────────────────────────────────────
+// CHALLENGE EDITOR
+// ─────────────────────────────────────────────
+function initChallengeEditor(problem) {
+  const ta = document.getElementById('challenge-code-area');
+  if (!ta) return;
+  if (challengeEditor) { challengeEditor.toTextArea(); challengeEditor = null; }
+  challengeEditor = CodeMirror.fromTextArea(ta, {
+    mode: 'text/x-c++src',
+    theme: 'monokai',
+    lineNumbers: true,
+    indentUnit: 4,
+    tabSize: 4,
+    indentWithTabs: false,
+    matchBrackets: true,
+    autoCloseBrackets: { pairs: "()[]{}''\"\"", explode: "()[]{}" },
+    lineWrapping: false,
+    extraKeys: {
+      'Ctrl-Z': cm => cm.undo(),
+      'Ctrl-Y': cm => cm.redo(),
+    },
+  });
+
+  const cursorEl = document.getElementById('editor-cursor-pos');
+  const updateCursor = () => {
+    if (!cursorEl) return;
+    const c = challengeEditor.getCursor();
+    cursorEl.textContent = 'Ln ' + (c.line + 1) + ', Col ' + (c.ch + 1);
+  };
+  challengeEditor.on('cursorActivity', updateCursor);
+  updateCursor();
+
+  const statusEl = document.getElementById('challenge-status');
+  let saveTimer;
+  challengeEditor.on('change', () => {
+    if (statusEl) {
+      statusEl.textContent = 'Unsaved';
+      statusEl.classList.remove('saved-flash');
+      clearTimeout(saveTimer);
+      saveTimer = setTimeout(() => {
+        statusEl.textContent = 'Saved';
+        void statusEl.offsetWidth;
+        statusEl.classList.add('saved-flash');
+      }, 800);
+    }
+  });
+
+  setTimeout(() => challengeEditor.refresh(), 50);
+  setTimeout(() => renderLatex(document.getElementById('arena-left-panel')), 80);
+}
+
+window.resetEditorCode = function() {
+  if (!challengeEditor) return;
+  challengeEditor.setValue('#include <bits/stdc++.h>\nusing namespace std;\n\nint main(){\n    ios_base::sync_with_stdio(false);\n //batats \n   cin.tie(NULL);\n\n    // your solution here\n\n    return 0;\n}'.replace(/\\n/g,'\n'));
+  challengeEditor.clearHistory();
+};
+
+window.toggleEditorFullscreen = function() {
+  const right = document.querySelector('.challenge-right');
+  if (!right) return;
+  right.classList.toggle('fullscreen');
+  setTimeout(() => challengeEditor && challengeEditor.refresh(), 50);
+};
+
+window.switchChallengeTab = function(btn, panelId) {
+  const container = btn.closest('.challenge-left') || btn.closest('.challenge-right');
+  if (container) {
+    container.querySelectorAll('.challenge-tab-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+  }
+  // Left panel tabs
+  const descEl = document.getElementById('desc-panel');
+  const subEl  = document.getElementById('sub-panel');
+  if (panelId === 'desc-panel' && descEl) {
+    descEl.classList.add('active'); descEl.style.display = 'flex';
+    if (subEl) { subEl.classList.remove('active'); subEl.style.display = 'none'; }
+    if (challengeEditor) setTimeout(() => challengeEditor.refresh(), 30);
+  }
+  if (panelId === 'sub-panel' && subEl) {
+    subEl.classList.add('active'); subEl.style.display = 'flex';
+    if (descEl) { descEl.classList.remove('active'); descEl.style.display = 'none'; }
+    const prob = activeProblems[activeProbIndex];
+    if (prob) loadContestSubmissions(prob.id);
+  }
+};
+
+window.switchArenaSubTab = function(btn, panelId) {
+  document.querySelectorAll('.arena-sub-tab').forEach(b => b.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+  // also sync the inner challenge-tab-btn
+  const descEl = document.getElementById('desc-panel');
+  const subEl  = document.getElementById('sub-panel');
+  if (panelId === 'desc-panel' && descEl) {
+    descEl.classList.add('active'); descEl.style.display = 'flex';
+    if (subEl) { subEl.classList.remove('active'); subEl.style.display = 'none'; }
+  }
+  if (panelId === 'sub-panel' && subEl) {
+    subEl.classList.add('active'); subEl.style.display = 'flex';
+    if (descEl) { descEl.classList.remove('active'); descEl.style.display = 'none'; }
+    const prob = activeProblems[activeProbIndex];
+    if (prob) loadContestSubmissions(prob.id);
+  }
+};
+
+window.switchBottomTab = function(btn, panelId) {
+  document.querySelectorAll('.challenge-bottom-tab').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  ['tc-input','tc-result'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.style.display = id === panelId ? 'block' : 'none';
+  });
+};
+
+function setExecLoading(loading, msg) {
+  const btnRunTop = document.getElementById('arena-btn-run');
+  const btnSubTop = document.getElementById('arena-btn-submit');
+  const spinner   = document.getElementById('challenge-spinner');
+  const spinnerB  = document.getElementById('challenge-spinner-b');
+  const statusElB = document.getElementById('challenge-status-b');
+  if (btnRunTop) btnRunTop.disabled = loading;
+  if (btnSubTop) btnSubTop.disabled = loading;
+  if (spinner)   spinner.style.display  = loading ? 'inline-block' : 'none';
+  if (spinnerB)  spinnerB.style.display = loading ? 'block' : 'none';
+  const txt = loading ? (msg || 'Running…') : '';
+  if (statusElB) statusElB.textContent = txt;
+  if (!loading) {
+    const rtBtn = document.querySelector('.challenge-bottom-tab:nth-child(2)');
+    if (rtBtn) switchBottomTab(rtBtn, 'tc-result');
+    // hide placeholder, show results
+    const ph = document.getElementById('challenge-results-placeholder');
+    const rs = document.getElementById('challenge-results');
+    if (ph) ph.style.display = 'none';
+    if (rs) rs.style.display = 'block';
+  }
+}
+
+// ─────────────────────────────────────────────
+// RUN & SUBMIT
+// ─────────────────────────────────────────────
+window.runChallenge = async function() {
+  const problem = activeProblems[activeProbIndex];
+  if (!problem) return;
+  const code = challengeEditor?.getValue() || '';
+  if (!code.trim()) return;
+  const examples = problem.examples || [];
+  if (!examples.length) { showToast('No examples to run against', 'warning'); return; }
+
+  setExecLoading(true, `Running ${examples.length} example(s)…`);
+  const resultsDiv = document.getElementById('challenge-results');
+  resultsDiv.innerHTML = '';
+  const rows = [];
+
+  for (let i = 0; i < examples.length; i++) {
+    const ex = examples[i];
+    try {
+      const r       = await wandboxRun(code, ex.input || '');
+      const verdict = classifyResult(r, ex.output);
+      const pass    = verdict === 'AC';
+
+      if (verdict === 'CE') {
+        rows.push(`<div class="result-case err">
+          <div class="result-case-header"><span class="result-dot err-dot"></span> Example ${i+1} — Compilation Error</div>
+          ${r.stderr ? `<div class="result-case-row" style="color:#FFB800;white-space:pre-wrap">${escapeHtml(r.stderr.substring(0,400))}</div>` : ''}
+        </div>`);
+      } else if (verdict === 'RE') {
+        rows.push(`<div class="result-case err">
+          <div class="result-case-header"><span class="result-dot err-dot"></span> Example ${i+1} — Runtime Error</div>
+          ${r.stderr ? `<div class="result-case-row" style="color:#FFB800;white-space:pre-wrap">${escapeHtml(r.stderr.substring(0,400))}</div>` : ''}
+        </div>`);
+      } else {
+        rows.push(`<div class="result-case ${pass?'pass':'fail'}">
+          <div class="result-case-header"><span class="result-dot ${pass?'pass-dot':'fail-dot'}"></span> Example ${i+1} — ${pass?'Passed':'Wrong Answer'}</div>
+          <div class="result-case-row">Input:    <span>${escapeHtml((ex.input||'').substring(0,200))}</span></div>
+          <div class="result-case-row">Expected: <span>${escapeHtml((ex.output||'').trim())}</span></div>
+          <div class="result-case-row">Got:      <span style="color:${pass?'#00E096':'#FF3D71'}">${escapeHtml(r.stdout.trim()||'(empty)')}</span></div>
+        </div>`);
+      }
+    } catch(e) {
+      rows.push(`<div class="result-case err">
+        <div class="result-case-header"><span class="result-dot warn-dot"></span> Example ${i+1} — Network Error</div>
+        <div class="result-case-row">${escapeHtml(e.message)}</div>
+      </div>`);
+    }
+  }
+  resultsDiv.innerHTML = rows.join('');
+  setExecLoading(false);
+  if (challengeEditor) setTimeout(() => challengeEditor.refresh(), 30);
+  setTimeout(() => resultsDiv.scrollIntoView({ behavior: 'smooth', block: 'nearest' }), 60);
+};
+
+window.submitChallenge = async function() {
+  // Check if contest is still running
+  const status = getContestStatus(activeContest);
+  if (status === 'ended') {
+    showToast('Contest has ended — submissions are closed.', 'warning');
+    return;
+  }
+
+  const problem = activeProblems[activeProbIndex];
+  if (!problem) return;
+  const code  = challengeEditor?.getValue() || '';
+  if (!code.trim()) return;
+  const tests = problem.tests || [];
+  if (!tests.length) { showToast('No hidden test cases configured', 'warning'); return; }
+
+  setExecLoading(true, `Judging ${tests.length} test(s)…`);
+  const resultsDiv = document.getElementById('challenge-results');
+  resultsDiv.innerHTML = '';
+
+  let finalVerdict = 'AC', verdictDesc = 'Accepted', failDetail = '', passedCount = 0;
+
+  for (let i = 0; i < tests.length; i++) {
+    setExecLoading(true, `Testing ${i+1} / ${tests.length}…`);
+    try {
+      const r       = await wandboxRun(code, tests[i].input || '');
+      const verdict = classifyResult(r, tests[i].output);
+      if (verdict === 'AC') {
+        passedCount++;
+      } else {
+        finalVerdict = verdict;
+        verdictDesc  = verdict === 'CE' ? 'Compilation Error'
+                     : verdict === 'RE' ? `Runtime Error on test ${i+1}`
+                     : `Wrong Answer on test ${i+1}`;
+        failDetail   = r.stderr || '';
+        break;
+      }
+    } catch(e) {
+      finalVerdict = 'NET';
+      verdictDesc  = `Network Error on test ${i+1}: ${e.message}`;
+      break;
+    }
+  }
+
+  const isAC = finalVerdict === 'AC';
+  const bannerClass = isAC ? 'verdict-ac' : finalVerdict === 'WA' ? 'verdict-wa' : 'verdict-err';
+  const bannerIcon  = isAC
+    ? '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>'
+    : '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>';
+
+  resultsDiv.innerHTML = `
+    <div class="verdict-banner ${bannerClass}">${bannerIcon} ${verdictDesc}</div>
+    ${failDetail ? `<div style="font-family:var(--font-mono);font-size:0.78rem;color:#FFB800;white-space:pre-wrap;padding:0.4rem 0.5rem;background:rgba(0,0,0,0.3);border-radius:6px;margin-top:0.4rem">${escapeHtml(failDetail.substring(0,600))}</div>` : ''}
+    <div style="font-size:0.78rem;color:var(--text-muted);text-align:center;margin-top:0.5rem">
+      ${passedCount} / ${tests.length} test cases passed
+    </div>`;
+
+  if (challengeEditor) setTimeout(() => challengeEditor.refresh(), 30);
+  setTimeout(() => resultsDiv.scrollIntoView({ behavior: 'smooth', block: 'nearest' }), 60);
+
+  // Save to localStorage
+  const subKey = `contest_${activeContestId}_prob_${problem.id}`;
+  const subs   = JSON.parse(localStorage.getItem(subKey) || '[]');
+  subs.unshift({ verdict: finalVerdict, verdictDesc, code, passedCount, totalTests: tests.length, timestamp: Date.now() });
+  if (subs.length > 50) subs.length = 50;
+  localStorage.setItem(subKey, JSON.stringify(subs));
+
+  // Save to Firestore for leaderboard
+  const submissionRef = doc(db, 'contests', activeContestId, 'submissions', `${currentUser.uid}_${problem.id}_${Date.now()}`);
+  await setDoc(submissionRef, {
+    userId:      currentUser.uid,
+    userEmail:   currentUser.email,
+    problemId:   problem.id,
+    verdict:     finalVerdict,
+    passedCount,
+    totalTests:  tests.length,
+    submitTime:  serverTimestamp(),
+    penalty:     finalVerdict !== 'AC' ? 1 : 0,
+  }).catch(() => {});
+
+  if (isAC) {
+    showToast('🎉 Accepted! Great solve!', 'success');
+    // Mark problem as solved in Firestore user record for this contest
+    await updateDoc(doc(db, 'users', currentUser.uid), {
+      [`contestProgress.${activeContestId}.${problem.id}`]: true,
+    }).catch(() => {});
+    buildProblemsNav(); // Refresh nav to show checkmark
+  }
+
+  loadContestSubmissions(problem.id);
+  setExecLoading(false);
+};
+
+function loadContestSubmissions(problemId) {
+  const list   = document.getElementById('submissions-list');
+  if (!list) return;
+  const subKey = `contest_${activeContestId}_prob_${problemId}`;
+  const subs   = JSON.parse(localStorage.getItem(subKey) || '[]');
+  if (!subs.length) {
+    list.innerHTML = '<p style="color:var(--text-muted);font-size:0.82rem;padding:0.5rem">No submissions yet.</p>';
+    return;
+  }
+  list.innerHTML = subs.map((s, i) => {
+    const isAC = s.verdict === 'AC', isWA = s.verdict === 'WA';
+    const cls  = isAC ? 'ac' : isWA ? 'wa' : 'err';
+    const icon = isAC
+      ? '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-1px"><polyline points="20 6 9 17 4 12"/></svg>'
+      : '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-1px"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>';
+    const score = s.totalTests != null ? ` · ${s.passedCount}/${s.totalTests}` : '';
+    return `
+      <div class="sub-item" onclick="loadSubmissionCode(${i},'${problemId}')">
+        <span class="sub-verdict ${cls}">${icon} ${s.verdictDesc}</span>
+        <span style="font-size:0.75rem;color:var(--neon-cyan)">${score}</span>
+        <span class="sub-ts">${new Date(s.timestamp).toLocaleString()}</span>
+      </div>`;
+  }).join('');
+}
+
+window.loadSubmissionCode = function(index, problemId) {
+  const subKey = `contest_${activeContestId}_prob_${problemId}`;
+  const subs   = JSON.parse(localStorage.getItem(subKey) || '[]');
+  const sub    = subs[index];
+  if (!sub || !challengeEditor) return;
+  challengeEditor.setValue(sub.code);
+  const descBtn = document.querySelector('.challenge-tab-btn');
+  if (descBtn) switchChallengeTab(descBtn, 'desc-panel');
+  showToast('Code loaded from submission', 'info');
+};
+
+// ─────────────────────────────────────────────
+// LEADERBOARD
+// ─────────────────────────────────────────────
+window.openLeaderboard = async function() {
+  document.getElementById('leaderboard-modal').classList.add('open');
+  const body = document.getElementById('leaderboard-body');
+  body.innerHTML = '<p style="text-align:center;padding:2rem;color:var(--text-muted)">Loading…</p>';
+
+  try {
+    const subsSnap = await getDocs(collection(db, 'contests', activeContestId, 'submissions'));
+    const subs = subsSnap.docs.map(d => d.data());
+
+    // Build per-user stats
+    const userMap = {};
+    subs.forEach(s => {
+      const uid = s.userId;
+      if (!userMap[uid]) userMap[uid] = { email: s.userEmail || uid, problems: {}, penalty: 0 };
+      const probId = s.problemId;
+      if (!userMap[uid].problems[probId]) userMap[uid].problems[probId] = { ac: false, attempts: 0, firstAcTime: null };
+      const pStat = userMap[uid].problems[probId];
+      if (!pStat.ac) {
+        if (s.verdict === 'AC') {
+          pStat.ac = true;
+          pStat.firstAcTime = s.submitTime?.toMillis?.() || Date.now();
+        } else {
+          pStat.attempts++;
+          userMap[uid].penalty += 20 * 60 * 1000; // 20 min penalty per WA
+        }
+      }
+    });
+
+    // Score: solved count, then by penalty time (ICPC-style)
+    const rows = Object.entries(userMap).map(([uid, u]) => {
+      const solved  = Object.values(u.problems).filter(p => p.ac).length;
+      const penalty = Object.values(u.problems).filter(p => p.ac).reduce((sum, p) => {
+        const start = activeContest.startTime?.toMillis?.() || activeContest.startTime;
+        return sum + Math.floor((p.firstAcTime - start) / 60000);
+      }, 0) + Math.floor(u.penalty / 60000);
+      return { uid, email: u.email, solved, penalty, problems: u.problems };
+    }).sort((a, b) => b.solved - a.solved || a.penalty - b.penalty);
+
+    const probLetters = activeProblems.map((_, i) => String.fromCharCode(65 + i));
+
+    const headerCells = probLetters.map(l =>
+      `<div class="lb-prob-cell" style="font-size:0.7rem;text-align:center">${l}</div>`
+    ).join('');
+
+    body.innerHTML = `
+      <div class="leaderboard-row header">
+        <div>Rank</div>
+        <div>User</div>
+        ${headerCells}
+        <div style="text-align:center">Solved</div>
+        <div style="text-align:right">Penalty</div>
+      </div>
+      ${rows.length ? rows.map((r, i) => {
+        const rankClass = i === 0 ? 'rank-1' : i === 1 ? 'rank-2' : i === 2 ? 'rank-3' : '';
+        const rankDisp  = i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : i + 1;
+        const isMe      = r.uid === currentUser.uid;
+
+        const probCells = activeProblems.map((p, pi) => {
+          const pStat = r.problems[p.id];
+          if (!pStat) return `<div class="lb-prob-cell">—</div>`;
+          if (pStat.ac) return `<div class="lb-prob-cell lb-prob-ac">✓<br><span style="font-size:0.65rem">${pStat.attempts > 0 ? `-${pStat.attempts}` : ''}</span></div>`;
+          return `<div class="lb-prob-cell lb-prob-wa">${pStat.attempts > 0 ? `${pStat.attempts}✗` : '—'}</div>`;
+        }).join('');
+
+        return `
+          <div class="leaderboard-row ${isMe ? 'me' : ''}">
+            <div class="rank-num ${rankClass}">${rankDisp}</div>
+            <div style="font-weight:600;font-size:0.85rem">${escapeHtml(r.email.split('@')[0])}</div>
+            ${probCells}
+            <div class="lb-solved">${r.solved}</div>
+            <div class="lb-penalty">${r.penalty}m</div>
+          </div>`;
+      }).join('') : '<p style="text-align:center;padding:2rem;color:var(--text-muted)">No submissions yet.</p>'}
+    `;
+  } catch(e) {
+    body.innerHTML = `<p style="text-align:center;padding:2rem;color:#FF3D71">Error: ${e.message}</p>`;
+  }
+};
+
+window.closeLeaderboard = function() {
+  document.getElementById('leaderboard-modal').classList.remove('open');
+};
+
+// ─────────────────────────────────────────────
+// LEAVE ARENA
+// ─────────────────────────────────────────────
+window.leaveArena = function() {
+  clearInterval(timerInterval);
+  if (challengeEditor) { challengeEditor.toTextArea(); challengeEditor = null; }
+  document.getElementById('contest-arena').style.display = 'none';
+  document.getElementById('contests-list-page').style.display = 'block';
+  document.body.classList.remove('arena-mode');
+  // close panel
+  document.getElementById('arena-prob-list-panel').classList.remove('open');
+  activeContestId = null;
+  activeContest   = null;
+  activeProblems  = [];
+  loadContests();
+};
+
+// ─────────────────────────────────────────────
+// UTILITIES
+// ─────────────────────────────────────────────
+function renderLatex(el) {
+  if (!el) return;
+  const tryRender = () => {
+    if (window.renderMathInElement) {
+      renderMathInElement(el, {
+        delimiters: [
+          { left: '$$',  right: '$$',  display: true  },
+          { left: '\\[', right: '\\]', display: true  },
+          { left: '$',   right: '$',   display: false },
+          { left: '\\(', right: '\\)', display: false },
+        ],
+        throwOnError: false,
+      });
+    } else {
+      setTimeout(tryRender, 120);
+    }
+  };
+  tryRender();
+}
+
+function escapeHtml(str) {
+  return String(str)
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+async function wandboxRun(code, stdin) {
+  const resp = await fetch('https://wandbox.org/api/compile.json', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      code, compiler: 'gcc-head', options: '-std=c++17 -O2', stdin: stdin || '',
+    }),
+  });
+  if (!resp.ok) throw new Error(`Wandbox HTTP ${resp.status}`);
+  const data = await resp.json();
+  return {
+    stdout: data.program_output  || '',
+    stderr: (data.compiler_error || '') + (data.program_error || ''),
+    code:   parseInt(data.status) || 0,
+  };
+}
+
+function classifyResult(result, expectedOutput) {
+  if (result.stderr && result.stderr.trim()) return 'CE';
+  if (result.code !== 0)                     return 'RE';
+  const got = result.stdout.trim();
+  const exp = (expectedOutput || '').trim();
+  return got === exp ? 'AC' : 'WA';
+}
+
+init();
+  </script>
+</body>
+</html>

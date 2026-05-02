@@ -29,7 +29,7 @@
     .podium-card:hover { transform: translateY(-6px); }
 
     .podium-avatar {
-      width: 60px; height: 60px; /* overridden inline for gold */
+      width: 60px; height: 60px;
       border-radius: 50%;
       display: flex; align-items: center; justify-content: center;
       font-size: 2rem;
@@ -137,6 +137,27 @@
       color: var(--cyan);
     }
 
+    /* ── ONLINE DOT ── */
+    .online-dot {
+      display: inline-block;
+      width: 9px; height: 9px;
+      background: #50dc78;
+      border-radius: 50%;
+      border: 2px solid var(--bg-card);
+      box-shadow: 0 0 6px #50dc78;
+      flex-shrink: 0;
+    }
+    .online-dot-podium {
+      position: absolute;
+      bottom: 2px; right: 2px;
+      width: 13px; height: 13px;
+      background: #50dc78;
+      border-radius: 50%;
+      border: 2px solid var(--bg-card);
+      box-shadow: 0 0 8px #50dc78;
+      z-index: 3;
+    }
+
     /* ── RESPONSIVE PODIUM ── */
     @media (max-width: 540px) {
       #podium { gap: 0.75rem !important; }
@@ -145,7 +166,7 @@
       .podium-handle { font-size: 0.76rem; max-width: 90px; }
     }
   </style>
-<link rel="icon" type="image/png" href="../assets/favicon.png">
+  <link rel="icon" type="image/png" href="../assets/favicon.png">
 </head>
 <body>
   <div class="bg-glow bg-glow-1"></div>
@@ -226,9 +247,11 @@
     import { requireAuth, isAdmin } from '../js/auth/auth.js';
     import { renderNavbar, renderSidebar } from '../js/dashboard/components.js';
     import { getLeaderboard, BADGES } from '../js/core/utils.js';
+    import { db } from '../js/core/firebase-config.js';
+    import { doc, updateDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
     let myUid = null;
-    const usersMap = new Map(); // id → user object (avoids huge inline JSON in onclick)
+    const usersMap = new Map();
 
     async function init() {
       let user;
@@ -238,11 +261,32 @@
       renderNavbar('leaderboard');
       renderSidebar('leaderboard', admin);
 
+      // ✅ سجل الـ lastSeen عند دخول الصفحة
+      updateDoc(doc(db, 'users', user.uid), { lastSeen: serverTimestamp() });
+      // ✅ جدده كل دقيقة طول ما الصفحة مفتوحة
+      setInterval(() => updateDoc(doc(db, 'users', user.uid), { lastSeen: serverTimestamp() }), 60_000);
+
       const leaders = await getLeaderboard();
       leaders.forEach(u => usersMap.set(u.id, u));
       renderPodium(leaders.slice(0, 3));
       renderTable(leaders);
       document.getElementById('total-count').textContent = `${leaders.length} participants`;
+    }
+
+    /* ── Online helpers ── */
+    function isOnline(u) {
+      if (!u.lastSeen?.toDate) return false;
+      return (Date.now() - u.lastSeen.toDate().getTime()) < 5 * 60 * 1000; // آخر 5 دقايق
+    }
+
+    function onlineDot(u) {
+      if (!isOnline(u)) return '';
+      return `<span class="online-dot" title="Online now"></span>`;
+    }
+
+    function onlineDotPodium(u) {
+      if (!isOnline(u)) return '';
+      return `<span class="online-dot-podium" title="Online now"></span>`;
     }
 
     /* ── Avatar helper: supports emoji & base64 images ── */
@@ -253,7 +297,7 @@
       return value || '🧑';
     }
 
-    /* ── PODIUM ─────────────────────────────────────────── */
+    /* ── PODIUM ── */
     function renderPodium(top3) {
       const podium  = document.getElementById('podium');
       const order   = [1, 0, 2]; // silver → gold → bronze (visual L→R)
@@ -282,11 +326,15 @@
             <div class="podium-avatar"
               style="border-color:${colors[vi]};color:${colors[vi]};background:${colors[vi]}18;width:${vi===1?'72px':'58px'};height:${vi===1?'72px':'58px'}">
               ${avatarHTML(u.avatar, vi === 1 ? '64px' : '50px')}
+              ${onlineDotPodium(u)}
             </div>
 
             <div class="podium-handle" style="color:${colors[vi]}">${handle}</div>
             <div class="podium-meta">Lvl ${u.currentLevel ?? 0} · W${u.currentWeek ?? 1}</div>
-            <div class="podium-streak" style="display:flex;align-items:center;gap:0.3rem"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="var(--warning)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 3z"/></svg> ${u.streak ?? 0}</div>
+            <div class="podium-streak" style="display:flex;align-items:center;gap:0.3rem">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="var(--warning)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 3z"/></svg>
+              ${u.streak ?? 0}
+            </div>
 
             <div class="podium-base" style="background:${colors[vi]}22;color:${colors[vi]}">
               ${nums[vi]}
@@ -296,7 +344,7 @@
       }).join('');
     }
 
-    /* ── TABLE ──────────────────────────────────────────── */
+    /* ── TABLE ── */
     function renderTable(leaders) {
       const tbody = document.getElementById('leaderboard-body');
       tbody.innerHTML = leaders.map(u => {
@@ -312,11 +360,15 @@
 
             <td>
               <div style="display:flex;align-items:center;gap:0.65rem">
-                <div class="lb-avatar" style="overflow:hidden">${avatarHTML(u.avatar, '36px')}</div>
+                <!-- Avatar مع position:relative للـ online dot -->
+                <div style="position:relative;flex-shrink:0">
+                  <div class="lb-avatar" style="overflow:hidden">${avatarHTML(u.avatar, '36px')}</div>
+                  ${isOnline(u) ? `<span class="online-dot-podium" style="width:10px;height:10px;bottom:0;right:0" title="Online now"></span>` : ''}
+                </div>
                 <div>
-                  <div style="font-weight:700;font-size:0.9rem">
+                  <div style="font-weight:700;font-size:0.9rem;display:flex;align-items:center;gap:0.4rem">
                     ${u.codeforcesHandle || 'Anonymous'}
-                    ${isMe ? '<span class="badge-chip cyan" style="font-size:0.66rem;margin-left:4px;padding:0.1rem 0.5rem">You</span>' : ''}
+                    ${isMe ? '<span class="badge-chip cyan" style="font-size:0.66rem;padding:0.1rem 0.5rem">You</span>' : ''}
                   </div>
                   <div class="fs-xs text-muted">${u.email?.split('@')[0] || ''}</div>
                 </div>
@@ -325,28 +377,33 @@
 
             <td><span class="badge-chip cyan">Lvl ${u.currentLevel ?? 0}</span></td>
             <td style="color:var(--text-secondary)">W${u.currentWeek ?? 1}</td>
-            <td style="color:var(--warning);font-weight:700;display:flex;align-items:center;gap:0.3rem">${u.streak ?? 0} <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="var(--warning)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 3z"/></svg></td>
-            <td style="color:var(--cyan);font-weight:600">${(u.badges||[]).length} <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="var(--cyan)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline;vertical-align:middle"><circle cx="12" cy="8" r="6"/><path d="M15.477 12.89 17 22l-5-3-5 3 1.523-9.11"/></svg></td>
+            <td style="color:var(--warning);font-weight:700;display:flex;align-items:center;gap:0.3rem">
+              ${u.streak ?? 0}
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="var(--warning)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 3z"/></svg>
+            </td>
+            <td style="color:var(--cyan);font-weight:600">
+              ${(u.badges||[]).length}
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="var(--cyan)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline;vertical-align:middle"><circle cx="12" cy="8" r="6"/><path d="M15.477 12.89 17 22l-5-3-5 3 1.523-9.11"/></svg>
+            </td>
           </tr>
         `;
       }).join('');
     }
 
-    /* ── OPEN PROFILE MODAL ─────────────────────────────── */
+    /* ── OPEN PROFILE MODAL ── */
     window.openUserProfile = function(uid) {
       const u = usersMap.get(uid);
       if (!u) return;
 
-      const isMe     = u.id === myUid;
-      const handle   = u.codeforcesHandle || 'Anonymous';
+      const isMe         = u.id === myUid;
+      const handle       = u.codeforcesHandle || 'Anonymous';
       const earnedBadges = (u.badges || []);
+      const online       = isOnline(u);
 
-      // Avatar — emoji or real photo
       const avatarEl = u.avatar && u.avatar.startsWith('data:')
         ? `<img src="${u.avatar}" style="width:100%;height:100%;object-fit:cover;border-radius:50%" />`
         : (u.avatar || '🧑');
 
-      // Build badge chips
       let badgeHTML = '';
       if (earnedBadges.length > 0 && typeof BADGES !== 'undefined') {
         badgeHTML = earnedBadges.map(bid => {
@@ -357,14 +414,20 @@
         badgeHTML = '<span class="text-muted fs-xs">No badges yet</span>';
       }
 
-      // Rank decoration
       const medalSvg = (stroke) => `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="${stroke}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline;vertical-align:middle;margin-right:0.25rem"><circle cx="12" cy="8" r="6"/><path d="M15.477 12.89 17 22l-5-3-5 3 1.523-9.11"/></svg>`;
       const rankLabel = u.rank === 1 ? medalSvg('#FFD700')+'#1' : u.rank === 2 ? medalSvg('#C0C0C0')+'#2' : u.rank === 3 ? medalSvg('#CD7F32')+'#3' : '#'+u.rank;
 
       document.getElementById('modal-profile-body').innerHTML = `
         <div class="pmodal-header">
-          <div class="pmodal-avatar" style="overflow:hidden">${avatarEl}</div>
-          <div class="pmodal-handle">${handle} ${isMe ? '<span class="badge-chip cyan" style="font-size:0.7rem">You</span>' : ''}</div>
+          <div style="position:relative;display:inline-block">
+            <div class="pmodal-avatar" style="overflow:hidden">${avatarEl}</div>
+            ${online ? `<span style="position:absolute;bottom:3px;right:3px;width:14px;height:14px;background:#50dc78;border-radius:50%;border:2px solid var(--bg-card);box-shadow:0 0 8px #50dc78" title="Online now"></span>` : ''}
+          </div>
+          <div class="pmodal-handle" style="display:flex;align-items:center;gap:0.5rem">
+            ${handle}
+            ${isMe ? '<span class="badge-chip cyan" style="font-size:0.7rem">You</span>' : ''}
+            ${online ? '<span style="display:inline-flex;align-items:center;gap:0.3rem;font-size:0.72rem;color:#50dc78;font-weight:600"><span style="width:7px;height:7px;background:#50dc78;border-radius:50%;display:inline-block"></span>Online</span>' : ''}
+          </div>
           <div class="fs-xs text-muted">${u.email || ''}</div>
         </div>
 
@@ -409,7 +472,6 @@
       document.getElementById('modal-profile').classList.add('open');
     };
 
-    // Close modal on overlay click
     document.getElementById('modal-profile').addEventListener('click', function(e) {
       if (e.target === this) this.classList.remove('open');
     });

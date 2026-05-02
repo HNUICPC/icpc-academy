@@ -156,17 +156,117 @@
         </div>
       </div>
 
+      <!-- Teams -->
+      <div class="card card-glow mt-lg" id="teams-section">
+        <div class="flex-between mb-md">
+          <h3>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline;vertical-align:middle;margin-right:0.4rem"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+            Teams
+          </h3>
+          <button class="btn btn-primary btn-sm" onclick="showCreateTeamModal()">+ Create Team</button>
+        </div>
+
+        <!-- Incoming team invites -->
+        <div id="team-invites-section" style="margin-bottom:1.5rem;display:none">
+          <h4 style="font-size:0.85rem;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.07em;margin-bottom:0.75rem">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline;vertical-align:middle;margin-right:0.3rem"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.99 12 19.79 19.79 0 0 1 1.85 3.36C1.64 2.18 2.48 1 3.66 1h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 8.64a16 16 0 0 0 6 6l1-1c.58-.58 1.4-.8 2.11-.45.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+            Pending Invites
+          </h4>
+          <div id="team-invites-list"></div>
+        </div>
+
+        <!-- My teams -->
+        <h4 style="font-size:0.85rem;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.07em;margin-bottom:0.75rem">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline;vertical-align:middle;margin-right:0.3rem"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+          My Teams
+        </h4>
+        <div id="my-teams-list">
+          <div class="skeleton" style="height:70px;border-radius:8px;margin-bottom:0.5rem"></div>
+        </div>
+      </div>
+
     </main>
   </div>
 
   <div id="toast-container"></div>
 
+  <!-- Create Team Modal -->
+  <div id="modal-create-team" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:9999;align-items:center;justify-content:center">
+    <div style="background:var(--bg-card,#0d1f3c);border:1px solid rgba(0,212,255,0.25);border-radius:16px;padding:1.75rem;width:100%;max-width:460px;margin:1rem;box-shadow:0 0 40px rgba(0,0,0,0.5)">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.25rem">
+        <h3 style="margin:0">Create Team</h3>
+        <button onclick="window.closeCreateTeamModal()" style="background:none;border:none;color:var(--text-muted);cursor:pointer;font-size:1.2rem;line-height:1">✕</button>
+      </div>
+      <div style="margin-bottom:1rem">
+        <label class="form-label">Team Name</label>
+        <input type="text" id="team-name-input" class="form-control" placeholder="e.g. Team Alpha" maxlength="40" />
+      </div>
+      <div style="margin-bottom:0.5rem">
+        <label class="form-label">
+          Invite Members <span style="font-weight:400;color:var(--text-muted)">(max 2 — must have an account)</span>
+        </label>
+        <div id="invite-inputs" style="display:flex;flex-direction:column;gap:0.5rem">
+          <input type="email" class="form-control invite-email-input" placeholder="Member 1 email address" />
+          <input type="email" class="form-control invite-email-input" placeholder="Member 2 email address" />
+        </div>
+      </div>
+      <div style="display:flex;gap:0.75rem;margin-top:1.25rem">
+        <button class="btn btn-primary flex-1" onclick="window.createTeam()">Create Team</button>
+        <button class="btn btn-ghost" onclick="window.closeCreateTeamModal()">Cancel</button>
+      </div>
+    </div>
+  </div>
+  <!-- Edit Team Modal -->
+<!-- Edit Team Modal -->
+<div id="modal-edit-team" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:9999;align-items:center;justify-content:center">
+  <div style="background:var(--bg-card,#0d1f3c);border:1px solid rgba(0,212,255,0.25);border-radius:16px;padding:1.75rem;width:100%;max-width:700px;margin:1rem;box-shadow:0 0 40px rgba(0,0,0,0.5)">
+    
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.25rem">
+      <h3 style="margin:0">Edit Team</h3>
+      <button onclick="window.closeEditTeamModal()" style="background:none;border:none;color:var(--text-muted);cursor:pointer;font-size:1.2rem;line-height:1">✕</button>
+    </div>
+
+    <div style="display:flex;gap:1.5rem;flex-wrap:wrap">
+      
+      <!-- يسار: اسم التيم -->
+      <div style="flex:1;min-width:200px">
+        <label class="form-label">Team Name</label>
+        <input type="text" id="edit-team-name-input" class="form-control" maxlength="40" style="margin-bottom:1rem"/>
+        <button class="btn btn-primary btn-sm" onclick="window.saveTeamName()">Save changes</button>
+      </div>
+
+      <!-- يمين: الأعضاء -->
+      <div style="flex:2;min-width:280px">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0.75rem">
+          <span style="font-weight:700;font-size:0.95rem">Team members</span>
+          <button class="btn btn-primary btn-sm" onclick="window.showInviteInput()">+ Invite user</button>
+        </div>
+
+        <!-- Invite input (مخفي في الأول) -->
+        <div id="invite-input-row" style="display:none;margin-bottom:0.75rem;display:none">
+          <div style="display:flex;gap:0.5rem">
+            <input type="email" id="edit-invite-email" class="form-control" placeholder="Email address" style="flex:1"/>
+            <button class="btn btn-primary btn-sm" onclick="window.sendEditInvite()">Send</button>
+            <button class="btn btn-ghost btn-sm" onclick="document.getElementById('invite-input-row').style.display='none'">✕</button>
+          </div>
+        </div>
+
+        <!-- قائمة الأعضاء -->
+        <div id="edit-members-list" style="border:1px solid var(--border);border-radius:10px;overflow:hidden"></div>
+      </div>
+
+    </div>
+  </div>
+</div>
   <script type="module">
     import { requireAuth, getUserProfile, isAdmin } from '../js/auth/auth.js';
     import { renderNavbar, renderSidebar, showToast } from '../js/dashboard/components.js';
-    import { BADGES, getUserNotifications, markNotificationRead } from '../js/core/utils.js';
+    import { BADGES, getUserNotifications, markNotificationRead, addNotification } from '../js/core/utils.js';
     import { db } from '../js/core/firebase-config.js';
-    import { doc, updateDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+    import {
+      doc, updateDoc, addDoc, getDoc, getDocs, collection,
+      query, where, serverTimestamp, deleteDoc
+    } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
     const AVATARS = [
       "🧑","👨","👩","🧔","👨‍💻","👩‍💻","🧠","😎",
@@ -301,6 +401,9 @@
     }
 
     async function init() {
+      // ✅ await علشان يتسجل قبل ما يجيب الـ leaderboard
+await updateDoc(doc(db, 'users', user.uid), { lastSeen: serverTimestamp() });
+setInterval(() => updateDoc(doc(db, 'users', user.uid), { lastSeen: serverTimestamp() }), 60_000);
       try { currentUser = await requireAuth(); } catch { return; }
 
       const admin = await isAdmin();
@@ -347,8 +450,176 @@
 
       renderAllBadges(profile.badges || []);
       loadNotifHistory();
+      loadMyTeams();
+      loadTeamInvites();
     }
+let _editingTeamId   = null;
+let _editingTeamData = null;
 
+window.showEditTeamModal = async (teamId, teamName) => {
+  _editingTeamId = teamId;
+  document.getElementById('edit-team-name-input').value = teamName;
+  document.getElementById('invite-input-row').style.display = 'none';
+  document.getElementById('edit-invite-email').value = '';
+  document.getElementById('modal-edit-team').style.display = 'flex';
+  await refreshEditMembersList();
+};
+
+window.closeEditTeamModal = () => {
+  document.getElementById('modal-edit-team').style.display = 'none';
+  _editingTeamId   = null;
+  _editingTeamData = null;
+};
+
+window.showInviteInput = () => {
+  document.getElementById('invite-input-row').style.display = 'flex';
+  document.getElementById('edit-invite-email').focus();
+};
+
+async function refreshEditMembersList() {
+  const list = document.getElementById('edit-members-list');
+  list.innerHTML = '<p class="text-muted fs-sm" style="padding:0.75rem">Loading...</p>';
+
+  const teamSnap = await getDoc(doc(db, 'teams', _editingTeamId));
+  _editingTeamData = teamSnap.data();
+
+  const allInvitesSnap = await getDocs(
+    query(collection(db, 'teamInvites'), where('teamId', '==', _editingTeamId))
+  );
+  const allInvites = allInvitesSnap.docs.map(d => ({ id: d.id, ...d.data() }));
+  const pending    = allInvites.filter(inv => inv.status === 'pending');
+  const declined   = allInvites.filter(inv => inv.status === 'declined');
+
+  // جيب بيانات الأعضاء
+  const memberProfiles = await Promise.all(
+    _editingTeamData.members.map(uid => getDoc(doc(db, 'users', uid)))
+  );
+
+  let html = '';
+
+  // الأعضاء الموجودين
+  memberProfiles.forEach(snap => {
+    if (!snap.exists()) return;
+    const u = snap.data();
+    const isOwner = snap.id === _editingTeamData.ownerId;
+    const avatarHtml = u.avatar?.startsWith('data:')
+      ? `<img src="${u.avatar}" style="width:48px;height:48px;border-radius:50%;object-fit:cover" />`
+      : `<div style="width:48px;height:48px;border-radius:50%;background:linear-gradient(135deg,var(--cyan),var(--blue));display:flex;align-items:center;justify-content:center;font-size:1.4rem">${u.avatar || '🧑'}</div>`;
+
+    html += `
+      <div style="display:flex;align-items:center;gap:1rem;padding:0.75rem 1rem;border-bottom:1px solid var(--border)">
+        ${avatarHtml}
+        <div style="flex:1">
+          <div style="font-weight:600;font-size:0.9rem;color:var(--cyan)">${u.codeforcesHandle || 'Unknown'}</div>
+          ${isOwner ? '<div style="font-size:0.72rem;color:var(--text-muted)">Owner</div>' : ''}
+        </div>
+        <span style="font-size:0.8rem;color:#50dc78;margin-right:0.5rem">Active</span>
+        ${!isOwner
+          ? `<button onclick="window._removeMember('${snap.id}')" style="background:none;border:none;cursor:pointer;color:#FF3D71;font-size:1.1rem;line-height:1">✕</button>`
+          : '<div style="width:24px"></div>'}
+      </div>`;
+  });
+
+  // Pending invites
+  pending.forEach(inv => {
+    const canResend = (inv.attempts || 1) < 3;
+    html += `
+      <div style="display:flex;align-items:center;gap:1rem;padding:0.75rem 1rem;border-bottom:1px solid var(--border);opacity:0.8">
+        <div style="width:48px;height:48px;border-radius:50%;background:rgba(255,161,22,0.1);border:2px dashed rgba(255,161,22,0.4);display:flex;align-items:center;justify-content:center;font-size:1.2rem">⏳</div>
+        <div style="flex:1">
+          <div style="font-size:0.85rem;color:var(--text-muted)">${inv.toEmail}</div>
+          <div style="font-size:0.72rem;color:#FFA116">Waiting for response</div>
+        </div>
+        ${canResend
+          ? `<button onclick="window._resendInvite('${inv.id}','${_editingTeamId}','${_editingTeamData.name.replace(/'/g,"\\'")}','${inv.toUid}','${inv.toEmail}')" style="background:rgba(255,255,255,0.06);border:1px solid var(--border);color:#FFA116;cursor:pointer;font-size:0.72rem;padding:0.2rem 0.6rem;border-radius:6px;margin-right:0.25rem">Re-invite</button>`
+          : ''}
+        <button onclick="window._cancelInvite('${inv.id}')" style="background:none;border:none;cursor:pointer;color:#FF3D71;font-size:1.1rem;line-height:1">✕</button>
+      </div>`;
+  });
+
+  // Declined invites
+  declined.forEach(inv => {
+    html += `
+      <div style="display:flex;align-items:center;gap:1rem;padding:0.75rem 1rem;border-bottom:1px solid var(--border);opacity:0.6">
+        <div style="width:48px;height:48px;border-radius:50%;background:rgba(255,61,113,0.08);border:2px dashed rgba(255,61,113,0.3);display:flex;align-items:center;justify-content:center;font-size:1.2rem">✗</div>
+        <div style="flex:1">
+          <div style="font-size:0.85rem;color:var(--text-muted)">${inv.toEmail}</div>
+          <div style="font-size:0.72rem;color:#FF3D71">Invitation declined</div>
+        </div>
+      </div>`;
+  });
+
+  list.innerHTML = html || '<p class="text-muted fs-sm" style="padding:0.75rem">No members yet.</p>';
+}
+
+window.saveTeamName = async () => {
+  const name = document.getElementById('edit-team-name-input').value.trim();
+  if (!name) { showToast('Please enter a team name', 'warning'); return; }
+  try {
+    await updateDoc(doc(db, 'teams', _editingTeamId), { name });
+    showToast('Team name updated!', 'success');
+    loadMyTeams();
+  } catch(e) { showToast('Error: ' + e.message, 'error'); }
+};
+
+window.sendEditInvite = async () => {
+  const email = document.getElementById('edit-invite-email').value.trim().toLowerCase();
+  if (!email) return;
+  if (email === currentUser.email) { showToast("You're already in the team", 'warning'); return; }
+  if (_editingTeamData.members.length >= 3) { showToast('Team is full (max 3)', 'warning'); return; }
+
+  try {
+    const userSnap = await getDocs(query(collection(db, 'users'), where('email', '==', email)));
+    if (userSnap.empty) { showToast(`User not found: ${email}`, 'error'); return; }
+
+    const toUid = userSnap.docs[0].id;
+    if (_editingTeamData.members.includes(toUid)) { showToast('Already a member', 'warning'); return; }
+
+    const allInvitesSnap = await getDocs(query(collection(db, 'teamInvites'), where('teamId', '==', _editingTeamId)));
+    const hasPending = allInvitesSnap.docs.some(d => d.data().toUid === toUid && d.data().status === 'pending');
+    if (hasPending) { showToast('Already has a pending invite', 'warning'); return; }
+
+    const teamName = document.getElementById('edit-team-name-input').value.trim();
+    await addDoc(collection(db, 'teamInvites'), {
+      teamId: _editingTeamId, teamName,
+      fromUid: currentUser.uid, fromEmail: currentUser.email,
+      toUid, toEmail: email,
+      status: 'pending', attempts: 1, createdAt: serverTimestamp(),
+    });
+    await addNotification(toUid, {
+      type: 'announcement',
+      title: `Team Invite: ${teamName}`,
+      message: `${currentUser.email} invited you to join team "${teamName}".`,
+    });
+
+    showToast(`Invite sent to ${email}`, 'success');
+    document.getElementById('edit-invite-email').value = '';
+    document.getElementById('invite-input-row').style.display = 'none';
+    await refreshEditMembersList();
+    loadMyTeams();
+  } catch(e) { showToast('Error: ' + e.message, 'error'); }
+};
+
+window._removeMember = async (uid) => {
+  if (!confirm('Remove this member from the team?')) return;
+  try {
+    const members = _editingTeamData.members.filter(m => m !== uid);
+    await updateDoc(doc(db, 'teams', _editingTeamId), { members });
+    showToast('Member removed', 'info');
+    await refreshEditMembersList();
+    loadMyTeams();
+  } catch(e) { showToast('Error: ' + e.message, 'error'); }
+};
+
+window._cancelInvite = async (inviteId) => {
+  if (!confirm('Cancel this invite?')) return;
+  try {
+    await deleteDoc(doc(db, 'teamInvites', inviteId));
+    showToast('Invite cancelled', 'info');
+    await refreshEditMembersList();
+    loadMyTeams();
+  } catch(e) { showToast('Error: ' + e.message, 'error'); }
+};
     function renderAllBadges(earned) {
       const grid = document.getElementById('all-badges-grid');
 
@@ -424,6 +695,278 @@
       await Promise.all(notifs.map(n => markNotificationRead(n.id)));
       showToast('All notifications marked as read', 'success');
       loadNotifHistory();
+    };
+
+    // ══════════════════════════════════════════════
+    // TEAMS
+    // ══════════════════════════════════════════════
+
+    window.showCreateTeamModal = () => {
+      const m = document.getElementById('modal-create-team');
+      m.style.display = 'flex';
+      document.getElementById('team-name-input').value = '';
+      document.querySelectorAll('.invite-email-input').forEach(el => el.value = '');
+    };
+
+    window.closeCreateTeamModal = () => {
+      document.getElementById('modal-create-team').style.display = 'none';
+    };
+
+    window.createTeam = async () => {
+      const name = document.getElementById('team-name-input').value.trim();
+      if (!name) { showToast('Please enter a team name', 'warning'); return; }
+
+      const emails = [...document.querySelectorAll('.invite-email-input')]
+        .map(el => el.value.trim().toLowerCase())
+        .filter(Boolean);
+
+      // Deduplicate & exclude self
+      const uniqueEmails = [...new Set(emails)].filter(e => e !== currentUser.email);
+      if (uniqueEmails.length > 2) { showToast('Max 2 members (excluding you)', 'warning'); return; }
+
+      // Check users exist
+      const memberUids = [];
+      for (const email of uniqueEmails) {
+        const q = query(collection(db, 'users'), where('email', '==', email));
+        const snap = await getDocs(q);
+        if (snap.empty) { showToast(`User not found: ${email}`, 'error'); return; }
+        memberUids.push({ uid: snap.docs[0].id, email });
+      }
+
+      try {
+        const teamRef = await addDoc(collection(db, 'teams'), {
+          name,
+          ownerId:   currentUser.uid,
+          ownerEmail: currentUser.email,
+          members:   [currentUser.uid],
+          createdAt: serverTimestamp(),
+        });
+
+        // Send invites
+        for (const { uid, email } of memberUids) {
+          await addDoc(collection(db, 'teamInvites'), {
+            teamId:      teamRef.id,
+            teamName:    name,
+            fromUid:     currentUser.uid,
+            fromEmail:   currentUser.email,
+            toUid:       uid,
+            toEmail:     email,
+            status:      'pending',
+            attempts:    1,
+            createdAt:   serverTimestamp(),
+          });
+          // In-site notification
+          await addNotification(uid, {
+            type:    'announcement',
+            title:   `Team Invite: ${name}`,
+            message: `${currentUser.email} invited you to join team "${name}".`,
+          });
+        }
+
+        showToast(`Team "${name}" created!`, 'success');
+        window.closeCreateTeamModal();
+        loadMyTeams();
+      } catch(e) {
+        showToast('Error: ' + e.message, 'error');
+      }
+    };
+
+    async function loadMyTeams() {
+  const container = document.getElementById('my-teams-list');
+  try {
+    const [ownedSnap, memberSnap] = await Promise.all([
+      getDocs(query(collection(db, 'teams'), where('ownerId', '==', currentUser.uid))),
+      getDocs(query(collection(db, 'teams'), where('members', 'array-contains', currentUser.uid))),
+    ]);
+
+    const teamMap = {};
+    ownedSnap.docs.forEach(d => teamMap[d.id] = { id: d.id, ...d.data() });
+    memberSnap.docs.forEach(d => { if (!teamMap[d.id]) teamMap[d.id] = { id: d.id, ...d.data() }; });
+    const teams = Object.values(teamMap);
+
+    if (!teams.length) {
+      container.innerHTML = '<p class="text-muted fs-sm" style="padding:1rem 0">No teams yet. Create one or wait for an invite.</p>';
+      return;
+    }
+
+    container.innerHTML = '';
+    for (const team of teams) {
+      const allInvitesSnap = await getDocs(
+        query(collection(db, 'teamInvites'), where('teamId', '==', team.id))
+      );
+      const allInvites = allInvitesSnap.docs.map(d => ({ id: d.id, ...d.data() }));
+      const pending  = allInvites.filter(inv => inv.status === 'pending');
+      const declined = allInvites.filter(inv => inv.status === 'declined');
+      const isOwner  = team.ownerId === currentUser.uid;
+
+      // ✅ جيب بيانات كل عضو
+      const memberProfiles = await Promise.all(
+        team.members.map(uid => getDoc(doc(db, 'users', uid)))
+      );
+
+      // ✅ رندر كل عضو بـ avatar واسم
+      const membersHtml = memberProfiles.map(snap => {
+        if (!snap.exists()) return '';
+        const u = snap.data();
+        const isTeamOwner = snap.id === team.ownerId;
+        const avatarHtml = u.avatar?.startsWith('data:')
+          ? `<img src="${u.avatar}" style="width:52px;height:52px;border-radius:50%;object-fit:cover;border:2px solid var(--cyan)" />`
+          : `<div style="width:52px;height:52px;border-radius:50%;background:linear-gradient(135deg,var(--cyan),var(--blue));display:flex;align-items:center;justify-content:center;font-size:1.5rem;border:2px solid var(--cyan)">${u.avatar || '🧑'}</div>`;
+
+        return `
+          <div style="display:flex;flex-direction:column;align-items:center;gap:0.35rem;min-width:60px">
+            <div style="position:relative">
+              ${avatarHtml}
+              ${isTeamOwner ? `<span style="position:absolute;top:-6px;right:-4px;font-size:0.75rem">👑</span>` : ''}
+            </div>
+            <span style="font-size:0.72rem;font-weight:600;color:${isTeamOwner ? 'var(--cyan)' : 'var(--text)'};text-align:center;max-width:64px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">
+              ${u.codeforcesHandle || 'Unknown'}
+            </span>
+          </div>`;
+      }).join('');
+
+      // ✅ Pending invites بـ avatar placeholder
+      const waitingHtml = pending.map(inv => `
+        <div style="display:flex;flex-direction:column;align-items:center;gap:0.35rem;min-width:60px">
+          <div style="width:52px;height:52px;border-radius:50%;background:rgba(255,161,22,0.1);border:2px dashed rgba(255,161,22,0.5);display:flex;align-items:center;justify-content:center;font-size:1.2rem">⏳</div>
+          <span style="font-size:0.68rem;color:#FFA116;text-align:center;max-width:64px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${inv.toEmail.split('@')[0]}</span>
+          <span style="font-size:0.62rem;color:var(--text-muted)">waiting</span>
+        </div>`
+      ).join('');
+
+      // ✅ Declined invites
+      const declinedHtml = isOwner ? declined.map(inv => {
+        const canResend = (inv.attempts || 1) < 3;
+        return `
+          <div style="display:flex;flex-direction:column;align-items:center;gap:0.35rem;min-width:60px">
+            <div style="width:52px;height:52px;border-radius:50%;background:rgba(255,61,113,0.08);border:2px dashed rgba(255,61,113,0.4);display:flex;align-items:center;justify-content:center;font-size:1.2rem">✗</div>
+            <span style="font-size:0.68rem;color:#FF3D71;text-align:center;max-width:64px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${inv.toEmail.split('@')[0]}</span>
+            ${canResend
+              ? `<button onclick="window._resendInvite('${inv.id}','${team.id}','${team.name.replace(/'/g,"\\'")}','${inv.toUid}','${inv.toEmail}')" style="background:rgba(255,255,255,0.08);border:none;color:#FFA116;cursor:pointer;font-size:0.62rem;padding:0.1rem 0.4rem;border-radius:4px">Re-invite</button>`
+              : `<span style="font-size:0.62rem;color:var(--text-muted)">max reached</span>`}
+          </div>`;
+      }).join('') : '';
+
+      const div = document.createElement('div');
+      div.style.cssText = 'padding:1rem;background:var(--bg-card2);border:1px solid var(--border);border-radius:12px;margin-bottom:0.75rem';
+      div.innerHTML = `
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0.75rem;flex-wrap:wrap;gap:0.5rem">
+          <div style="display:flex;align-items:center;gap:0.5rem">
+            <span style="font-weight:700;font-size:1rem">${team.name}</span>
+            ${isOwner
+              ? '<span class="badge-chip cyan" style="font-size:0.7rem">Owner</span>'
+              : '<span class="badge-chip" style="font-size:0.7rem;background:rgba(255,255,255,0.07);color:var(--text-muted)">Member</span>'}
+          </div>
+          ${isOwner
+            ? `<div style="display:flex;gap:0.5rem">
+  <button class="btn btn-ghost btn-sm" style="font-size:0.78rem" onclick="window.showEditTeamModal('${team.id}','${team.name.replace(/'/g,"\\'")}')">Edit</button>
+  <button class="btn btn-ghost btn-sm" style="color:#FF3D71;font-size:0.78rem" onclick="window._deleteTeam('${team.id}','${team.name.replace(/'/g,"\\'")}')">Delete</button>
+</div>`
+            : `<button class="btn btn-ghost btn-sm" style="font-size:0.78rem" onclick="window._leaveTeam('${team.id}','${team.name.replace(/'/g,"\\'")}')">Leave</button>`}
+        </div>
+        <div style="display:flex;align-items:flex-start;gap:1rem;flex-wrap:wrap">
+          ${membersHtml}${waitingHtml}${declinedHtml}
+        </div>
+      `;
+      container.appendChild(div);
+    }
+  } catch(e) {
+    container.innerHTML = `<p class="text-muted fs-sm">Could not load teams.</p>`;
+    console.error('loadMyTeams error:', e);
+  }
+}
+    async function loadTeamInvites() {
+      const section = document.getElementById('team-invites-section');
+      const list    = document.getElementById('team-invites-list');
+      try {
+        const snap = await getDocs(
+          query(collection(db, 'teamInvites'),
+            where('toUid', '==', currentUser.uid),
+            where('status', '==', 'pending')
+          )
+        );
+        const invites = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+        if (!invites.length) { section.style.display = 'none'; return; }
+        section.style.display = 'block';
+        list.innerHTML = invites.map(inv => `
+          <div style="display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap;padding:0.85rem 1rem;background:var(--bg-card2);border:1px solid rgba(0,212,255,0.2);border-radius:10px;margin-bottom:0.5rem">
+            <div>
+              <div style="font-weight:600;font-size:0.9rem">${inv.teamName}</div>
+              <div style="font-size:0.78rem;color:var(--text-muted);margin-top:0.2rem">From: ${inv.fromEmail}</div>
+            </div>
+            <div style="display:flex;gap:0.5rem">
+              <button class="btn btn-primary btn-sm" onclick="window._acceptInvite('${inv.id}','${inv.teamId}')">Accept</button>
+              <button class="btn btn-ghost btn-sm" onclick="window._declineInvite('${inv.id}','${inv.teamId}','${inv.fromUid}','${inv.teamName.replace(/'/g,"\\'")}')">Decline</button>
+            </div>
+          </div>
+        `).join('');
+      } catch(e) { section.style.display = 'none'; }
+    }
+
+    window._acceptInvite = async (inviteId, teamId) => {
+      try {
+        await updateDoc(doc(db, 'teamInvites', inviteId), { status: 'accepted' });
+        await updateDoc(doc(db, 'teams', teamId), {
+          members: (await getDoc(doc(db, 'teams', teamId))).data().members.concat(currentUser.uid)
+        });
+        showToast('You joined the team!', 'success');
+        loadTeamInvites();
+        loadMyTeams();
+      } catch(e) { showToast('Error: ' + e.message, 'error'); }
+    };
+
+    window._declineInvite = async (inviteId, teamId, fromUid, teamName) => {
+      try {
+        await updateDoc(doc(db, 'teamInvites', inviteId), { status: 'declined' });
+        // Notify owner
+        await addNotification(fromUid, {
+          type:    'warning',
+          title:   `Invite Declined`,
+          message: `${currentUser.email} declined your invite to team "${teamName}".`,
+        });
+        showToast('Invite declined.', 'info');
+        loadTeamInvites();
+      } catch(e) { showToast('Error: ' + e.message, 'error'); }
+    };
+
+    window._resendInvite = async (oldInviteId, teamId, teamName, toUid, toEmail) => {
+      try {
+        const oldDoc = await getDoc(doc(db, 'teamInvites', oldInviteId));
+        const attempts = (oldDoc.data()?.attempts || 1) + 1;
+        if (attempts > 3) { showToast('Max 3 invites per person reached', 'warning'); return; }
+        // Update old invite to re-send
+        await updateDoc(doc(db, 'teamInvites', oldInviteId), { status: 'pending', attempts });
+        await addNotification(toUid, {
+          type:    'announcement',
+          title:   `Team Re-invite: ${teamName}`,
+          message: `${currentUser.email} invited you again to join team "${teamName}".`,
+        });
+        showToast(`Re-invite sent to ${toEmail}`, 'success');
+        loadMyTeams();
+      } catch(e) { showToast('Error: ' + e.message, 'error'); }
+    };
+
+    window._deleteTeam = async (teamId, teamName) => {
+      if (!confirm(`Delete team "${teamName}"? This cannot be undone.`)) return;
+      try {
+        // Delete all invites for this team
+        const invSnap = await getDocs(query(collection(db, 'teamInvites'), where('teamId', '==', teamId)));
+        for (const d of invSnap.docs) await deleteDoc(d.ref);
+        await deleteDoc(doc(db, 'teams', teamId));
+        showToast('Team deleted.', 'success');
+        loadMyTeams();
+      } catch(e) { showToast('Error: ' + e.message, 'error'); }
+    };
+
+    window._leaveTeam = async (teamId, teamName) => {
+      if (!confirm(`Leave team "${teamName}"?`)) return;
+      try {
+        const teamDoc = await getDoc(doc(db, 'teams', teamId));
+        const members = teamDoc.data().members.filter(uid => uid !== currentUser.uid);
+        await updateDoc(doc(db, 'teams', teamId), { members });
+        showToast('You left the team.', 'info');
+        loadMyTeams();
+      } catch(e) { showToast('Error: ' + e.message, 'error'); }
     };
 
     init();

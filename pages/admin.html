@@ -154,6 +154,9 @@
       <button class="admin-tab-btn" data-panel="notifications">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline;vertical-align:-2px;margin-right:5px"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>Notifications
       </button>
+      <button class="admin-tab-btn" data-panel="contests">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline;vertical-align:-2px;margin-right:5px"><circle cx="12" cy="8" r="6"/><path d="M15.477 12.89 17 22l-5-3-5 3 1.523-9.11"/></svg>Contests
+      </button>
       <a href="dashboard.html" class="admin-tab-back">
         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline;vertical-align:-2px;margin-right:4px"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>Dashboard
       </a>
@@ -354,6 +357,20 @@
         </div>
       </div>
 
+      <!-- ══ CONTESTS ════════════════════════════════════════════════ -->
+      <div class="admin-panel" id="panel-contests">
+        <div class="page-header flex-between">
+          <div>
+            <h1>Contests</h1>
+            <p>Create and manage timed programming contests</p>
+          </div>
+          <button class="btn btn-primary btn-sm" onclick="showAddContest()">+ New Contest</button>
+        </div>
+        <div id="contests-admin-list">
+          <p class="text-muted fs-sm">Loading contests…</p>
+        </div>
+      </div>
+
     </div>
   </div>
 
@@ -521,6 +538,126 @@
     </div>
   </div>
 
+  <!-- Add/Edit Contest Modal -->
+  <div class="modal-overlay" id="modal-contest">
+    <div class="modal" style="max-width:680px">
+      <div class="modal-header">
+        <h3 id="modal-contest-title">New Contest</h3>
+        <button class="modal-close" onclick="closeModal('modal-contest')">✕</button>
+      </div>
+      <input type="hidden" id="contest-edit-id" />
+      <div class="form-group">
+        <label class="form-label">Title</label>
+        <input type="text" id="contest-title-input" class="form-control" placeholder="e.g. ICPC Academy Round #1" />
+      </div>
+      <div class="form-group">
+        <label class="form-label">Description <span style="font-weight:400;color:var(--text-muted)">(optional)</span></label>
+        <textarea id="contest-desc-input" class="form-control" placeholder="Short description shown on the contest list"></textarea>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem">
+        <div class="form-group">
+          <label class="form-label">Start Date &amp; Time</label>
+          <input type="datetime-local" id="contest-start-input" class="form-control" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">End Date &amp; Time</label>
+          <input type="datetime-local" id="contest-end-input" class="form-control" />
+        </div>
+      </div>
+
+      <!-- Contest Type -->
+      <div class="form-group">
+        <label class="form-label">Contest Type</label>
+        <div style="display:flex;gap:0.75rem;flex-wrap:wrap;margin-top:0.35rem">
+          <label style="display:flex;align-items:center;gap:0.5rem;cursor:pointer;padding:0.55rem 1rem;border:1px solid var(--border);border-radius:10px;font-size:0.85rem;font-weight:600;transition:border-color 0.15s,background 0.15s" id="ctype-lbl-individual">
+            <input type="radio" name="contest-type" id="ctype-individual" value="individual" checked style="accent-color:var(--neon-cyan,#00D4FF);width:15px;height:15px" onchange="updateContestTypeLabels()">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline;vertical-align:middle"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+            Individual
+          </label>
+          <label style="display:flex;align-items:center;gap:0.5rem;cursor:pointer;padding:0.55rem 1rem;border:1px solid var(--border);border-radius:10px;font-size:0.85rem;font-weight:600;transition:border-color 0.15s,background 0.15s" id="ctype-lbl-team">
+            <input type="radio" name="contest-type" id="ctype-team" value="team" style="accent-color:var(--neon-cyan,#00D4FF);width:15px;height:15px" onchange="updateContestTypeLabels()">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline;vertical-align:middle"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+            Team
+          </label>
+          <label style="display:flex;align-items:center;gap:0.5rem;cursor:pointer;padding:0.55rem 1rem;border:1px solid var(--border);border-radius:10px;font-size:0.85rem;font-weight:600;transition:border-color 0.15s,background 0.15s" id="ctype-lbl-both">
+            <input type="radio" name="contest-type" id="ctype-both" value="both" style="accent-color:var(--neon-cyan,#00D4FF);width:15px;height:15px" onchange="updateContestTypeLabels()">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline;vertical-align:middle"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/><path d="M20 8h2m-1-1v2" stroke-width="2.5"/></svg>
+            Both
+          </label>
+        </div>
+      </div>
+
+      <!-- Problems Section -->
+      <div class="form-group" style="margin-top:0.5rem">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0.6rem">
+          <label class="form-label" style="margin:0">Problems (Challenges)</label>
+          <button type="button" class="btn btn-ghost btn-sm" onclick="addContestProblemRow()">+ Add Problem</button>
+        </div>
+        <div id="contest-problems-list"></div>
+      </div>
+
+      <div style="display:flex;gap:0.75rem;margin-top:0.5rem">
+        <button class="btn btn-primary flex-1" onclick="saveContest()">Save Contest</button>
+        <button class="btn btn-ghost" onclick="closeModal('modal-contest')">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Create New Contest Problem Modal -->
+  <div class="modal-overlay" id="modal-cp-create">
+    <div class="modal" style="max-width:680px">
+      <div class="modal-header">
+        <h3 id="modal-cp-title">New Contest Problem</h3>
+        <button class="modal-close" onclick="closeModal('modal-cp-create')">✕</button>
+      </div>
+      <input type="hidden" id="cp-edit-index" value="-1" />
+      <div class="form-group">
+        <label class="form-label">Problem Title</label>
+        <input type="text" id="cp-title-input" class="form-control" placeholder="e.g. Sum of Array" />
+      </div>
+      <div class="form-group">
+        <label class="form-label">Problem Statement
+          <span style="font-weight:400;color:var(--text-muted)"> — LaTeX supported ($…$, \[…\])</span>
+        </label>
+        <textarea id="cp-statement-input" class="form-control" style="min-height:130px"
+          placeholder="Describe the problem. Use \[ \frac{n(n+1)}{2} \] for display math, $O(n)$ for inline."
+          oninput="refreshCPLatexPreview('cp-statement-input','cp-preview-statement')"></textarea>
+        <div class="latex-preview-wrap">
+          <button type="button" class="latex-preview-toggle"
+            onclick="toggleCPLatexPreview('cp-preview-statement','cp-statement-input')">👁 Preview LaTeX</button>
+          <div class="latex-preview-box" id="cp-preview-statement"></div>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Constraints
+          <span style="font-weight:400;color:var(--text-muted)"> — LaTeX supported</span>
+        </label>
+        <textarea id="cp-constraints-input" class="form-control" style="min-height:80px"
+          placeholder="e.g. $1 \le n \le 10^5$&#10;$1 \le a_i \le 10^9$"
+          oninput="refreshCPLatexPreview('cp-constraints-input','cp-preview-constraints')"></textarea>
+        <div class="latex-preview-wrap">
+          <button type="button" class="latex-preview-toggle"
+            onclick="toggleCPLatexPreview('cp-preview-constraints','cp-constraints-input')">👁 Preview LaTeX</button>
+          <div class="latex-preview-box" id="cp-preview-constraints"></div>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Examples <span style="color:var(--text-muted);font-weight:400">(shown to students — Explanation supports LaTeX)</span></label>
+        <div id="cp-examples-list"></div>
+        <button type="button" class="btn btn-ghost btn-sm" style="margin-top:0.5rem" onclick="addCPExample()">+ Add Example</button>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Hidden Test Cases <span style="color:var(--text-muted);font-weight:400">(not shown to students)</span></label>
+        <div id="cp-tests-list"></div>
+        <button type="button" class="btn btn-ghost btn-sm" style="margin-top:0.5rem" onclick="addCPTest()">+ Add Test Case</button>
+      </div>
+      <div style="display:flex;gap:0.75rem;margin-top:0.5rem">
+        <button class="btn btn-primary flex-1" onclick="saveContestProblem()">Add to Contest</button>
+        <button class="btn btn-ghost" onclick="closeModal('modal-cp-create')">Cancel</button>
+      </div>
+    </div>
+  </div>
+
   <div id="toast-container"></div>
 
   <script type="module">
@@ -554,6 +691,7 @@
           if (panel === 'users')         loadUsersAdmin();
           if (panel === 'notifications') loadNotifPanel();
           if (panel === 'content')       loadLevelsAdmin();
+          if (panel === 'contests')       loadContestsAdmin();
         });
       });
     }
@@ -1374,6 +1512,440 @@ window._deleteUser = async (uid, email) => {
         output: row.querySelector('.tc-output')?.value?.trim() || ''
       })).filter(t => t.input || t.output);
     }
+
+
+    // ══════════════════════════════════════════════
+    // CONTESTS ADMIN
+    // ══════════════════════════════════════════════
+    let contestsAdminCache = [];
+    let contestProblemsTemp = []; // Problems being added in the modal
+    let allChallengesCache  = []; // All challenge sections for picker
+
+    async function loadContestsAdmin() {
+      const container = document.getElementById('contests-admin-list');
+      container.innerHTML = '<p class="text-muted fs-sm">Loading…</p>';
+      try {
+        const snap = await getDocs(query(collection(db, 'contests'), orderBy('startTime', 'desc')));
+        contestsAdminCache = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+        renderContestsAdminList(contestsAdminCache);
+      } catch(e) {
+        container.innerHTML = `<p style="color:#FF3D71">Error: ${e.message}</p>`;
+      }
+    }
+
+    function formatDatetime(ts) {
+      if (!ts) return '—';
+      const d = ts.toDate ? ts.toDate() : new Date(ts);
+      return d.toLocaleString();
+    }
+
+    function getContestStatus(c) {
+      const now   = Date.now();
+      const start = c.startTime?.toMillis?.() || c.startTime;
+      const end   = c.endTime?.toMillis?.()   || c.endTime;
+      if (now < start) return 'upcoming';
+      if (now >= start && now <= end) return 'running';
+      return 'ended';
+    }
+
+    function renderContestsAdminList(contests) {
+      const container = document.getElementById('contests-admin-list');
+      if (!contests.length) {
+        container.innerHTML = `<div class="card" style="text-align:center;padding:3rem;color:var(--text-muted)">
+          <p style="font-size:2rem;margin-bottom:0.5rem">⚔️</p>
+          <p>No contests yet. Click "+ New Contest" to create one.</p>
+        </div>`;
+        return;
+      }
+      container.innerHTML = contests.map(c => {
+        const status = getContestStatus(c);
+        const statusBadge = status === 'running'
+          ? `<span class="badge-chip green" style="font-size:0.72rem">LIVE</span>`
+          : status === 'upcoming'
+          ? `<span class="badge-chip cyan" style="font-size:0.72rem">Upcoming</span>`
+          : `<span class="badge-chip" style="font-size:0.72rem;background:rgba(255,255,255,0.05);color:var(--text-muted)">Ended</span>`;
+
+        return `
+          <div class="card card-glow" style="margin-bottom:1rem">
+            <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:1rem;flex-wrap:wrap">
+              <div>
+                <div style="display:flex;align-items:center;gap:0.75rem;margin-bottom:0.35rem">
+                  ${statusBadge}
+                  <h3 style="margin:0;font-size:1.05rem">${c.title || 'Untitled'}</h3>
+                </div>
+                <div style="font-size:0.8rem;color:var(--text-muted);display:flex;gap:1.5rem;flex-wrap:wrap">
+                  <span>🕐 Start: ${formatDatetime(c.startTime)}</span>
+                  <span>🕐 End: ${formatDatetime(c.endTime)}</span>
+                  <span>📄 ${c.problemCount || 0} problem${(c.problemCount||0) !== 1 ? 's' : ''}</span>
+                  <span>👤 ${(c.registrations || []).length} registered</span>
+                  <span>${c.contestType === 'team' ? '👥 Team' : c.contestType === 'both' ? '👤👥 Individual & Team' : '👤 Individual'}</span>
+                </div>
+              </div>
+              <div style="display:flex;gap:0.5rem;flex-shrink:0">
+                <button class="btn btn-outline btn-sm" onclick="editContest('${c.id}')">Edit</button>
+                <button class="btn btn-outline btn-sm" onclick="manageContestProblems('${c.id}','${(c.title||'').replace(/'/g,"\'")}')">Problems</button>
+                <button class="btn btn-danger btn-sm" onclick="deleteContest('${c.id}','${(c.title||'').replace(/'/g,"\'")}')">Delete</button>
+              </div>
+            </div>
+          </div>`;
+      }).join('');
+    }
+
+    window.updateContestTypeLabels = () => {
+      ['individual','team','both'].forEach(v => {
+        const lbl = document.getElementById(`ctype-lbl-${v}`);
+        const inp = document.getElementById(`ctype-${v}`);
+        if (!lbl || !inp) return;
+        if (inp.checked) {
+          lbl.style.borderColor = 'var(--neon-cyan,#00D4FF)';
+          lbl.style.background  = 'rgba(0,212,255,0.1)';
+          lbl.style.color       = 'var(--neon-cyan,#00D4FF)';
+        } else {
+          lbl.style.borderColor = 'var(--border)';
+          lbl.style.background  = 'transparent';
+          lbl.style.color       = '';
+        }
+      });
+    };
+
+    window.showAddContest = () => {
+      document.getElementById('contest-edit-id').value = '';
+      document.getElementById('modal-contest-title').textContent = 'New Contest';
+      document.getElementById('contest-title-input').value = '';
+      document.getElementById('contest-desc-input').value  = '';
+      document.getElementById('contest-start-input').value = '';
+      document.getElementById('contest-end-input').value   = '';
+      document.getElementById('ctype-individual').checked  = true;
+      updateContestTypeLabels();
+      contestProblemsTemp = [];
+      renderContestProblemsTemp();
+      openModal('modal-contest');
+    };
+
+    window.editContest = async (contestId) => {
+      const cSnap = await getDoc(doc(db, 'contests', contestId));
+      if (!cSnap.exists()) return;
+      const c = cSnap.data();
+
+      document.getElementById('contest-edit-id').value = contestId;
+      document.getElementById('modal-contest-title').textContent = 'Edit Contest';
+      document.getElementById('contest-title-input').value = c.title || '';
+      document.getElementById('contest-desc-input').value  = c.description || '';
+
+      const toLocal = (ts) => {
+        if (!ts) return '';
+        const d = ts.toDate ? ts.toDate() : new Date(ts);
+        return new Date(d.getTime() - d.getTimezoneOffset() * 60000).toISOString().slice(0,16);
+      };
+      document.getElementById('contest-start-input').value = toLocal(c.startTime);
+      document.getElementById('contest-end-input').value   = toLocal(c.endTime);
+
+      // Restore contest type
+      const ctype = c.contestType || 'individual';
+      const ctypeEl = document.getElementById(`ctype-${ctype}`);
+      if (ctypeEl) ctypeEl.checked = true;
+      updateContestTypeLabels();
+
+      // Load problems
+      const probSnap = await getDocs(query(
+        collection(db, 'contests', contestId, 'problems'),
+        orderBy('order', 'asc')
+      ));
+      contestProblemsTemp = probSnap.docs.map(d => ({ id: d.id, ...d.data() }));
+      renderContestProblemsTemp();
+      openModal('modal-contest');
+    };
+
+    function renderContestProblemsTemp() {
+      const list = document.getElementById('contest-problems-list');
+      if (!contestProblemsTemp.length) {
+        list.innerHTML = `<div style="text-align:center;padding:1.5rem;border:1px dashed var(--border);border-radius:10px;color:var(--text-muted);font-size:0.85rem">
+          No problems added yet. Click "+ Add Problem" to create a new one.
+        </div>`;
+        return;
+      }
+      list.innerHTML = contestProblemsTemp.map((p, i) => {
+        const letter = String.fromCharCode(65 + i);
+        return `
+          <div style="display:flex;align-items:center;gap:0.75rem;padding:0.65rem 0.85rem;background:rgba(255,255,255,0.03);border:1px solid var(--border);border-radius:10px;margin-bottom:0.5rem">
+            <span style="width:26px;height:26px;background:rgba(0,212,255,0.15);border-radius:6px;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:0.85rem;color:var(--neon-cyan);flex-shrink:0">${letter}</span>
+            <div style="flex:1;min-width:0">
+              <div style="font-weight:600;font-size:0.88rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${p.title || 'Untitled'}</div>
+              ${p.sourceRef ? `<div style="font-size:0.72rem;color:var(--text-muted)">From: ${p.sourceRef}</div>` : ''}
+            </div>
+            <div style="display:flex;gap:0.4rem;flex-shrink:0">
+              <button type="button" onclick="editContestProblem(${i})" style="background:none;border:1px solid var(--border);color:var(--text-muted);cursor:pointer;font-size:0.75rem;padding:0.2rem 0.55rem;border-radius:6px">✏️</button>
+              <button type="button" onclick="removeContestProblem(${i})" style="background:none;border:none;color:#FF3D71;cursor:pointer;font-size:0.9rem;padding:0 0.2rem">✕</button>
+            </div>
+          </div>`;
+      }).join('');
+    }
+
+    window.removeContestProblem = (index) => {
+      contestProblemsTemp.splice(index, 1);
+      renderContestProblemsTemp();
+    };
+
+    window.editContestProblem = (index) => {
+      const p = contestProblemsTemp[index];
+      if (!p) return;
+      document.getElementById('cp-edit-index').value = index;
+      document.getElementById('modal-cp-title').textContent = `Edit Problem ${String.fromCharCode(65 + index)}`;
+      document.getElementById('cp-title-input').value       = p.title       || '';
+      document.getElementById('cp-statement-input').value   = p.statement   || '';
+      document.getElementById('cp-constraints-input').value = p.constraints || '';
+      // Hide any open previews
+      document.querySelectorAll('#modal-cp-create .latex-preview-box').forEach(b => b.classList.remove('visible'));
+      // Re-populate examples
+      const exList = document.getElementById('cp-examples-list');
+      exList.innerHTML = '';
+      (p.examples || []).forEach(ex => addCPExample(ex));
+      if (!exList.children.length) addCPExample();
+      // Re-populate tests
+      const tList = document.getElementById('cp-tests-list');
+      tList.innerHTML = '';
+      (p.tests || []).forEach(t => addCPTest(t));
+      if (!tList.children.length) addCPTest();
+      openModal('modal-cp-create');
+    };
+
+    window.addContestProblemRow = () => {
+      // Open create-new-problem modal (fresh form)
+      document.getElementById('cp-edit-index').value = '-1';
+      document.getElementById('modal-cp-title').textContent = 'New Contest Problem';
+      document.getElementById('cp-title-input').value = '';
+      document.getElementById('cp-statement-input').value = '';
+      document.getElementById('cp-constraints-input').value = '';
+      // Hide any open previews
+      document.querySelectorAll('#modal-cp-create .latex-preview-box').forEach(b => b.classList.remove('visible'));
+      // Reset examples & tests
+      const exList = document.getElementById('cp-examples-list');
+      const tList  = document.getElementById('cp-tests-list');
+      exList.innerHTML = '';
+      tList.innerHTML  = '';
+      addCPExample();
+      addCPTest();
+      openModal('modal-cp-create');
+    };
+
+    // ── LaTeX preview helpers for contest-problem modal ──
+    window.toggleCPLatexPreview = (previewId, textareaId) => {
+      const box = document.getElementById(previewId);
+      if (!box) return;
+      box.classList.toggle('visible');
+      if (box.classList.contains('visible')) {
+        const ta = document.getElementById(textareaId);
+        if (ta) { box.textContent = ta.value; adminRenderLatex(box); }
+      }
+    };
+    window.refreshCPLatexPreview = (textareaId, previewId) => {
+      const box = document.getElementById(previewId);
+      if (!box || !box.classList.contains('visible')) return;
+      const ta = document.getElementById(textareaId);
+      if (!ta) return;
+      box.textContent = ta.value;
+      adminRenderLatex(box);
+    };
+
+    // ── CP explanation preview (per-row) ──
+    window.toggleCPExplPreview = (btnEl) => {
+      const row = btnEl.closest('.challenge-row');
+      const box = row.querySelector('.cp-expl-preview-box');
+      const ta  = row.querySelector('.cp-ex-explanation');
+      if (!box || !ta) return;
+      box.classList.toggle('visible');
+      if (box.classList.contains('visible')) { box.textContent = ta.value; adminRenderLatex(box); }
+    };
+    window.refreshCPExplPreview = (taEl) => {
+      const row = taEl.closest('.challenge-row');
+      const box = row?.querySelector('.cp-expl-preview-box');
+      if (!box || !box.classList.contains('visible')) return;
+      box.textContent = taEl.value;
+      adminRenderLatex(box);
+    };
+
+    // ── Add example row inside CP modal ──
+    window.addCPExample = (data = {}) => {
+      const container = document.getElementById('cp-examples-list');
+      const idx = container.children.length;
+      const div = document.createElement('div');
+      div.className = 'challenge-row';
+      div.innerHTML = `
+        <div class="challenge-row-header">
+          <span>Example ${idx + 1}</span>
+          <button type="button" class="challenge-row-remove"
+            onclick="this.closest('.challenge-row').remove(); renumberRows('cp-examples-list','Example')">✕</button>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.5rem">
+          <div>
+            <label class="form-label" style="font-size:0.72rem;margin-bottom:0.2rem">Input</label>
+            <textarea class="form-control cp-ex-input" rows="2" placeholder="e.g. 5\n1 2 3 4 5">${data.input||''}</textarea>
+          </div>
+          <div>
+            <label class="form-label" style="font-size:0.72rem;margin-bottom:0.2rem">Output</label>
+            <textarea class="form-control cp-ex-output" rows="2" placeholder="e.g. 15">${data.output||''}</textarea>
+          </div>
+        </div>
+        <div>
+          <label class="form-label" style="font-size:0.72rem;margin-bottom:0.2rem">Explanation
+            <span style="font-weight:400;color:var(--text-muted)"> (optional, LaTeX supported)</span>
+          </label>
+          <textarea class="form-control cp-ex-explanation" rows="2"
+            placeholder="Optional — supports $LaTeX$"
+            oninput="refreshCPExplPreview(this)">${data.explanation||''}</textarea>
+          <div class="latex-preview-wrap">
+            <button type="button" class="latex-preview-toggle" onclick="toggleCPExplPreview(this)">👁 Preview</button>
+            <div class="latex-preview-box cp-expl-preview-box"></div>
+          </div>
+        </div>
+      `;
+      container.appendChild(div);
+    };
+
+    // ── Add hidden test row inside CP modal ──
+    window.addCPTest = (data = {}) => {
+      const container = document.getElementById('cp-tests-list');
+      const idx = container.children.length;
+      const div = document.createElement('div');
+      div.className = 'challenge-row';
+      div.innerHTML = `
+        <div class="challenge-row-header">
+          <span>Test Case ${idx + 1}</span>
+          <button type="button" class="challenge-row-remove"
+            onclick="this.closest('.challenge-row').remove(); renumberRows('cp-tests-list','Test Case')">✕</button>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.5rem">
+          <div>
+            <label class="form-label" style="font-size:0.72rem;margin-bottom:0.2rem">Input</label>
+            <textarea class="form-control cp-tc-input" rows="2" placeholder="Hidden input">${data.input||''}</textarea>
+          </div>
+          <div>
+            <label class="form-label" style="font-size:0.72rem;margin-bottom:0.2rem">Expected Output</label>
+            <textarea class="form-control cp-tc-output" rows="2" placeholder="Expected output">${data.output||''}</textarea>
+          </div>
+        </div>
+      `;
+      container.appendChild(div);
+    };
+
+    // ── Collect helpers ──
+    function collectCPExamples() {
+      return [...document.querySelectorAll('#cp-examples-list .challenge-row')].map(row => ({
+        input:       row.querySelector('.cp-ex-input')?.value?.trim()       || '',
+        output:      row.querySelector('.cp-ex-output')?.value?.trim()      || '',
+        explanation: row.querySelector('.cp-ex-explanation')?.value?.trim() || ''
+      })).filter(e => e.input || e.output);
+    }
+    function collectCPTests() {
+      return [...document.querySelectorAll('#cp-tests-list .challenge-row')].map(row => ({
+        input:  row.querySelector('.cp-tc-input')?.value?.trim()  || '',
+        output: row.querySelector('.cp-tc-output')?.value?.trim() || ''
+      })).filter(t => t.input || t.output);
+    }
+
+    // ── Save the new problem into contestProblemsTemp ──
+    window.saveContestProblem = () => {
+      const title = document.getElementById('cp-title-input').value.trim();
+      if (!title) { showToast('Please enter a problem title', 'warning'); return; }
+
+      const problem = {
+        title,
+        statement:   document.getElementById('cp-statement-input').value.trim(),
+        constraints: document.getElementById('cp-constraints-input').value.trim(),
+        examples:    collectCPExamples(),
+        tests:       collectCPTests(),
+        order:       contestProblemsTemp.length + 1,
+      };
+
+      const editIdx = parseInt(document.getElementById('cp-edit-index').value);
+      if (editIdx >= 0) {
+        contestProblemsTemp[editIdx] = { ...contestProblemsTemp[editIdx], ...problem };
+        showToast(`Problem ${String.fromCharCode(65 + editIdx)} updated!`, 'success');
+      } else {
+        contestProblemsTemp.push(problem);
+        showToast(`"${title}" added as Problem ${String.fromCharCode(64 + contestProblemsTemp.length)}`, 'success');
+      }
+
+      closeModal('modal-cp-create');
+      renderContestProblemsTemp();
+    };
+
+    window.saveContest = async () => {
+      const title = document.getElementById('contest-title-input').value.trim();
+      const desc  = document.getElementById('contest-desc-input').value.trim();
+      const startVal = document.getElementById('contest-start-input').value;
+      const endVal   = document.getElementById('contest-end-input').value;
+      const editId   = document.getElementById('contest-edit-id').value;
+
+      if (!title)    { showToast('Please enter a contest title', 'warning'); return; }
+      if (!startVal) { showToast('Please set a start time', 'warning'); return; }
+      if (!endVal)   { showToast('Please set an end time', 'warning'); return; }
+
+      const startDate = new Date(startVal);
+      const endDate   = new Date(endVal);
+      if (endDate <= startDate) { showToast('End time must be after start time', 'warning'); return; }
+
+      const contestData = {
+        title,
+        description:  desc,
+        startTime:    startDate,
+        endTime:      endDate,
+        contestType:  document.querySelector('input[name="contest-type"]:checked')?.value || 'individual',
+        problemCount: contestProblemsTemp.length,
+        registrations: editId ? undefined : [],
+        updatedAt:    serverTimestamp(),
+      };
+      if (!editId) contestData.createdAt = serverTimestamp();
+
+      try {
+        let contestId = editId;
+        if (editId) {
+          const updateData = { ...contestData };
+          delete updateData.registrations; // Don't overwrite registrations on edit
+          await updateDoc(doc(db, 'contests', editId), updateData);
+        } else {
+          contestData.registrations = [];
+          const ref = await addDoc(collection(db, 'contests'), contestData);
+          contestId = ref.id;
+        }
+
+        // Save problems as sub-collection
+        for (let i = 0; i < contestProblemsTemp.length; i++) {
+          const p = { ...contestProblemsTemp[i], order: i + 1 };
+          if (p.id && editId) {
+            // Update existing problem doc
+            await updateDoc(doc(db, 'contests', contestId, 'problems', p.id), p);
+          } else {
+            const { id: _, ...pData } = p;
+            await addDoc(collection(db, 'contests', contestId, 'problems'), pData);
+          }
+        }
+
+        showToast(editId ? 'Contest updated!' : 'Contest created!', 'success');
+        closeModal('modal-contest');
+        loadContestsAdmin();
+      } catch(e) {
+        showToast('Error: ' + e.message, 'error');
+      }
+    };
+
+    window.manageContestProblems = async (contestId, title) => {
+      await editContest(contestId);
+    };
+
+    window.deleteContest = async (contestId, title) => {
+      if (!confirm(`Delete contest "${title}"? This cannot be undone.`)) return;
+      try {
+        // Delete all problems sub-collection
+        const probSnap = await getDocs(collection(db, 'contests', contestId, 'problems'));
+        for (const d of probSnap.docs) await deleteDoc(d.ref);
+        await deleteDoc(doc(db, 'contests', contestId));
+        showToast('Contest deleted.', 'success');
+        loadContestsAdmin();
+      } catch(e) {
+        showToast('Error: ' + e.message, 'error');
+      }
+    };
 
     init();
   </script>

@@ -113,6 +113,9 @@
     import { updateStreak, getLeaderboard, getLevels, getWeeks, getSections, getWeekProgress, BADGES } from '../js/core/utils.js';
 
     async function init() {
+      // ✅ await علشان يتسجل قبل ما يجيب الـ leaderboard
+await updateDoc(doc(db, 'users', user.uid), { lastSeen: serverTimestamp() });
+setInterval(() => updateDoc(doc(db, 'users', user.uid), { lastSeen: serverTimestamp() }), 60_000);
       let user;
       try { user = await requireAuth(); } catch { return; }
 
