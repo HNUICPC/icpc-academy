@@ -1167,9 +1167,6 @@ let contestsCache   = [];
 // INIT
 // ─────────────────────────────────────────────
 async function init() {
-  // ✅ await علشان يتسجل قبل ما يجيب الـ leaderboard
-await updateDoc(doc(db, 'users', user.uid), { lastSeen: serverTimestamp() });
-setInterval(() => updateDoc(doc(db, 'users', user.uid), { lastSeen: serverTimestamp() }), 60_000);
   currentUser    = await requireAuth();
   adminMode      = await isAdmin();
   renderNavbar('contest');
