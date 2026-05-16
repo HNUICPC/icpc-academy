@@ -7,6 +7,7 @@
   <link rel="stylesheet" href="css/main.css" />
   <link rel="stylesheet" href="css/auth.css" />
   <link rel="stylesheet" href="css/leetcode-theme.css" />
+  <link rel="icon" type="image/png" href="/assets/favicon.png">
   <style>
     .hero {
       min-height: 100vh;
@@ -129,6 +130,60 @@
       margin-bottom: 1rem;
     }
 
+    .trainer-card {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.75rem;
+      background: rgba(0,212,255,0.05);
+      border: 1px solid rgba(0,212,255,0.2);
+      border-radius: 18px;
+      padding: 1.5rem 1.25rem;
+      width: 175px;
+      cursor: default;
+      transition: transform 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .trainer-card:hover {
+      transform: translateY(-7px);
+      border-color: rgba(0,212,255,0.55);
+      box-shadow: 0 0 28px rgba(0,212,255,0.22);
+    }
+
+    .trainer-photo-wrap {
+      width: 100px;
+      height: 100px;
+      border-radius: 14px;
+      background: rgba(0,212,255,0.1);
+      border: 2px solid rgba(0,212,255,0.3);
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2.6rem;
+      flex-shrink: 0;
+    }
+
+    .trainer-photo-wrap img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .trainer-name {
+      font-weight: 800;
+      font-size: 0.88rem;
+      color: var(--text-primary);
+      text-align: center;
+      line-height: 1.3;
+    }
+
+    .trainer-role {
+      font-size: 0.75rem;
+      color: var(--cyan);
+      text-align: center;
+    }
+
     @keyframes float {
       0%, 100% { transform: translateY(0); }
       50% { transform: translateY(-12px); }
@@ -151,68 +206,16 @@
       animation: gridMove 50s linear infinite;
     }
 
-    /* ── TRAINER CARDS ── */
-    .trainer-card {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 0.75rem;
-      background: rgba(0,212,255,0.05);
-      border: 1px solid rgba(0,212,255,0.2);
-      border-radius: 18px;
-      padding: 1.5rem 1.25rem;
-      width: 175px;
-      cursor: default;
-      transition: transform 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
-    }
-    .trainer-card:hover {
-      transform: translateY(-7px);
-      border-color: rgba(0,212,255,0.55);
-      box-shadow: 0 0 28px rgba(0,212,255,0.22);
-    }
-    .trainer-photo-wrap {
-      width: 100px;
-      height: 100px;
-      border-radius: 14px;
-      background: rgba(0,212,255,0.1);
-      border: 2px solid rgba(0,212,255,0.3);
-      overflow: hidden;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 2.6rem;
-      flex-shrink: 0;
-    }
-    .trainer-photo-wrap img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-    }
-    .trainer-name {
-      font-weight: 800;
-      font-size: 0.88rem;
-      color: var(--text-primary);
-      text-align: center;
-      line-height: 1.3;
-    }
-    .trainer-role {
-      font-size: 0.75rem;
-      color: var(--cyan);
-      text-align: center;
-    }
-
     @media (max-width: 600px) {
       .trainer-card { width: 140px; padding: 1.1rem 0.9rem; }
       .trainer-photo-wrap { width: 80px; height: 80px; }
     }
   </style>
-<link rel="icon" type="image/png" href="/assets/favicon.png">
 </head>
 <body>
   <div class="bg-glow bg-glow-1"></div>
   <div class="bg-glow bg-glow-2"></div>
 
-  <!-- Loading -->
   <div id="loading-screen" style="position:fixed;inset:0;background:var(--bg-deep);display:flex;align-items:center;justify-content:center;z-index:9999;transition:opacity 0.6s ease;">
     <div style="text-align:center">
       <div style="font-size:4rem;margin-bottom:1.2rem;animation:float 2.5s infinite">
@@ -229,7 +232,10 @@
   <section class="hero" id="main-content" style="display:none">
 
     <div class="hero-badge">
-      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9.5 2A2.5 2.5 0 0 1 12 4.5v15a2.5 2.5 0 0 1-4.96-.46 2.5 2.5 0 0 1-2.96-3.08 3 3 0 0 1-.34-5.58 2.5 2.5 0 0 1 1.32-4.24 2.5 2.5 0 0 1 1.98-3A2.5 2.5 0 0 1 9.5 2Z"/><path d="M14.5 2A2.5 2.5 0 0 0 12 4.5v15a2.5 2.5 0 0 0 4.96-.46 2.5 2.5 0 0 0 2.96-3.08 3 3 0 0 0 .34-5.58 2.5 2.5 0 0 0-1.32-4.24 2.5 2.5 0 0 0-1.98-3A2.5 2.5 0 0 0 14.5 2Z"/></svg>
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M9.5 2A2.5 2.5 0 0 1 12 4.5v15a2.5 2.5 0 0 1-4.96-.46 2.5 2.5 0 0 1-2.96-3.08 3 3 0 0 1-.34-5.58 2.5 2.5 0 0 1 1.32-4.24 2.5 2.5 0 0 1 1.98-3A2.5 2.5 0 0 1 9.5 2Z"/>
+        <path d="M14.5 2A2.5 2.5 0 0 0 12 4.5v15a2.5 2.5 0 0 0 4.96-.46 2.5 2.5 0 0 0 2.96-3.08 3 3 0 0 0 .34-5.58 2.5 2.5 0 0 0-1.32-4.24 2.5 2.5 0 0 0-1.98-3A2.5 2.5 0 0 0 14.5 2Z"/>
+      </svg>
       ECPC 2026 Official Training Platform
     </div>
 
@@ -252,7 +258,6 @@
       <a href="pages/login.html" class="btn btn-outline btn-lg">Sign In</a>
     </div>
 
-    <!-- Trainer Section -->
     <div class="trainer-highlight">
       <h2>Meet Your Trainers</h2>
       <p>
@@ -262,34 +267,46 @@
 
       <div style="display:flex;gap:1.5rem;justify-content:center;flex-wrap:wrap;margin-top:1.75rem">
 
-        <!-- DR. Hadeer Ahmed -->
         <div class="trainer-card">
           <div class="trainer-photo-wrap">
             <img src="assets/trainers/hadeer.jpg" alt="DR. Hadeer Ahmed"
               onerror="this.style.display='none';this.nextElementSibling.style.display='flex'" />
-            <span style="display:none;align-items:center;justify-content:center;width:100%;height:100%"><svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="rgba(0,212,255,0.6)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/><path d="M17 11l1.5 1.5L21 10"/></svg></span>
+            <span style="display:none;align-items:center;justify-content:center;width:100%;height:100%">
+              <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="rgba(0,212,255,0.6)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/>
+                <path d="M17 11l1.5 1.5L21 10"/>
+              </svg>
+            </span>
           </div>
           <div class="trainer-name">DR. Hadeer Ahmed</div>
           <div class="trainer-role">Founder</div>
         </div>
 
-        <!-- Eng. Youssef Barakat -->
         <div class="trainer-card">
           <div class="trainer-photo-wrap">
             <img src="assets/trainers/youssef.jpg" alt="Eng. Youssef Barakat"
               onerror="this.style.display='none';this.nextElementSibling.style.display='flex'" />
-            <span style="display:none;align-items:center;justify-content:center;width:100%;height:100%"><svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="rgba(0,212,255,0.6)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/><polyline points="9.5 13.5 7 16 9.5 18.5"/><polyline points="14.5 13.5 17 16 14.5 18.5"/></svg></span>
+            <span style="display:none;align-items:center;justify-content:center;width:100%;height:100%">
+              <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="rgba(0,212,255,0.6)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/>
+                <polyline points="9.5 13.5 7 16 9.5 18.5"/><polyline points="14.5 13.5 17 16 14.5 18.5"/>
+              </svg>
+            </span>
           </div>
           <div class="trainer-name">Eng. Youssef Barakat</div>
           <div class="trainer-role">Co-Founder & Head Trainer</div>
         </div>
 
-        <!-- Eng. Ahmed Reda -->
         <div class="trainer-card">
           <div class="trainer-photo-wrap">
             <img src="assets/trainers/ahmed.jpg" alt="Eng. Ahmed Reda"
               onerror="this.style.display='none';this.nextElementSibling.style.display='flex'" />
-            <span style="display:none;align-items:center;justify-content:center;width:100%;height:100%"><svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="rgba(0,212,255,0.6)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/><path d="M15 11h4M17 9v4"/></svg></span>
+            <span style="display:none;align-items:center;justify-content:center;width:100%;height:100%">
+              <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="rgba(0,212,255,0.6)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/>
+                <path d="M15 11h4M17 9v4"/>
+              </svg>
+            </span>
           </div>
           <div class="trainer-name">Eng. Ahmed Reda</div>
           <div class="trainer-role">Founder</div>
@@ -298,7 +315,6 @@
       </div>
     </div>
 
-    <!-- Features -->
     <div class="features">
       <div class="feature-card">
         <div class="feature-icon">
@@ -331,6 +347,7 @@
         <p>Compete with the best Egyptian programmers and track your progress in real time.</p>
       </div>
     </div>
+
   </section>
 
   <div id="toast-container"></div>
@@ -341,17 +358,17 @@
     import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 
     onAuthStateChanged(auth, async (user) => {
-      const loading = document.getElementById('loading-screen');
-      const main    = document.getElementById('main-content');
+      const loadingScreen = document.getElementById('loading-screen');
+      const mainContent = document.getElementById('main-content');
 
       if (user && user.emailVerified) {
         const admin = await isAdmin();
         window.location.href = admin ? 'pages/admin.html' : 'pages/dashboard.html';
       } else {
-        loading.style.opacity = '0';
-        setTimeout(() => { 
-          loading.style.display = 'none'; 
-          main.style.display = 'flex'; 
+        loadingScreen.style.opacity = '0';
+        setTimeout(() => {
+          loadingScreen.style.display = 'none';
+          mainContent.style.display = 'flex';
         }, 600);
       }
     });
